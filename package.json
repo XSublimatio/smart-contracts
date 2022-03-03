@@ -22,8 +22,7 @@
         "test:coverage": "npm run compile && npx hardhat coverage --temp artifacts --network coverage",
         "prettier": "prettier --write ./",
         "web3-typechain": "typechain --target web3-v1 --out-dir ./src/web3 './artifacts/contracts/XSublimatio.sol/XSublimatio.json'",
-        "ethers-typechain": "typechain --target ethers-v5 --out-dir ./src/ethers './artifacts/contracts/XSublimatio.sol/XSublimatio.json'",
-        "addscope": "node tools/packagejson name @faction-nfts/xsublimatio-smart-contracts"
+        "ethers-typechain": "typechain --target ethers-v5 --out-dir ./src/ethers './artifacts/contracts/XSublimatio.sol/XSublimatio.json'"
     },
     "publishConfig": {
         "access": "public"
