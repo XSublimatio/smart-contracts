@@ -21,27 +21,36 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
 export interface XSublimatioInterface extends utils.Interface {
     contractName: 'XSublimatio';
     functions: {
+        'DECOMPOSITION_TIME()': FunctionFragment;
+        'MOLECULES_PER_PURCHASE()': FunctionFragment;
+        'PRICE_PER_MOLECULE()': FunctionFragment;
+        'acceptOwnership()': FunctionFragment;
         'approve(address,uint256)': FunctionFragment;
+        'availabilities()': FunctionFragment;
         'balanceOf(address)': FunctionFragment;
         'baseURI()': FunctionFragment;
         'brew(uint256[],uint256,address)': FunctionFragment;
         'burnDates(uint256)': FunctionFragment;
         'contractURI()': FunctionFragment;
         'decompose(uint256)': FunctionFragment;
+        'drugAvailabilities()': FunctionFragment;
         'drugsAvailable()': FunctionFragment;
         'getApproved(uint256)': FunctionFragment;
         'getDrugAvailability(uint256)': FunctionFragment;
         'getMoleculeAvailability(uint256)': FunctionFragment;
         'getRecipe(uint256)': FunctionFragment;
         'isApprovedForAll(address,address)': FunctionFragment;
+        'moleculeAvailabilities()': FunctionFragment;
         'moleculesAvailable()': FunctionFragment;
         'name()': FunctionFragment;
         'owner()': FunctionFragment;
         'ownerOf(uint256)': FunctionFragment;
+        'pendingOwner()': FunctionFragment;
+        'proposeOwnership(address)': FunctionFragment;
         'purchase(address,uint256)': FunctionFragment;
-        'renounceOwnership()': FunctionFragment;
         'safeTransferFrom(address,address,uint256)': FunctionFragment;
         'setApprovalForAll(address,bool)': FunctionFragment;
+        'setBaseURI(string)': FunctionFragment;
         'startDecomposition(uint256)': FunctionFragment;
         'supportsInterface(bytes4)': FunctionFragment;
         'symbol()': FunctionFragment;
@@ -50,31 +59,39 @@ export interface XSublimatioInterface extends utils.Interface {
         'tokenURI(uint256)': FunctionFragment;
         'totalSupply()': FunctionFragment;
         'transferFrom(address,address,uint256)': FunctionFragment;
-        'transferOwnership(address)': FunctionFragment;
         'withdrawProceeds(uint256,address)': FunctionFragment;
     };
 
+    encodeFunctionData(functionFragment: 'DECOMPOSITION_TIME', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'MOLECULES_PER_PURCHASE', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'PRICE_PER_MOLECULE', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'acceptOwnership', values?: undefined): string;
     encodeFunctionData(functionFragment: 'approve', values: [string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'availabilities', values?: undefined): string;
     encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
     encodeFunctionData(functionFragment: 'baseURI', values?: undefined): string;
     encodeFunctionData(functionFragment: 'brew', values: [BigNumberish[], BigNumberish, string]): string;
     encodeFunctionData(functionFragment: 'burnDates', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'contractURI', values?: undefined): string;
     encodeFunctionData(functionFragment: 'decompose', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'drugAvailabilities', values?: undefined): string;
     encodeFunctionData(functionFragment: 'drugsAvailable', values?: undefined): string;
     encodeFunctionData(functionFragment: 'getApproved', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'getDrugAvailability', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'getMoleculeAvailability', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'getRecipe', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'isApprovedForAll', values: [string, string]): string;
+    encodeFunctionData(functionFragment: 'moleculeAvailabilities', values?: undefined): string;
     encodeFunctionData(functionFragment: 'moleculesAvailable', values?: undefined): string;
     encodeFunctionData(functionFragment: 'name', values?: undefined): string;
     encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
     encodeFunctionData(functionFragment: 'ownerOf', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'pendingOwner', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'proposeOwnership', values: [string]): string;
     encodeFunctionData(functionFragment: 'purchase', values: [string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'renounceOwnership', values?: undefined): string;
     encodeFunctionData(functionFragment: 'safeTransferFrom', values: [string, string, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'setApprovalForAll', values: [string, boolean]): string;
+    encodeFunctionData(functionFragment: 'setBaseURI', values: [string]): string;
     encodeFunctionData(functionFragment: 'startDecomposition', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
     encodeFunctionData(functionFragment: 'symbol', values?: undefined): string;
@@ -83,30 +100,38 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'tokenURI', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'totalSupply', values?: undefined): string;
     encodeFunctionData(functionFragment: 'transferFrom', values: [string, string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'transferOwnership', values: [string]): string;
     encodeFunctionData(functionFragment: 'withdrawProceeds', values: [BigNumberish, string]): string;
 
+    decodeFunctionResult(functionFragment: 'DECOMPOSITION_TIME', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'MOLECULES_PER_PURCHASE', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'PRICE_PER_MOLECULE', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'acceptOwnership', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'availabilities', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'baseURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'brew', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'burnDates', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'contractURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'decompose', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'drugAvailabilities', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'drugsAvailable', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'getApproved', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'getDrugAvailability', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'getMoleculeAvailability', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'getRecipe', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'isApprovedForAll', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'moleculeAvailabilities', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'moleculesAvailable', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'ownerOf', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'pendingOwner', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'proposeOwnership', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'purchase', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'renounceOwnership', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'safeTransferFrom', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'setApprovalForAll', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'setBaseURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'startDecomposition', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'symbol', data: BytesLike): Result;
@@ -115,21 +140,26 @@ export interface XSublimatioInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: 'tokenURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'totalSupply', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'transferFrom', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'transferOwnership', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'withdrawProceeds', data: BytesLike): Result;
 
     events: {
         'Approval(address,address,uint256)': EventFragment;
         'ApprovalForAll(address,address,bool)': EventFragment;
+        'BaseURISet(string)': EventFragment;
         'MoleculeDecompositionStarted(address,uint256,uint256)': EventFragment;
-        'OwnershipTransferred(address,address)': EventFragment;
+        'OwnershipAccepted(address,address)': EventFragment;
+        'OwnershipProposed(address,address)': EventFragment;
+        'ProceedsWithdrawn(address,uint256)': EventFragment;
         'Transfer(address,address,uint256)': EventFragment;
     };
 
     getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'BaseURISet'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'MoleculeDecompositionStarted'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'OwnershipTransferred'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'OwnershipAccepted'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'OwnershipProposed'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'ProceedsWithdrawn'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
 }
 
@@ -141,6 +171,10 @@ export type ApprovalForAllEvent = TypedEvent<[string, string, boolean], { owner:
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 
+export type BaseURISetEvent = TypedEvent<[string], { baseURI: string }>;
+
+export type BaseURISetEventFilter = TypedEventFilter<BaseURISetEvent>;
+
 export type MoleculeDecompositionStartedEvent = TypedEvent<
     [string, BigNumber, BigNumber],
     { owner: string; tokenId: BigNumber; burnDate: BigNumber }
@@ -148,9 +182,17 @@ export type MoleculeDecompositionStartedEvent = TypedEvent<
 
 export type MoleculeDecompositionStartedEventFilter = TypedEventFilter<MoleculeDecompositionStartedEvent>;
 
-export type OwnershipTransferredEvent = TypedEvent<[string, string], { previousOwner: string; newOwner: string }>;
+export type OwnershipAcceptedEvent = TypedEvent<[string, string], { previousOwner: string; owner: string }>;
 
-export type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
+export type OwnershipAcceptedEventFilter = TypedEventFilter<OwnershipAcceptedEvent>;
+
+export type OwnershipProposedEvent = TypedEvent<[string, string], { owner: string; pendingOwner: string }>;
+
+export type OwnershipProposedEventFilter = TypedEventFilter<OwnershipProposedEvent>;
+
+export type ProceedsWithdrawnEvent = TypedEvent<[string, BigNumber], { destination: string; amount: BigNumber }>;
+
+export type ProceedsWithdrawnEventFilter = TypedEventFilter<ProceedsWithdrawnEvent>;
 
 export type TransferEvent = TypedEvent<[string, string, BigNumber], { from: string; to: string; tokenId: BigNumber }>;
 
@@ -180,11 +222,26 @@ export interface XSublimatio extends BaseContract {
     removeListener: OnEvent<this>;
 
     functions: {
+        DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
         approve(
             to: string,
             tokenId: BigNumberish,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
+
+        availabilities(overrides?: CallOverrides): Promise<
+            [BigNumber[], BigNumber[]] & {
+                moleculesAvailabilities_: BigNumber[];
+                drugAvailabilities_: BigNumber[];
+            }
+        >;
 
         balanceOf(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
@@ -203,6 +260,8 @@ export interface XSublimatio extends BaseContract {
 
         decompose(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
+        drugAvailabilities(overrides?: CallOverrides): Promise<[BigNumber[]] & { availabilities_: BigNumber[] }>;
+
         drugsAvailable(overrides?: CallOverrides): Promise<[BigNumber] & { drugsAvailable_: BigNumber }>;
 
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
@@ -218,6 +277,8 @@ export interface XSublimatio extends BaseContract {
 
         isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<[boolean]>;
 
+        moleculeAvailabilities(overrides?: CallOverrides): Promise<[BigNumber[]] & { availabilities_: BigNumber[] }>;
+
         moleculesAvailable(overrides?: CallOverrides): Promise<[BigNumber] & { moleculesAvailable_: BigNumber }>;
 
         name(overrides?: CallOverrides): Promise<[string]>;
@@ -226,13 +287,15 @@ export interface XSublimatio extends BaseContract {
 
         ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
 
+        pendingOwner(overrides?: CallOverrides): Promise<[string]>;
+
+        proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
         purchase(
             destination_: string,
             minQuantity_: BigNumberish,
             overrides?: PayableOverrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
-
-        renounceOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
         'safeTransferFrom(address,address,uint256)'(
             from: string,
@@ -254,6 +317,8 @@ export interface XSublimatio extends BaseContract {
             approved: boolean,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
+
+        setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
         startDecomposition(
             tokenId_: BigNumberish,
@@ -279,8 +344,6 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
 
-        transferOwnership(newOwner: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
         withdrawProceeds(
             amount_: BigNumberish,
             destination_: string,
@@ -288,7 +351,22 @@ export interface XSublimatio extends BaseContract {
         ): Promise<ContractTransaction>;
     };
 
+    DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<BigNumber>;
+
+    MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
     approve(to: string, tokenId: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
+    availabilities(overrides?: CallOverrides): Promise<
+        [BigNumber[], BigNumber[]] & {
+            moleculesAvailabilities_: BigNumber[];
+            drugAvailabilities_: BigNumber[];
+        }
+    >;
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -307,6 +385,8 @@ export interface XSublimatio extends BaseContract {
 
     decompose(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
+    drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
+
     drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
     getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
@@ -319,6 +399,8 @@ export interface XSublimatio extends BaseContract {
 
     isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
 
+    moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
+
     moleculesAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
     name(overrides?: CallOverrides): Promise<string>;
@@ -327,13 +409,15 @@ export interface XSublimatio extends BaseContract {
 
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
+    pendingOwner(overrides?: CallOverrides): Promise<string>;
+
+    proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
     purchase(
         destination_: string,
         minQuantity_: BigNumberish,
         overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    renounceOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     'safeTransferFrom(address,address,uint256)'(
         from: string,
@@ -356,6 +440,8 @@ export interface XSublimatio extends BaseContract {
         overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
     startDecomposition(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
@@ -377,8 +463,6 @@ export interface XSublimatio extends BaseContract {
         overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    transferOwnership(newOwner: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
     withdrawProceeds(
         amount_: BigNumberish,
         destination_: string,
@@ -386,7 +470,22 @@ export interface XSublimatio extends BaseContract {
     ): Promise<ContractTransaction>;
 
     callStatic: {
+        DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<BigNumber>;
+
+        MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<BigNumber>;
+
+        PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<BigNumber>;
+
+        acceptOwnership(overrides?: CallOverrides): Promise<void>;
+
         approve(to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        availabilities(overrides?: CallOverrides): Promise<
+            [BigNumber[], BigNumber[]] & {
+                moleculesAvailabilities_: BigNumber[];
+                drugAvailabilities_: BigNumber[];
+            }
+        >;
 
         balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -400,6 +499,8 @@ export interface XSublimatio extends BaseContract {
 
         decompose(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
+        drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
+
         drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
@@ -412,6 +513,8 @@ export interface XSublimatio extends BaseContract {
 
         isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
 
+        moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
+
         moleculesAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
         name(overrides?: CallOverrides): Promise<string>;
@@ -420,9 +523,11 @@ export interface XSublimatio extends BaseContract {
 
         ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-        purchase(destination_: string, minQuantity_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber[]>;
+        pendingOwner(overrides?: CallOverrides): Promise<string>;
 
-        renounceOwnership(overrides?: CallOverrides): Promise<void>;
+        proposeOwnership(newOwner_: string, overrides?: CallOverrides): Promise<void>;
+
+        purchase(destination_: string, minQuantity_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber[]>;
 
         'safeTransferFrom(address,address,uint256)'(
             from: string,
@@ -441,6 +546,8 @@ export interface XSublimatio extends BaseContract {
 
         setApprovalForAll(operator: string, approved: boolean, overrides?: CallOverrides): Promise<void>;
 
+        setBaseURI(baseURI_: string, overrides?: CallOverrides): Promise<void>;
+
         startDecomposition(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
         supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
@@ -457,8 +564,6 @@ export interface XSublimatio extends BaseContract {
 
         transferFrom(from: string, to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-        transferOwnership(newOwner: string, overrides?: CallOverrides): Promise<void>;
-
         withdrawProceeds(amount_: BigNumberish, destination_: string, overrides?: CallOverrides): Promise<void>;
     };
 
@@ -473,6 +578,9 @@ export interface XSublimatio extends BaseContract {
         'ApprovalForAll(address,address,bool)'(owner?: string | null, operator?: string | null, approved?: null): ApprovalForAllEventFilter;
         ApprovalForAll(owner?: string | null, operator?: string | null, approved?: null): ApprovalForAllEventFilter;
 
+        'BaseURISet(string)'(baseURI?: null): BaseURISetEventFilter;
+        BaseURISet(baseURI?: null): BaseURISetEventFilter;
+
         'MoleculeDecompositionStarted(address,uint256,uint256)'(
             owner?: string | null,
             tokenId?: BigNumberish | null,
@@ -484,15 +592,31 @@ export interface XSublimatio extends BaseContract {
             burnDate?: null
         ): MoleculeDecompositionStartedEventFilter;
 
-        'OwnershipTransferred(address,address)'(previousOwner?: string | null, newOwner?: string | null): OwnershipTransferredEventFilter;
-        OwnershipTransferred(previousOwner?: string | null, newOwner?: string | null): OwnershipTransferredEventFilter;
+        'OwnershipAccepted(address,address)'(previousOwner?: string | null, owner?: string | null): OwnershipAcceptedEventFilter;
+        OwnershipAccepted(previousOwner?: string | null, owner?: string | null): OwnershipAcceptedEventFilter;
+
+        'OwnershipProposed(address,address)'(owner?: string | null, pendingOwner?: string | null): OwnershipProposedEventFilter;
+        OwnershipProposed(owner?: string | null, pendingOwner?: string | null): OwnershipProposedEventFilter;
+
+        'ProceedsWithdrawn(address,uint256)'(destination?: string | null, amount?: null): ProceedsWithdrawnEventFilter;
+        ProceedsWithdrawn(destination?: string | null, amount?: null): ProceedsWithdrawnEventFilter;
 
         'Transfer(address,address,uint256)'(from?: string | null, to?: string | null, tokenId?: BigNumberish | null): TransferEventFilter;
         Transfer(from?: string | null, to?: string | null, tokenId?: BigNumberish | null): TransferEventFilter;
     };
 
     estimateGas: {
+        DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<BigNumber>;
+
+        MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<BigNumber>;
+
+        PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<BigNumber>;
+
+        acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+
         approve(to: string, tokenId: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+
+        availabilities(overrides?: CallOverrides): Promise<BigNumber>;
 
         balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -511,6 +635,8 @@ export interface XSublimatio extends BaseContract {
 
         decompose(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
+        drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber>;
+
         drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
@@ -523,6 +649,8 @@ export interface XSublimatio extends BaseContract {
 
         isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+        moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber>;
+
         moleculesAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
         name(overrides?: CallOverrides): Promise<BigNumber>;
@@ -531,13 +659,15 @@ export interface XSublimatio extends BaseContract {
 
         ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
+        pendingOwner(overrides?: CallOverrides): Promise<BigNumber>;
+
+        proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+
         purchase(
             destination_: string,
             minQuantity_: BigNumberish,
             overrides?: PayableOverrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
-
-        renounceOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
         'safeTransferFrom(address,address,uint256)'(
             from: string,
@@ -559,6 +689,8 @@ export interface XSublimatio extends BaseContract {
             approved: boolean,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
+
+        setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
         startDecomposition(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
@@ -581,8 +713,6 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
 
-        transferOwnership(newOwner: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
         withdrawProceeds(
             amount_: BigNumberish,
             destination_: string,
@@ -591,11 +721,21 @@ export interface XSublimatio extends BaseContract {
     };
 
     populateTransaction: {
+        DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
+
         approve(
             to: string,
             tokenId: BigNumberish,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
+
+        availabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         balanceOf(owner: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -614,6 +754,8 @@ export interface XSublimatio extends BaseContract {
 
         decompose(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
+        drugAvailabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
         drugsAvailable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -626,6 +768,8 @@ export interface XSublimatio extends BaseContract {
 
         isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+        moleculeAvailabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
         moleculesAvailable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -634,13 +778,15 @@ export interface XSublimatio extends BaseContract {
 
         ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+        pendingOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
+
         purchase(
             destination_: string,
             minQuantity_: BigNumberish,
             overrides?: PayableOverrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
-
-        renounceOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
         'safeTransferFrom(address,address,uint256)'(
             from: string,
@@ -662,6 +808,8 @@ export interface XSublimatio extends BaseContract {
             approved: boolean,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
+
+        setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
         startDecomposition(
             tokenId_: BigNumberish,
@@ -686,8 +834,6 @@ export interface XSublimatio extends BaseContract {
             tokenId: BigNumberish,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
-
-        transferOwnership(newOwner: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
         withdrawProceeds(
             amount_: BigNumberish,

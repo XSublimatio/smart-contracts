@@ -1,5 +1,12 @@
 import { BigNumber } from 'ethers';
 
+export const MOLECULE_MAX_SUPPLIES: number[] = [
+    1134, 250, 142, 121, 121, 120, 120, 120, 107, 97, 95, 95, 95, 95, 82, 50, 36, 36, 36, 34, 34, 34, 32, 32, 32, 29, 29, 29, 29, 24, 24,
+    21, 20, 18, 12, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+];
+
+export const DRUG_MAX_SUPPLIES: number[] = [250, 18, 100, 21, 50, 20, 142, 50, 7, 24, 95, 120, 34, 2, 29, 12, 121, 32, 7];
+
 export const RECIPES: number[][] = [
     [0, 1],
     [0, 33],
@@ -147,3 +154,14 @@ export function getTokenFromId(tokenId: BigNumber): Molecule | Drug {
               specialWaterIndex: tokenId.shr(240).mask(8).toNumber(),
           };
 }
+
+export function canBrew(drugType: number, tokenIds: BigNumber[]): boolean {
+    const molecules = tokenIds.map(getTokenFromId).filter(({ category }) => category === 'molecule');
+
+    return RECIPES[drugType].reduce(
+        (accumulator: boolean, moleculeType: number) => accumulator && !!molecules.find(({ type }) => type === moleculeType),
+        true
+    );
+}
+
+// TODO: metadata

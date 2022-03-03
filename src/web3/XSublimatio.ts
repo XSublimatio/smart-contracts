@@ -30,6 +30,10 @@ export type ApprovalForAll = ContractEventLog<{
     1: string;
     2: boolean;
 }>;
+export type BaseURISet = ContractEventLog<{
+    baseURI: string;
+    0: string;
+}>;
 export type MoleculeDecompositionStarted = ContractEventLog<{
     owner: string;
     tokenId: string;
@@ -38,9 +42,21 @@ export type MoleculeDecompositionStarted = ContractEventLog<{
     1: string;
     2: string;
 }>;
-export type OwnershipTransferred = ContractEventLog<{
+export type OwnershipAccepted = ContractEventLog<{
     previousOwner: string;
-    newOwner: string;
+    owner: string;
+    0: string;
+    1: string;
+}>;
+export type OwnershipProposed = ContractEventLog<{
+    owner: string;
+    pendingOwner: string;
+    0: string;
+    1: string;
+}>;
+export type ProceedsWithdrawn = ContractEventLog<{
+    destination: string;
+    amount: string;
     0: string;
     1: string;
 }>;
@@ -57,7 +73,22 @@ export interface XSublimatio extends BaseContract {
     constructor(jsonInterface: any[], address?: string, options?: ContractOptions): XSublimatio;
     clone(): XSublimatio;
     methods: {
+        DECOMPOSITION_TIME(): NonPayableTransactionObject<string>;
+
+        MOLECULES_PER_PURCHASE(): NonPayableTransactionObject<string>;
+
+        PRICE_PER_MOLECULE(): NonPayableTransactionObject<string>;
+
+        acceptOwnership(): NonPayableTransactionObject<void>;
+
         approve(to: string, tokenId: number | string | BN): NonPayableTransactionObject<void>;
+
+        availabilities(): NonPayableTransactionObject<{
+            moleculesAvailabilities_: string[];
+            drugAvailabilities_: string[];
+            0: string[];
+            1: string[];
+        }>;
 
         balanceOf(owner: string): NonPayableTransactionObject<string>;
 
@@ -75,6 +106,8 @@ export interface XSublimatio extends BaseContract {
 
         decompose(tokenId_: number | string | BN): NonPayableTransactionObject<void>;
 
+        drugAvailabilities(): NonPayableTransactionObject<string[]>;
+
         drugsAvailable(): NonPayableTransactionObject<string>;
 
         getApproved(tokenId: number | string | BN): NonPayableTransactionObject<string>;
@@ -87,6 +120,8 @@ export interface XSublimatio extends BaseContract {
 
         isApprovedForAll(owner: string, operator: string): NonPayableTransactionObject<boolean>;
 
+        moleculeAvailabilities(): NonPayableTransactionObject<string[]>;
+
         moleculesAvailable(): NonPayableTransactionObject<string>;
 
         name(): NonPayableTransactionObject<string>;
@@ -95,9 +130,11 @@ export interface XSublimatio extends BaseContract {
 
         ownerOf(tokenId: number | string | BN): NonPayableTransactionObject<string>;
 
-        purchase(destination_: string, minQuantity_: number | string | BN): PayableTransactionObject<string[]>;
+        pendingOwner(): NonPayableTransactionObject<string>;
 
-        renounceOwnership(): NonPayableTransactionObject<void>;
+        proposeOwnership(newOwner_: string): NonPayableTransactionObject<void>;
+
+        purchase(destination_: string, minQuantity_: number | string | BN): PayableTransactionObject<string[]>;
 
         'safeTransferFrom(address,address,uint256)'(
             from: string,
@@ -113,6 +150,8 @@ export interface XSublimatio extends BaseContract {
         ): NonPayableTransactionObject<void>;
 
         setApprovalForAll(operator: string, approved: boolean): NonPayableTransactionObject<void>;
+
+        setBaseURI(baseURI_: string): NonPayableTransactionObject<void>;
 
         startDecomposition(tokenId_: number | string | BN): NonPayableTransactionObject<void>;
 
@@ -130,8 +169,6 @@ export interface XSublimatio extends BaseContract {
 
         transferFrom(from: string, to: string, tokenId: number | string | BN): NonPayableTransactionObject<void>;
 
-        transferOwnership(newOwner: string): NonPayableTransactionObject<void>;
-
         withdrawProceeds(amount_: number | string | BN, destination_: string): NonPayableTransactionObject<void>;
     };
     events: {
@@ -141,11 +178,20 @@ export interface XSublimatio extends BaseContract {
         ApprovalForAll(cb?: Callback<ApprovalForAll>): EventEmitter;
         ApprovalForAll(options?: EventOptions, cb?: Callback<ApprovalForAll>): EventEmitter;
 
+        BaseURISet(cb?: Callback<BaseURISet>): EventEmitter;
+        BaseURISet(options?: EventOptions, cb?: Callback<BaseURISet>): EventEmitter;
+
         MoleculeDecompositionStarted(cb?: Callback<MoleculeDecompositionStarted>): EventEmitter;
         MoleculeDecompositionStarted(options?: EventOptions, cb?: Callback<MoleculeDecompositionStarted>): EventEmitter;
 
-        OwnershipTransferred(cb?: Callback<OwnershipTransferred>): EventEmitter;
-        OwnershipTransferred(options?: EventOptions, cb?: Callback<OwnershipTransferred>): EventEmitter;
+        OwnershipAccepted(cb?: Callback<OwnershipAccepted>): EventEmitter;
+        OwnershipAccepted(options?: EventOptions, cb?: Callback<OwnershipAccepted>): EventEmitter;
+
+        OwnershipProposed(cb?: Callback<OwnershipProposed>): EventEmitter;
+        OwnershipProposed(options?: EventOptions, cb?: Callback<OwnershipProposed>): EventEmitter;
+
+        ProceedsWithdrawn(cb?: Callback<ProceedsWithdrawn>): EventEmitter;
+        ProceedsWithdrawn(options?: EventOptions, cb?: Callback<ProceedsWithdrawn>): EventEmitter;
 
         Transfer(cb?: Callback<Transfer>): EventEmitter;
         Transfer(options?: EventOptions, cb?: Callback<Transfer>): EventEmitter;
@@ -159,11 +205,20 @@ export interface XSublimatio extends BaseContract {
     once(event: 'ApprovalForAll', cb: Callback<ApprovalForAll>): void;
     once(event: 'ApprovalForAll', options: EventOptions, cb: Callback<ApprovalForAll>): void;
 
+    once(event: 'BaseURISet', cb: Callback<BaseURISet>): void;
+    once(event: 'BaseURISet', options: EventOptions, cb: Callback<BaseURISet>): void;
+
     once(event: 'MoleculeDecompositionStarted', cb: Callback<MoleculeDecompositionStarted>): void;
     once(event: 'MoleculeDecompositionStarted', options: EventOptions, cb: Callback<MoleculeDecompositionStarted>): void;
 
-    once(event: 'OwnershipTransferred', cb: Callback<OwnershipTransferred>): void;
-    once(event: 'OwnershipTransferred', options: EventOptions, cb: Callback<OwnershipTransferred>): void;
+    once(event: 'OwnershipAccepted', cb: Callback<OwnershipAccepted>): void;
+    once(event: 'OwnershipAccepted', options: EventOptions, cb: Callback<OwnershipAccepted>): void;
+
+    once(event: 'OwnershipProposed', cb: Callback<OwnershipProposed>): void;
+    once(event: 'OwnershipProposed', options: EventOptions, cb: Callback<OwnershipProposed>): void;
+
+    once(event: 'ProceedsWithdrawn', cb: Callback<ProceedsWithdrawn>): void;
+    once(event: 'ProceedsWithdrawn', options: EventOptions, cb: Callback<ProceedsWithdrawn>): void;
 
     once(event: 'Transfer', cb: Callback<Transfer>): void;
     once(event: 'Transfer', options: EventOptions, cb: Callback<Transfer>): void;

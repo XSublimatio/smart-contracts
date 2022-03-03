@@ -6,19 +6,40 @@ import { ERC721, ERC721Enumerable, Strings } from "@openzeppelin/contracts/token
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 // TODO: Some checks are done implicitly by array out-of-bound errors.
+// TODO: Don't use ERC721Enumerable if no additional UX is desired (and implement totalSupply manually)
 
-contract XSublimatio is ERC721Enumerable, Ownable {
+contract XSublimatio is ERC721Enumerable {
 
+    /// @notice Emitted when the base URI is set (or re-set).
+    event BaseURISet(string baseURI);
+
+    /// @notice Emitted when an account has accepted ownership.
+    event OwnershipAccepted(address indexed previousOwner, address indexed owner);
+
+    /// @notice Emitted when owner proposed an account that can accept ownership.
+    event OwnershipProposed(address indexed owner, address indexed pendingOwner);
+
+    /// @notice Emitted when owner has withdrawn proceeds.
+    event ProceedsWithdrawn(address indexed destination, uint256 amount);
+
+    /// @notice Emitted when owner has withdrawn proceeds.
     event MoleculeDecompositionStarted(address indexed owner, uint256 indexed tokenId, uint256 burnDate);
 
-    uint256 internal constant MOLECULES_PER_PURCHASE = 5;
-    uint256 internal constant DECOMPOSITION_TIME = 10 days;
+    uint256 public constant DECOMPOSITION_TIME = 10 days;
+    uint256 public constant MOLECULES_PER_PURCHASE = 5;
+    uint256 public constant PRICE_PER_MOLECULE = 0.2 ether;
+
+    uint256 internal constant IS_NOT_LOCKED = uint256(1);
+    uint256 internal constant IS_LOCKED = uint256(2);
+
+    uint256 internal _lockedStatus = IS_NOT_LOCKED;
+
+    address public owner;
+    address public pendingOwner;
 
     string public baseURI;
 
     mapping(uint256 => uint256) public burnDates;
-
-    uint256 internal pricePerMolecule = 0.2 ether;
 
     // Contains first 23 molecule availabilities (11 bits each).
     uint256 internal COMPACT_STATE_1 = uint256(226273811297403348448206775794466307537893312132982461222617777606987601006);
@@ -32,8 +53,48 @@ contract XSublimatio is ERC721Enumerable, Ownable {
     // Contains (left to right) 19 drug availabilities (8 bits each), total drugs available (11 bits), and drug nonce (remaining 93 bits).
     uint256 internal COMPACT_STATE_4 = uint256(6474154468114041304457969074349321919403682697978);
 
-    constructor (string memory baseURI_) ERC721("XSublimatio", "XSUB") Ownable() {
+    constructor (string memory baseURI_, address owner_) ERC721("XSublimatio", "XSUB") {
         baseURI = baseURI_;
+        owner = owner_;
+    }
+
+    modifier noReenter() {
+        require(_lockedStatus == IS_NOT_LOCKED, "NO_REENTER");
+
+        _lockedStatus = IS_LOCKED;
+        _;
+        _lockedStatus = IS_NOT_LOCKED;
+    }
+
+    modifier onlyOwner() {
+        require(owner == msg.sender, "UNAUTHORIZED");
+
+        _;
+    }
+
+    /***********************/
+    /*** Admin Functions ***/
+    /***********************/
+
+    function acceptOwnership() external {
+        require(pendingOwner == msg.sender, "UNAUTHORIZED");
+
+        emit OwnershipAccepted(owner, msg.sender);
+        owner = msg.sender;
+        pendingOwner = address(0);
+    }
+
+    function proposeOwnership(address newOwner_) external onlyOwner {
+        emit OwnershipProposed(owner, pendingOwner = newOwner_);
+    }
+
+    function setBaseURI(string calldata baseURI_) external onlyOwner {
+        emit BaseURISet(baseURI = baseURI_);
+    }
+
+    function withdrawProceeds(uint256 amount_, address destination_) external onlyOwner {
+        require(_transferEther(destination_, amount_), "ETHER_TRANSFER_FAILED");
+        emit ProceedsWithdrawn(destination_, amount_);
     }
 
     /**************************/
@@ -101,10 +162,6 @@ contract XSublimatio is ERC721Enumerable, Ownable {
         _mint(destination_, tokenId_ |= (drugType_ + 63) << 248);
     }
 
-    function contractURI() external view returns (string memory contractURI_) {
-        contractURI_ = string(abi.encodePacked(baseURI, "info"));
-    }
-
     function decompose(uint256 tokenId_) external {
         // Extract drug type from token id.
         uint256 drugType = (tokenId_ >> 248) - 63;
@@ -165,8 +222,97 @@ contract XSublimatio is ERC721Enumerable, Ownable {
         _burn(tokenId_);
     }
 
+    function purchase(address destination_, uint256 minQuantity_) external payable returns (uint256[] memory tokenIds_) {
+        // Cache relevant compact states from storage.
+        uint256 compactState1 = COMPACT_STATE_1;
+        uint256 compactState2 = COMPACT_STATE_2;
+        uint256 compactState3 = COMPACT_STATE_3;
+
+        // Get the number of molecules available from compactState3 and determine how many molecules will be purchased in this call.
+        uint256 availableMoleculeCount = _getMoleculesAvailable(compactState3);
+        uint256 count = availableMoleculeCount >= MOLECULES_PER_PURCHASE ? MOLECULES_PER_PURCHASE : availableMoleculeCount;
+
+        // Prevent a purchase fo 0 nfts, as well as a purchase of less nfts than the user expected.
+        require(count != 0, "NO_MOLECULES_AVAILABLE");
+        require(count >= minQuantity_, "CANNOT_FULLFIL_REQUEST");
+
+        // Compute the price this purchase will cost, since it will be needed later, and count will be decremented in a while-loop.
+        uint256 totalCost;
+        unchecked {
+            totalCost = PRICE_PER_MOLECULE * count;
+        }
+
+        // Revert if insufficient ether was provided.
+        require(msg.value >= totalCost, "INCORRECT_VALUE");
+
+        // Initialize the array of token IDs to a length of the nfts to be purchased.
+        tokenIds_ = new uint256[](count);
+
+        while (count > 0) {
+            // Get a random number as the token ID, but shift out space for the molecule type (8 bits) and special index (8 bits).
+            uint256 tokenId = _generatePseudoRandomNumber(_getMoleculeNonce(compactState3)) >> 16;
+            uint256 moleculeType;
+
+            unchecked {
+                // Provide _drawMolecule with the 3 relevant cached compact states, and a random number (derived from tokenId) between 0 and availableMoleculeCount - 1, inclusively.
+                // The result is newly updated cached compact states. Also, availableMoleculeCount is pre-decremented so that each random number is within correct bounds.
+                ( compactState1, compactState2, compactState3, moleculeType ) = _drawMolecule(compactState1, compactState2, compactState3, _limitTo(tokenId, --availableMoleculeCount));
+
+                // Put molecule type as the leftmost 8 bits in the token id (saving it in the array of token IDs) and mint the molecule NFT.
+                _mint(destination_, tokenIds_[--count] = (tokenId | (moleculeType << 248)));
+            }
+        }
+
+        // Set relevant storage state fromm the cache ones.
+        COMPACT_STATE_1 = compactState1;
+        COMPACT_STATE_2 = compactState2;
+        COMPACT_STATE_3 = compactState3;
+
+        // Require that exact ether was provided, or that extra ether is successfully returned to the caller,
+        require(msg.value == totalCost || _transferEther(msg.sender, msg.value - totalCost), "ETHER_TRANSFER_FAILED");
+    }
+
+    function startDecomposition(uint256 tokenId_) external {
+        // Check that the caller owns the token.
+        require(ownerOf(tokenId_) == msg.sender, "NOT_OWNER");
+
+        // Extract drug type from token id and check that it is in fact a drug.
+        require((tokenId_ >> 248) >= 63, "NOT_DRUG");
+
+        unchecked {
+            // Add the token to `burnDates` so it can be burned after DECOMPOSITION_TIME, and emit the event.
+            emit MoleculeDecompositionStarted(
+                msg.sender,
+                tokenId_,
+                burnDates[tokenId_] = block.timestamp + DECOMPOSITION_TIME
+            );
+        }
+
+        // Take possession of the token.
+        _transfer(msg.sender, address(this), tokenId_);
+    }
+
+    /***************/
+    /*** Getters ***/
+    /***************/
+
+    function availabilities() external view returns (uint256[63] memory moleculesAvailabilities_, uint256[19] memory drugAvailabilities_) {
+        moleculesAvailabilities_ = moleculeAvailabilities();
+        drugAvailabilities_ = drugAvailabilities();
+    }
+
+    function contractURI() external view returns (string memory contractURI_) {
+        contractURI_ = string(abi.encodePacked(baseURI, "info"));
+    }
+
     function drugsAvailable() external view returns (uint256 drugsAvailable_) {
         drugsAvailable_ = _getDrugsAvailable(COMPACT_STATE_4);
+    }
+
+    function drugAvailabilities() public view returns (uint256[19] memory availabilities_) {
+        for (uint256 i; i < 19; ++i) {
+            availabilities_[i] = _getMoleculeAvailability(COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, i);
+        }
     }
 
     function getDrugAvailability(uint256 drugType_) external view returns (uint256 availability_) {
@@ -282,78 +428,10 @@ contract XSublimatio is ERC721Enumerable, Ownable {
         moleculesAvailable_ = _getMoleculesAvailable(COMPACT_STATE_3);
     }
 
-    function purchase(address destination_, uint256 minQuantity_) external payable returns (uint256[] memory tokenIds_) {
-        // Cache relevant compact states from storage.
-        uint256 compactState1 = COMPACT_STATE_1;
-        uint256 compactState2 = COMPACT_STATE_2;
-        uint256 compactState3 = COMPACT_STATE_3;
-
-        // Get the number of molecules available from compactState3 and determine how many molecules will be purchased in this call.
-        uint256 availableMoleculeCount = _getMoleculesAvailable(compactState3);
-        uint256 count = availableMoleculeCount >= MOLECULES_PER_PURCHASE ? MOLECULES_PER_PURCHASE : availableMoleculeCount;
-
-        // Prevent a purchase fo 0 nfts, as well as a purchase of less nfts than the user expected.
-        require(count != 0, "NO_MOLECULES_AVAILABLE");
-        require(count >= minQuantity_, "CANNOT_FULLFIL_REQUEST");
-
-        // Compute the price this purchase will cost, since it will be needed later, and count will be decremented in a while-loop.
-        uint256 totalCost;
-        unchecked {
-            totalCost = pricePerMolecule * count;
+    function moleculeAvailabilities() public view returns (uint256[63] memory availabilities_) {
+        for (uint256 i; i < 63; ++i) {
+            availabilities_[i] = _getDrugAvailability(COMPACT_STATE_4, i);
         }
-
-        // Revert if insufficient ether was provided.
-        require(msg.value >= totalCost, "INCORRECT_VALUE");
-
-        // Initialize the array of token IDs to a length of the nfts to be purchased.
-        tokenIds_ = new uint256[](count);
-
-        while (count > 0) {
-            // Get a random number as the token ID, but shift out space for the molecule type (8 bits) and special index (8 bits).
-            uint256 tokenId = _generatePseudoRandomNumber(_getMoleculeNonce(compactState3)) >> 16;
-            uint256 moleculeType;
-
-            unchecked {
-                // Provide _drawMolecule with the 3 relevant cached compact states, and a random number (derived from tokenId) between 0 and availableMoleculeCount - 1, inclusively.
-                // The result is newly updated cached compact states. Also, availableMoleculeCount is pre-decremented so that each random number is within correct bounds.
-                ( compactState1, compactState2, compactState3, moleculeType ) = _drawMolecule(compactState1, compactState2, compactState3, _limitTo(tokenId, --availableMoleculeCount));
-
-                // Put molecule type as the leftmost 8 bits in the token id (saving it in the array of token IDs) and mint the molecule NFT.
-                _mint(destination_, tokenIds_[--count] = (tokenId | (moleculeType << 248)));
-            }
-        }
-
-        // Set relevant storage state fromm the cache ones.
-        COMPACT_STATE_1 = compactState1;
-        COMPACT_STATE_2 = compactState2;
-        COMPACT_STATE_3 = compactState3;
-
-        // Require that exact ether was provided, or that extra ether is successfully returned to the caller,
-        require(msg.value == totalCost || _transferEther(msg.sender, msg.value - totalCost), "ETHER_TRANSFER_FAILED");
-    }
-
-    function startDecomposition(uint256 tokenId_) external {
-        // Check that the caller owns the token.
-        require(ownerOf(tokenId_) == msg.sender, "NOT_OWNER");
-
-        // Extract drug type from token id and check that it is in fact a drug.
-        require((tokenId_ >> 248) >= 63, "NOT_DRUG");
-
-        unchecked {
-            // Add the token to `burnDates` so it can be burned after DECOMPOSITION_TIME, and emit the event.
-            emit MoleculeDecompositionStarted(
-                msg.sender,
-                tokenId_,
-                burnDates[tokenId_] = block.timestamp + DECOMPOSITION_TIME
-            );
-        }
-
-        // Take possession of the token.
-        _transfer(msg.sender, address(this), tokenId_);
-    }
-
-    function withdrawProceeds(uint256 amount_, address destination_) external onlyOwner {
-        require(_transferEther(destination_, amount_), "ETHER_TRANSFER_FAILED");
     }
 
     /**************************/

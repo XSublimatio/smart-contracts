@@ -18,7 +18,7 @@ describe('XSublimatio', () => {
 
         const contractFactory = new XSublimatio__factory(alice);
 
-        contract = await contractFactory.deploy('http://127.0.0.1:8080/');
+        contract = await contractFactory.deploy('http://127.0.0.1:8080/', await alice.getAddress());
         await contract.deployed();
 
         expect(contract.address).to.properAddress;
