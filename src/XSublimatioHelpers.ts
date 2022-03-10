@@ -119,7 +119,7 @@ export const DRUG_NAMES: string[] = [
 
 export interface Token {
     type: number;
-    seed: BigNumber;
+    seed: string;
     category: 'molecule' | 'drug';
     name: string;
 }
@@ -133,9 +133,10 @@ export interface Drug extends Token {
     specialWaterIndex: number;
 }
 
-export function getTokenFromId(tokenId: BigNumber): Molecule | Drug {
-    const type = tokenId.shr(248).toNumber();
-    const seed = tokenId.mask(240);
+export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
+    const id = BigNumber.from(tokenId);
+    const type = id.shr(248).toNumber();
+    const seed = id.mask(240).toString();
 
     return type < 63
         ? {
@@ -151,11 +152,11 @@ export function getTokenFromId(tokenId: BigNumber): Molecule | Drug {
               category: 'drug',
               name: DRUG_NAMES[type - 63],
               drugType: type - 63,
-              specialWaterIndex: tokenId.shr(240).mask(8).toNumber(),
+              specialWaterIndex: id.shr(240).mask(8).toNumber(),
           };
 }
 
-export function canBrew(drugType: number, tokenIds: BigNumber[]): boolean {
+export function canBrew(drugType: number, tokenIds: BigNumber[] | string[]): boolean {
     const molecules = tokenIds.map(getTokenFromId).filter(({ category }) => category === 'molecule');
 
     return RECIPES[drugType].reduce(
@@ -163,5 +164,3 @@ export function canBrew(drugType: number, tokenIds: BigNumber[]): boolean {
         true
     );
 }
-
-// TODO: metadata
