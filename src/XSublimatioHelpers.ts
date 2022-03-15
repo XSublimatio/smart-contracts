@@ -135,25 +135,38 @@ export interface Drug extends Token {
 
 export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
     const id = BigNumber.from(tokenId);
+
+    if (id.gte(BigNumber.from(1).shl(256))) throw 'Invalid Token Id 1';
+
     const type = id.shr(248).toNumber();
+
+    if (type > 81) throw 'Invalid Token Id 2';
+
     const seed = id.mask(240).toString();
 
-    return type < 63
-        ? {
-              type,
-              seed,
-              category: 'molecule',
-              name: MOLECULE_NAMES[type],
-              moleculeType: type,
-          }
-        : {
-              type,
-              seed,
-              category: 'drug',
-              name: DRUG_NAMES[type - 63],
-              drugType: type - 63,
-              specialWaterIndex: id.shr(240).mask(8).toNumber(),
-          };
+    if (type < 63) {
+        return {
+            type,
+            seed,
+            category: 'molecule',
+            name: MOLECULE_NAMES[type],
+            moleculeType: type,
+        };
+    }
+
+    const drugType = type - 63;
+    const specialWaterIndex = id.shr(240).mask(8).toNumber();
+
+    if (specialWaterIndex > RECIPES[drugType].length) throw 'Invalid Token Id 3';
+
+    return {
+        type,
+        seed,
+        category: 'drug',
+        name: DRUG_NAMES[drugType],
+        drugType,
+        specialWaterIndex,
+    };
 }
 
 export function canBrew(drugType: number, tokenIds: BigNumber[] | string[]): boolean {

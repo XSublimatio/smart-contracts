@@ -90,6 +90,10 @@ describe('XSublimatio', () => {
     });
 
     describe('purchase and brew', () => {
+        beforeEach(async () => {
+            await (await contract.enableBrewing()).wait();
+        });
+
         it('Cannot brew an invalid drug type', async () => {
             const aliceAddress = await alice.getAddress();
             await expect(contract.brew([0, 1, 2], 19, aliceAddress)).to.be.revertedWith('INVALID_DRUG_TYPE');
@@ -297,7 +301,24 @@ describe('XSublimatio', () => {
     });
 
     describe('purchase, brew, startDecomposition, and decompose', () => {
+        beforeEach(async () => {
+            await (await contract.enableBrewing()).wait();
+            await (await contract.enableConsumingFor(await alice.getAddress())).wait();
+        });
+
+        it('Cannot startDecomposition for non-consumer', async () => {
+            const bobAddress = await bob.getAddress();
+            const value = ethers.utils.parseUnits('1.0');
+
+            const tx = await (await contract.connect(bob).purchase(bobAddress, 0, { value })).wait();
+            const tokenIds = tx.events?.map(({ args }) => args?.tokenId) as BigNumber[];
+
+            await expect(contract.connect(bob).startDecomposition(tokenIds[0])).to.be.revertedWith('CONSUMER_NOT_ENABLED');
+        });
+
         it('Cannot startDecomposition for token not owned', async () => {
+            await (await contract.enableConsumingFor(await bob.getAddress())).wait();
+
             const aliceAddress = await alice.getAddress();
             const value = ethers.utils.parseUnits('1.0');
 
@@ -355,7 +376,7 @@ describe('XSublimatio', () => {
             const startDecompositionTx = await (await contract.startDecomposition(drugToken)).wait();
             const decompositionEvent = startDecompositionTx.events?.[0];
 
-            expect(decompositionEvent?.event).to.equal('MoleculeDecompositionStarted');
+            expect(decompositionEvent?.event).to.equal('DecompositionStarted');
             expect(decompositionEvent?.args?.owner).to.equal(aliceAddress);
             expect(decompositionEvent?.args?.tokenId).to.equal(drugToken);
 
@@ -425,7 +446,7 @@ describe('XSublimatio', () => {
             const startDecompositionTx = await (await contract.startDecomposition(drugToken)).wait();
             const decompositionEvent = startDecompositionTx.events?.[0];
 
-            expect(decompositionEvent?.event).to.equal('MoleculeDecompositionStarted');
+            expect(decompositionEvent?.event).to.equal('DecompositionStarted');
             expect(decompositionEvent?.args?.owner).to.equal(aliceAddress);
             expect(decompositionEvent?.args?.tokenId).to.equal(drugToken);
 

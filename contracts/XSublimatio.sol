@@ -3,27 +3,13 @@
 pragma solidity ^0.8.10;
 
 import { ERC721, ERC721Enumerable, Strings } from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+
+import { IXSublimatio } from "./interfaces/IXSublimatio.sol";
 
 // TODO: Some checks are done implicitly by array out-of-bound errors.
 // TODO: Don't use ERC721Enumerable if no additional UX is desired (and implement totalSupply manually)
 
-contract XSublimatio is ERC721Enumerable {
-
-    /// @notice Emitted when the base URI is set (or re-set).
-    event BaseURISet(string baseURI);
-
-    /// @notice Emitted when an account has accepted ownership.
-    event OwnershipAccepted(address indexed previousOwner, address indexed owner);
-
-    /// @notice Emitted when owner proposed an account that can accept ownership.
-    event OwnershipProposed(address indexed owner, address indexed pendingOwner);
-
-    /// @notice Emitted when owner has withdrawn proceeds.
-    event ProceedsWithdrawn(address indexed destination, uint256 amount);
-
-    /// @notice Emitted when owner has withdrawn proceeds.
-    event MoleculeDecompositionStarted(address indexed owner, uint256 indexed tokenId, uint256 burnDate);
+contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
     uint256 public constant DECOMPOSITION_TIME = 10 days;
     uint256 public constant MOLECULES_PER_PURCHASE = 5;
@@ -39,7 +25,11 @@ contract XSublimatio is ERC721Enumerable {
 
     string public baseURI;
 
-    mapping(uint256 => uint256) public burnDates;
+    mapping(uint256 => uint256) public burnDateFor;
+
+    bool public brewingEnabled;
+
+    mapping(address => bool) public consumingEnabledFor;
 
     // Contains first 23 molecule availabilities (11 bits each).
     uint256 internal COMPACT_STATE_1 = uint256(226273811297403348448206775794466307537893312132982461222617777606987601006);
@@ -84,6 +74,18 @@ contract XSublimatio is ERC721Enumerable {
         pendingOwner = address(0);
     }
 
+    function enableBrewing() external onlyOwner {
+        require(!brewingEnabled, "BREWING_ENABLED");
+        brewingEnabled = true;
+        emit BrewingEnabled();
+    }
+
+    function enableConsumingFor(address consumer_) external onlyOwner {
+        require(!consumingEnabledFor[consumer_], "CONSUMING_ENABLED");
+        consumingEnabledFor[consumer_] = true;
+        emit ConsumingEnabled(consumer_);
+    }
+
     function proposeOwnership(address newOwner_) external onlyOwner {
         emit OwnershipProposed(owner, pendingOwner = newOwner_);
     }
@@ -102,6 +104,9 @@ contract XSublimatio is ERC721Enumerable {
     /**************************/
 
     function brew(uint256[] calldata tokenIds_, uint256 drugType_, address destination_) external returns (uint256 tokenId_) {
+        // Check that brewing is enabled.
+        require(brewingEnabled, "BREWING_NOT_YET_ENABLED");
+
         // Check that drugType_ is valid.
         require(drugType_ < 19, "INVALID_DRUG_TYPE");
 
@@ -170,10 +175,10 @@ contract XSublimatio is ERC721Enumerable {
         uint256 specialWaterIndex = (tokenId_ >> 240) & type(uint8).max;
 
         // Check the token is marked for burning and that the burn date has been reached/passed.
-        require(block.timestamp >= burnDates[tokenId_], "CANNOT_BURN_YET");
+        require(block.timestamp >= burnDateFor[tokenId_], "CANNOT_BURN_YET");
 
         // Delete the burnDate for this token.
-        delete burnDates[tokenId_];
+        delete burnDateFor[tokenId_];
 
         // Cache relevant compact states from storage.
         uint256 compactState1 = COMPACT_STATE_1;
@@ -273,6 +278,9 @@ contract XSublimatio is ERC721Enumerable {
     }
 
     function startDecomposition(uint256 tokenId_) external {
+        // Check that consuming is enabled at the caller.
+        require(consumingEnabledFor[msg.sender], "CONSUMER_NOT_ENABLED");
+
         // Check that the caller owns the token.
         require(ownerOf(tokenId_) == msg.sender, "NOT_OWNER");
 
@@ -280,11 +288,11 @@ contract XSublimatio is ERC721Enumerable {
         require((tokenId_ >> 248) >= 63, "NOT_DRUG");
 
         unchecked {
-            // Add the token to `burnDates` so it can be burned after DECOMPOSITION_TIME, and emit the event.
-            emit MoleculeDecompositionStarted(
+            // Add the token to `burnDateFor` so it can be burned after DECOMPOSITION_TIME, and emit the event.
+            emit DecompositionStarted(
                 msg.sender,
                 tokenId_,
-                burnDates[tokenId_] = block.timestamp + DECOMPOSITION_TIME
+                burnDateFor[tokenId_] = block.timestamp + DECOMPOSITION_TIME
             );
         }
 

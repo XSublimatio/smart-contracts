@@ -34,7 +34,12 @@ export type BaseURISet = ContractEventLog<{
     baseURI: string;
     0: string;
 }>;
-export type MoleculeDecompositionStarted = ContractEventLog<{
+export type BrewingEnabled = ContractEventLog<{}>;
+export type ConsumingEnabled = ContractEventLog<{
+    consumer: string;
+    0: string;
+}>;
+export type DecompositionStarted = ContractEventLog<{
     owner: string;
     tokenId: string;
     burnDate: string;
@@ -100,7 +105,11 @@ export interface XSublimatio extends BaseContract {
             destination_: string
         ): NonPayableTransactionObject<string>;
 
-        burnDates(arg0: number | string | BN): NonPayableTransactionObject<string>;
+        brewingEnabled(): NonPayableTransactionObject<boolean>;
+
+        burnDateFor(arg0: number | string | BN): NonPayableTransactionObject<string>;
+
+        consumingEnabledFor(arg0: string): NonPayableTransactionObject<boolean>;
 
         contractURI(): NonPayableTransactionObject<string>;
 
@@ -109,6 +118,10 @@ export interface XSublimatio extends BaseContract {
         drugAvailabilities(): NonPayableTransactionObject<string[]>;
 
         drugsAvailable(): NonPayableTransactionObject<string>;
+
+        enableBrewing(): NonPayableTransactionObject<void>;
+
+        enableConsumingFor(consumer_: string): NonPayableTransactionObject<void>;
 
         getApproved(tokenId: number | string | BN): NonPayableTransactionObject<string>;
 
@@ -181,8 +194,14 @@ export interface XSublimatio extends BaseContract {
         BaseURISet(cb?: Callback<BaseURISet>): EventEmitter;
         BaseURISet(options?: EventOptions, cb?: Callback<BaseURISet>): EventEmitter;
 
-        MoleculeDecompositionStarted(cb?: Callback<MoleculeDecompositionStarted>): EventEmitter;
-        MoleculeDecompositionStarted(options?: EventOptions, cb?: Callback<MoleculeDecompositionStarted>): EventEmitter;
+        BrewingEnabled(cb?: Callback<BrewingEnabled>): EventEmitter;
+        BrewingEnabled(options?: EventOptions, cb?: Callback<BrewingEnabled>): EventEmitter;
+
+        ConsumingEnabled(cb?: Callback<ConsumingEnabled>): EventEmitter;
+        ConsumingEnabled(options?: EventOptions, cb?: Callback<ConsumingEnabled>): EventEmitter;
+
+        DecompositionStarted(cb?: Callback<DecompositionStarted>): EventEmitter;
+        DecompositionStarted(options?: EventOptions, cb?: Callback<DecompositionStarted>): EventEmitter;
 
         OwnershipAccepted(cb?: Callback<OwnershipAccepted>): EventEmitter;
         OwnershipAccepted(options?: EventOptions, cb?: Callback<OwnershipAccepted>): EventEmitter;
@@ -208,8 +227,14 @@ export interface XSublimatio extends BaseContract {
     once(event: 'BaseURISet', cb: Callback<BaseURISet>): void;
     once(event: 'BaseURISet', options: EventOptions, cb: Callback<BaseURISet>): void;
 
-    once(event: 'MoleculeDecompositionStarted', cb: Callback<MoleculeDecompositionStarted>): void;
-    once(event: 'MoleculeDecompositionStarted', options: EventOptions, cb: Callback<MoleculeDecompositionStarted>): void;
+    once(event: 'BrewingEnabled', cb: Callback<BrewingEnabled>): void;
+    once(event: 'BrewingEnabled', options: EventOptions, cb: Callback<BrewingEnabled>): void;
+
+    once(event: 'ConsumingEnabled', cb: Callback<ConsumingEnabled>): void;
+    once(event: 'ConsumingEnabled', options: EventOptions, cb: Callback<ConsumingEnabled>): void;
+
+    once(event: 'DecompositionStarted', cb: Callback<DecompositionStarted>): void;
+    once(event: 'DecompositionStarted', options: EventOptions, cb: Callback<DecompositionStarted>): void;
 
     once(event: 'OwnershipAccepted', cb: Callback<OwnershipAccepted>): void;
     once(event: 'OwnershipAccepted', options: EventOptions, cb: Callback<OwnershipAccepted>): void;

@@ -30,11 +30,15 @@ export interface XSublimatioInterface extends utils.Interface {
         'balanceOf(address)': FunctionFragment;
         'baseURI()': FunctionFragment;
         'brew(uint256[],uint256,address)': FunctionFragment;
-        'burnDates(uint256)': FunctionFragment;
+        'brewingEnabled()': FunctionFragment;
+        'burnDateFor(uint256)': FunctionFragment;
+        'consumingEnabledFor(address)': FunctionFragment;
         'contractURI()': FunctionFragment;
         'decompose(uint256)': FunctionFragment;
         'drugAvailabilities()': FunctionFragment;
         'drugsAvailable()': FunctionFragment;
+        'enableBrewing()': FunctionFragment;
+        'enableConsumingFor(address)': FunctionFragment;
         'getApproved(uint256)': FunctionFragment;
         'getDrugAvailability(uint256)': FunctionFragment;
         'getMoleculeAvailability(uint256)': FunctionFragment;
@@ -71,11 +75,15 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
     encodeFunctionData(functionFragment: 'baseURI', values?: undefined): string;
     encodeFunctionData(functionFragment: 'brew', values: [BigNumberish[], BigNumberish, string]): string;
-    encodeFunctionData(functionFragment: 'burnDates', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'brewingEnabled', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'burnDateFor', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'consumingEnabledFor', values: [string]): string;
     encodeFunctionData(functionFragment: 'contractURI', values?: undefined): string;
     encodeFunctionData(functionFragment: 'decompose', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'drugAvailabilities', values?: undefined): string;
     encodeFunctionData(functionFragment: 'drugsAvailable', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'enableBrewing', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'enableConsumingFor', values: [string]): string;
     encodeFunctionData(functionFragment: 'getApproved', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'getDrugAvailability', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'getMoleculeAvailability', values: [BigNumberish]): string;
@@ -111,11 +119,15 @@ export interface XSublimatioInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'baseURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'brew', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'burnDates', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'brewingEnabled', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'burnDateFor', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'consumingEnabledFor', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'contractURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'decompose', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'drugAvailabilities', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'drugsAvailable', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'enableBrewing', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'enableConsumingFor', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'getApproved', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'getDrugAvailability', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'getMoleculeAvailability', data: BytesLike): Result;
@@ -146,7 +158,9 @@ export interface XSublimatioInterface extends utils.Interface {
         'Approval(address,address,uint256)': EventFragment;
         'ApprovalForAll(address,address,bool)': EventFragment;
         'BaseURISet(string)': EventFragment;
-        'MoleculeDecompositionStarted(address,uint256,uint256)': EventFragment;
+        'BrewingEnabled()': EventFragment;
+        'ConsumingEnabled(address)': EventFragment;
+        'DecompositionStarted(address,uint256,uint256)': EventFragment;
         'OwnershipAccepted(address,address)': EventFragment;
         'OwnershipProposed(address,address)': EventFragment;
         'ProceedsWithdrawn(address,uint256)': EventFragment;
@@ -156,7 +170,9 @@ export interface XSublimatioInterface extends utils.Interface {
     getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'BaseURISet'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'MoleculeDecompositionStarted'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'BrewingEnabled'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'ConsumingEnabled'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'DecompositionStarted'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'OwnershipAccepted'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'OwnershipProposed'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'ProceedsWithdrawn'): EventFragment;
@@ -175,12 +191,20 @@ export type BaseURISetEvent = TypedEvent<[string], { baseURI: string }>;
 
 export type BaseURISetEventFilter = TypedEventFilter<BaseURISetEvent>;
 
-export type MoleculeDecompositionStartedEvent = TypedEvent<
+export type BrewingEnabledEvent = TypedEvent<[], {}>;
+
+export type BrewingEnabledEventFilter = TypedEventFilter<BrewingEnabledEvent>;
+
+export type ConsumingEnabledEvent = TypedEvent<[string], { consumer: string }>;
+
+export type ConsumingEnabledEventFilter = TypedEventFilter<ConsumingEnabledEvent>;
+
+export type DecompositionStartedEvent = TypedEvent<
     [string, BigNumber, BigNumber],
     { owner: string; tokenId: BigNumber; burnDate: BigNumber }
 >;
 
-export type MoleculeDecompositionStartedEventFilter = TypedEventFilter<MoleculeDecompositionStartedEvent>;
+export type DecompositionStartedEventFilter = TypedEventFilter<DecompositionStartedEvent>;
 
 export type OwnershipAcceptedEvent = TypedEvent<[string, string], { previousOwner: string; owner: string }>;
 
@@ -254,7 +278,11 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
 
-        burnDates(arg0: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
+        brewingEnabled(overrides?: CallOverrides): Promise<[boolean]>;
+
+        burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
         contractURI(overrides?: CallOverrides): Promise<[string] & { contractURI_: string }>;
 
@@ -263,6 +291,10 @@ export interface XSublimatio extends BaseContract {
         drugAvailabilities(overrides?: CallOverrides): Promise<[BigNumber[]] & { availabilities_: BigNumber[] }>;
 
         drugsAvailable(overrides?: CallOverrides): Promise<[BigNumber] & { drugsAvailable_: BigNumber }>;
+
+        enableBrewing(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
+        enableConsumingFor(consumer_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
 
@@ -379,7 +411,11 @@ export interface XSublimatio extends BaseContract {
         overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    burnDates(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    brewingEnabled(overrides?: CallOverrides): Promise<boolean>;
+
+    burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+    consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     contractURI(overrides?: CallOverrides): Promise<string>;
 
@@ -388,6 +424,10 @@ export interface XSublimatio extends BaseContract {
     drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
     drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
+
+    enableBrewing(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
+    enableConsumingFor(consumer_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
@@ -493,7 +533,11 @@ export interface XSublimatio extends BaseContract {
 
         brew(tokenIds_: BigNumberish[], drugType_: BigNumberish, destination_: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-        burnDates(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+        brewingEnabled(overrides?: CallOverrides): Promise<boolean>;
+
+        burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
         contractURI(overrides?: CallOverrides): Promise<string>;
 
@@ -502,6 +546,10 @@ export interface XSublimatio extends BaseContract {
         drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
         drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
+
+        enableBrewing(overrides?: CallOverrides): Promise<void>;
+
+        enableConsumingFor(consumer_: string, overrides?: CallOverrides): Promise<void>;
 
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
@@ -581,16 +629,18 @@ export interface XSublimatio extends BaseContract {
         'BaseURISet(string)'(baseURI?: null): BaseURISetEventFilter;
         BaseURISet(baseURI?: null): BaseURISetEventFilter;
 
-        'MoleculeDecompositionStarted(address,uint256,uint256)'(
+        'BrewingEnabled()'(): BrewingEnabledEventFilter;
+        BrewingEnabled(): BrewingEnabledEventFilter;
+
+        'ConsumingEnabled(address)'(consumer?: null): ConsumingEnabledEventFilter;
+        ConsumingEnabled(consumer?: null): ConsumingEnabledEventFilter;
+
+        'DecompositionStarted(address,uint256,uint256)'(
             owner?: string | null,
             tokenId?: BigNumberish | null,
             burnDate?: null
-        ): MoleculeDecompositionStartedEventFilter;
-        MoleculeDecompositionStarted(
-            owner?: string | null,
-            tokenId?: BigNumberish | null,
-            burnDate?: null
-        ): MoleculeDecompositionStartedEventFilter;
+        ): DecompositionStartedEventFilter;
+        DecompositionStarted(owner?: string | null, tokenId?: BigNumberish | null, burnDate?: null): DecompositionStartedEventFilter;
 
         'OwnershipAccepted(address,address)'(previousOwner?: string | null, owner?: string | null): OwnershipAcceptedEventFilter;
         OwnershipAccepted(previousOwner?: string | null, owner?: string | null): OwnershipAcceptedEventFilter;
@@ -629,7 +679,11 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
 
-        burnDates(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+        brewingEnabled(overrides?: CallOverrides): Promise<BigNumber>;
+
+        burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
         contractURI(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -638,6 +692,10 @@ export interface XSublimatio extends BaseContract {
         drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber>;
 
         drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
+
+        enableBrewing(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+
+        enableConsumingFor(consumer_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -748,7 +806,11 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
 
-        burnDates(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        brewingEnabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         contractURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -757,6 +819,10 @@ export interface XSublimatio extends BaseContract {
         drugAvailabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         drugsAvailable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        enableBrewing(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
+
+        enableConsumingFor(consumer_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
