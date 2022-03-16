@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { XSublimatio__factory, XSublimatio, RECIPES, Molecule, Drug, getTokenFromId } from '../src';
+import { XSublimatio__factory, XSublimatio, RECIPES, Molecule, Drug, getTokenFromId, getMetadata } from '../src';
 import { BigNumber, Signer } from 'ethers';
 
 chai.use(chaiAsPromised);

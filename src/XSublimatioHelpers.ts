@@ -133,6 +133,20 @@ export interface Drug extends Token {
     specialWaterIndex: number;
 }
 
+export interface Attribute {
+    trait_type: string;
+    value: string;
+}
+
+export interface Metadata {
+    attributes: Attribute[];
+    description: string;
+    name: string;
+    background_color: string;
+    image: string;
+    animation_url: string;
+}
+
 export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
     const id = BigNumber.from(tokenId);
 
@@ -176,4 +190,30 @@ export function canBrew(drugType: number, tokenIds: BigNumber[] | string[]): boo
         (accumulator: boolean, moleculeType: number) => accumulator && !!molecules.find(({ type }) => type === moleculeType),
         true
     );
+}
+
+export function getMetadata(tokenId: BigNumber | string, baseUri: string): Metadata {
+    const token = getTokenFromId(tokenId);
+
+    const { category, name, seed, type } = token;
+
+    const attributes: Attribute[] = [
+        { trait_type: 'Category', value: category },
+        { trait_type: 'Name', value: name },
+        { trait_type: 'Seed', value: seed },
+        { trait_type: 'Type', value: type.toString() },
+    ];
+
+    if (token.category === 'drug') {
+        attributes.push({ trait_type: 'Special Water Index', value: (token as Drug).specialWaterIndex.toString() });
+    }
+
+    return {
+        attributes,
+        description: `An xSublimatio ${category}`,
+        name,
+        background_color: 'ffffff',
+        image: `${baseUri}/${tokenId}.webp`,
+        animation_url: `${baseUri}/${tokenId}.mp4`,
+    };
 }
