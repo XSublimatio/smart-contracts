@@ -192,7 +192,7 @@ export function canBrew(drugType: number, tokenIds: BigNumber[] | string[]): boo
     );
 }
 
-export function getMetadata(tokenId: BigNumber | string, baseUri: string): Metadata {
+export function getMetadata(tokenId: BigNumber | string, mediaUri: string): Metadata {
     const token = getTokenFromId(tokenId);
 
     const { category, name, seed, type } = token;
@@ -213,7 +213,7 @@ export function getMetadata(tokenId: BigNumber | string, baseUri: string): Metad
         description: `An xSublimatio ${category}`,
         name,
         background_color: 'ffffff',
-        image: `${baseUri}/${tokenId}.webp`,
-        animation_url: `${baseUri}/${tokenId}.mp4`,
+        image: `${mediaUri}/${tokenId}.webp`,
+        animation_url: `${mediaUri}/${tokenId}.mp4`,
     };
 }
