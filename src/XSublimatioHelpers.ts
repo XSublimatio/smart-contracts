@@ -50,35 +50,35 @@ export const MOLECULE_NAMES: string[] = [
     'Hyoscyamine',
     'Scopolamine',
     'Lactucine',
-    'Lactucopicrin',
-    'Lactuside-A',
+    'Lactupicrin',
+    'Lactuside A',
     'Codeine',
     'Noscapine',
     'Papaverine',
     'Baeocystin',
     'Norbaeocystin',
     'Psilocin',
-    'Psilocybin',
+    'Psilocybine',
     'Belladonnine',
-    'Scopoletol',
+    'Scopoletin',
     'GHB',
     'LSD',
     'Chloroquine',
     'Mandragorin',
-    'Divinatorin-A',
-    'Divinatorin-B',
+    'Divinatorin A',
+    'Divinatorin B',
     'DMT',
     'Harmol',
     'Nicotine',
-    'Salvidivin-B',
-    'Salvinicin-A',
-    'Salvinorin-A',
-    'Telepathine',
+    'Salvidivin B',
+    'Salvinicin A',
+    'Salvinorin A',
+    'Harmine',
     'Tetrahydroharmine',
     'Acetylcholine',
     'Dopamine',
     'Dynorphin',
-    'Enkephalin',
+    'Metenkephalin',
     'MDMA',
     'Oxytocin',
     'Phenethylamine',
@@ -95,15 +95,81 @@ export const MOLECULE_NAMES: string[] = [
     'Water (Salvia Divinorum)',
 ];
 
+export const MOLECULE_FORMULAS: string[] = [
+    'H2_O',
+    'CH3_CH2_O_H',
+    'C10_H15_N',
+    'C8_H10_N4_O2',
+    'C7_H8_N4_O2',
+    'C9_H13_N_O',
+    'C9_H11_N_O',
+    'C10_H13_N_O',
+    'C17_H21_N_O4',
+    'C21_H30_O2',
+    'C21_H30_O2',
+    'C21_H32_O2',
+    'C21_H26_O2',
+    'C21_H30_O2',
+    'C17_H19_N_O3',
+    'C13_H16_Cl_N_O',
+    'C17_H23_N_O3',
+    'C17_H23_N_O3',
+    'C17_H21_N_O4',
+    'C15_H16_O5',
+    'C23_H22_O7',
+    'C21_H30_O9',
+    'C18_H21_N_O3',
+    'C22_H23_N_O7',
+    'C20_H22_Cl_N_O4',
+    'C11_H15_N2_O4_P',
+    'C10_H13_N2_O4_P',
+    'C12_H16_N2_O',
+    'C12_H17_N2_O4_P',
+    'C34_H42_N2_O4',
+    'C10_H8_O4',
+    'C4_H8_O3',
+    'C20_H25_N3_O',
+    'C18_H26_Cl_N3',
+    'C13_H24_N2_O',
+    'C20_H28_O4',
+    'C21_H30_O5',
+    'C12_H16_N2',
+    'C12_H10_N2_O',
+    'C10_H14_N2',
+    'C23_H28_O10',
+    'C25_H36_O12',
+    'C23_H28_O8',
+    'C13_H12_N2_O',
+    'C13_H16_N2_O',
+    'C7_H16_N_O2+',
+    'C8_H11_N_O2',
+    'C99_H155_N31_O23',
+    'C27_H35_N5_O7_S',
+    'C11_H16_Cl_N_O2',
+    'C43_H66_N12_O12_S2',
+    'C8_H11_N',
+    'H2_O',
+    'H2_O',
+    'H2_O',
+    'H2_O',
+    'H2_O',
+    'H2_O',
+    'H2_O',
+    'H2_O',
+    'H2_O',
+    'H2_O',
+    'H2_O',
+];
+
 export const DRUG_NAMES: string[] = [
-    'Alcohol (Isolated)',
-    'Chloroquine (Isolated)',
-    'Cocaine (Isolated)',
-    'GHB (Isolated)',
-    'Ketamine (Isolated)',
-    'LSD (Isolated)',
-    'Methamphetamine (Isolated)',
-    'Morphine (Isolated)',
+    'Alcohol (Iso)',
+    'Chloroquine (Iso)',
+    'Cocaine (Iso)',
+    'GHB (Iso)',
+    'Ketamine (Iso)',
+    'LSD (Iso)',
+    'Methamphetamine (Iso)',
+    'Morphine (Iso)',
     'Ayahuasca',
     'Belladonna',
     'Cannabis',
@@ -117,25 +183,49 @@ export const DRUG_NAMES: string[] = [
     'Salvia Divinorum',
 ];
 
+export const DRUG_DESCRIPTIONS: string[] = [
+    'GABA receptor',
+    'Chloroquine resistance transporter',
+    'Noradrenaline transporter',
+    'IP03705p',
+    'NMDA 1',
+    '5-HT2A receptor',
+    'TAAR1',
+    'Opioid receptor',
+    'Acetylcholinesterase',
+    'Acetylcholine receptor',
+    'Cannabinoid receptor',
+    'Adrenergic receptor',
+    'PTGS2',
+    'Oxytocin receptor',
+    'Serotonin receptor',
+    'Dopamine transporter',
+    'Adenosine receptor',
+    'Kappa-type opioid receptor',
+    'Delta-type opioid receptor',
+];
+
 export interface Token {
     type: number;
-    seed: string;
+    seed: number;
     category: 'molecule' | 'drug';
     name: string;
 }
 
 export interface Molecule extends Token {
     moleculeType: number;
+    formula: string;
 }
 
 export interface Drug extends Token {
     drugType: number;
     specialWaterIndex: number;
+    description: string;
 }
 
 export interface Attribute {
     trait_type: string;
-    value: string;
+    value: string | number;
 }
 
 export interface Metadata {
@@ -150,13 +240,13 @@ export interface Metadata {
 export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
     const id = BigNumber.from(tokenId);
 
-    if (id.gte(BigNumber.from(1).shl(256))) throw 'Invalid Token Id 1';
+    if (id.gte(BigNumber.from(1).shl(256))) throw 'Invalid Token Id';
 
     const type = id.shr(248).toNumber();
 
-    if (type > 81) throw 'Invalid Token Id 2';
+    if (type > 81) throw 'Invalid Token Id';
 
-    const seed = id.mask(240).toString();
+    const seed = ~~`0b${id.mask(32).toBigInt().toString(2)}`;
 
     if (type < 63) {
         return {
@@ -165,6 +255,7 @@ export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
             category: 'molecule',
             name: MOLECULE_NAMES[type],
             moleculeType: type,
+            formula: MOLECULE_FORMULAS[type],
         };
     }
 
@@ -180,6 +271,7 @@ export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
         name: DRUG_NAMES[drugType],
         drugType,
         specialWaterIndex,
+        description: DRUG_DESCRIPTIONS[drugType],
     };
 }
 
@@ -201,7 +293,7 @@ export function getMetadata(tokenId: BigNumber | string, mediaUri: string): Meta
         { trait_type: 'Category', value: category },
         { trait_type: 'Name', value: name },
         { trait_type: 'Seed', value: seed },
-        { trait_type: 'Type', value: type.toString() },
+        { trait_type: 'Type', value: type },
     ];
 
     if (token.category === 'drug') {

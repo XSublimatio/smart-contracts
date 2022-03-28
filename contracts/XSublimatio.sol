@@ -114,7 +114,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         uint256 compactState4 = COMPACT_STATE_4;
 
         // Get a random number as the token ID, but shift out space for the drug type (8 bits) and special index (8 bits).
-        tokenId_ = _generatePseudoRandomNumber(_getDrugNonce(compactState4)) >> 16;
+        tokenId_ = _generatePseudoRandomNumber(_getDrugNonce(compactState4)) >> 224;
 
         // Check that drug is available.
         require(_getDrugAvailability(compactState4, drugType_) != 0, "DRUG_NOT_AVAILABLE");
@@ -255,7 +255,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
         while (count > 0) {
             // Get a random number as the token ID, but shift out space for the molecule type (8 bits) and special index (8 bits).
-            uint256 tokenId = _generatePseudoRandomNumber(_getMoleculeNonce(compactState3)) >> 16;
+            uint256 tokenId = _generatePseudoRandomNumber(_getMoleculeNonce(compactState3)) >> 224;
             uint256 moleculeType;
 
             unchecked {
