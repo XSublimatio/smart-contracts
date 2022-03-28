@@ -226,6 +226,7 @@ export interface Drug extends Token {
 export interface Attribute {
     trait_type: string;
     value: string | number;
+    display_type?: 'number';
 }
 
 export interface Metadata {
@@ -292,12 +293,17 @@ export function getMetadata(tokenId: BigNumber | string, mediaUri: string): Meta
     const attributes: Attribute[] = [
         { trait_type: 'Category', value: category },
         { trait_type: 'Name', value: name },
-        { trait_type: 'Seed', value: seed },
-        { trait_type: 'Type', value: type },
+        { trait_type: 'Seed', display_type: 'number', value: seed },
+        { trait_type: 'Type', display_type: 'number', value: type },
     ];
 
     if (token.category === 'drug') {
-        attributes.push({ trait_type: 'Special Water Index', value: (token as Drug).specialWaterIndex.toString() });
+        attributes.push({ trait_type: 'Special Water Index', display_type: 'number', value: (token as Drug).specialWaterIndex });
+        attributes.push({ trait_type: 'Description', value: (token as Drug).description });
+    }
+
+    if (token.category === 'molecule') {
+        attributes.push({ trait_type: 'Formula', value: (token as Molecule).formula });
     }
 
     return {
