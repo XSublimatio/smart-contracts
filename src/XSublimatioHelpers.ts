@@ -381,7 +381,7 @@ export function getMetadata(token: Token | BigNumber | BigInt | string, mediaUri
         description: `An xSublimatio ${category}`,
         name,
         background_color: 'ffffff',
-        image: `${mediaUri}/${id}.webp`,
-        animation_url: `${mediaUri}/${id}.mp4`,
+        image: `${mediaUri}/${id}.png`,
+        animation_url: `${mediaUri}/${id}.webm`,
     };
 }
