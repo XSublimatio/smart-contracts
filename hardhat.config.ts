@@ -14,7 +14,7 @@ const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY! || '0xc87509a1c067b
 const config: HardhatUserConfig = {
     defaultNetwork: 'hardhat',
     solidity: {
-        version: '0.8.10',
+        version: '0.8.13',
         settings: {
             evmVersion: 'london',
             optimizer: {

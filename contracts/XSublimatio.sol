@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity 0.8.13;
 
 import { ERC721, ERC721Enumerable, Strings } from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
@@ -8,6 +8,9 @@ import { IXSublimatio } from "./interfaces/IXSublimatio.sol";
 
 // TODO: Some checks are done implicitly by array out-of-bound errors.
 // TODO: Don't use ERC721Enumerable if no additional UX is desired (and implement totalSupply manually)
+
+// NOTE: despite token ids being generated with a molecule nonce or a drug nonce (which means there can be an overlap),
+//       the tokenId will eventually be prepended with a number of that molecule or drug type.
 
 contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
@@ -113,9 +116,6 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         // Cache relevant compact state from storage.
         uint256 compactState4 = COMPACT_STATE_4;
 
-        // Get a random number as the token ID, but shift out space for the drug type (8 bits) and special index (8 bits).
-        tokenId_ = _generatePseudoRandomNumber(_getDrugNonce(compactState4)) >> 224;
-
         // Check that drug is available.
         require(_getDrugAvailability(compactState4, drugType_) != 0, "DRUG_NOT_AVAILABLE");
 
@@ -123,6 +123,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         COMPACT_STATE_4 = _decrementDrugAvailability(compactState4, drugType_);
 
         uint256 specialWater;
+        uint256 specialWaterIndex;
 
         unchecked {
             // The specific special water moleculeType for this drug is 44 more than the drugType.
@@ -148,8 +149,8 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
             if (moleculeType == specialWater) {
                 // There is only 1 of molecule of a special water for a specific drug, so no need to worry about overlap here.
                 unchecked {
-                    // Put recipe index where a special water was used (1-based index, since a zero in this space would mean "none used").
-                    tokenId_ |= (index + 1) << 240;
+                    // Save recipe index where a special water was used (1-based index, since a zero in this space would mean "none used").
+                    specialWaterIndex = index + 1;
                 }
             } else {
                 require(recipe[index] == moleculeType, "INVALID_MOLECULE");
@@ -164,7 +165,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         }
 
         // Put token type as the leftmost 8 bits in the token id and mint the drug NFT (drugType + 63).
-        _mint(destination_, tokenId_ |= (drugType_ + 63) << 248);
+        _mint(destination_, tokenId_ = _generateTokenId(drugType_ + 63, specialWaterIndex, _generatePseudoRandomNumber(_getDrugNonce(compactState4))));
     }
 
     function decompose(uint256 tokenId_) external {
@@ -254,17 +255,17 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         tokenIds_ = new uint256[](count);
 
         while (count > 0) {
-            // Get a random number as the token ID, but shift out space for the molecule type (8 bits) and special index (8 bits).
-            uint256 tokenId = _generatePseudoRandomNumber(_getMoleculeNonce(compactState3)) >> 224;
+            // Get a pseudo random number.
+            uint256 randomNumber = _generatePseudoRandomNumber(_getMoleculeNonce(compactState3));
             uint256 moleculeType;
 
             unchecked {
-                // Provide _drawMolecule with the 3 relevant cached compact states, and a random number (derived from tokenId) between 0 and availableMoleculeCount - 1, inclusively.
+                // Provide _drawMolecule with the 3 relevant cached compact states, and a random number between 0 and availableMoleculeCount - 1, inclusively.
                 // The result is newly updated cached compact states. Also, availableMoleculeCount is pre-decremented so that each random number is within correct bounds.
-                ( compactState1, compactState2, compactState3, moleculeType ) = _drawMolecule(compactState1, compactState2, compactState3, _limitTo(tokenId, --availableMoleculeCount));
+                ( compactState1, compactState2, compactState3, moleculeType ) = _drawMolecule(compactState1, compactState2, compactState3, _limitTo(randomNumber, --availableMoleculeCount));
 
-                // Put molecule type as the leftmost 8 bits in the token id (saving it in the array of token IDs) and mint the molecule NFT.
-                _mint(destination_, tokenIds_[--count] = (tokenId | (moleculeType << 248)));
+                // Generate a token id from the moleculeType and randomNumber (saving it in the array of token IDs) and mint the molecule NFT.
+                _mint(destination_, tokenIds_[--count] = _generateTokenId(moleculeType, 0, randomNumber));
             }
         }
 
@@ -500,10 +501,49 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         ( newCompactState1_, newCompactState2_, newCompactState3_ ) = _decrementMoleculeAvailability(compactState1_, compactState2_, compactState3_, moleculeType_);
     }
 
-    function _generatePseudoRandomNumber(uint256 randomNonce_) internal view returns (uint256 pseudoRandomNumber_) {
+    function _generatePseudoRandomNumber(uint256 nonce_) internal view returns (uint256 pseudoRandomNumber_) {
         unchecked {
-            pseudoRandomNumber_ = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, randomNonce_)));
+            pseudoRandomNumber_ = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, nonce_)));
         }
+    }
+
+    function _generateTokenId(uint256 type_, uint256 specialWaterIndex_, uint256 pseudoRandomNumber_) internal pure returns (uint256 tokenId_) {
+        unchecked {
+            // First 8 bits are the type, next 8 bits are the special water index, and last 136 bits are from the pseudo random number.
+            tokenId_ = (type_ << 248) | (specialWaterIndex_ << 240) | (pseudoRandomNumber_ >> 120);
+        }
+
+        // From right to left:
+        //  - 32 bits are to be used as an unsigned 32-bit (or signed 32-bit) seed.
+        //  - 16 bits are to be used as an unsigned 16-bit for brt.
+        //  - 16 bits are to be used as an unsigned 16-bit for sat.
+        //  - 16 bits are to be used as an unsigned 16-bit for hue.
+
+        //  - 8 bits are to be used for 2 lighting types.
+        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16, 2);
+
+        //  - 8 bits are to be used for 4 molecule integrity types.
+        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8, 4);
+
+        //  - 8 bits are to be used for 3 deformation types.
+        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8, 3);
+
+        //  - 8 bits are to be used for 2 color shift types.
+        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8 + 8, 2);
+
+        //  - 8 bits are to be used for 3 stripe amount types.
+        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8 + 8 + 8, 3);
+
+        //  - 8 bits are to be used for 3 blob types.
+        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8 + 8 + 8 + 8, 3);
+
+        //  - 8 bits are to be used for 6 palette types.
+        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8 + 8 + 8 + 8 + 8, 6);
+    }
+
+    function _constrainBits(uint256 input_, uint256 mask_, uint256 shift_, uint256 max_) internal pure returns (uint256 output_) {
+        // Clear out bits in input with mask, and replace them with the removed bits constrained to some max.
+        output_ = (input_ & ~(mask_ << shift_)) | ((((input_ >> shift_) & mask_) % max_) << shift_);
     }
 
     function _getDrugAvailability(uint256 compactState4_, uint256 drugType_) internal pure returns (uint256 availability_) {

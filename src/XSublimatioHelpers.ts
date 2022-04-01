@@ -206,8 +206,8 @@ export const DRUG_DESCRIPTIONS: string[] = [
 ];
 
 export interface Token {
+    id: string;
     type: number;
-    seed: number;
     category: 'molecule' | 'drug';
     name: string;
 }
@@ -238,8 +238,9 @@ export interface Metadata {
     animation_url: string;
 }
 
-export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
-    const id = BigNumber.from(tokenId);
+export function getTokenFromId(tokenId: BigNumber | BigInt | string): Molecule | Drug {
+    const tokenIdString = tokenId.toString();
+    const id = BigNumber.from(tokenIdString);
 
     if (id.gte(BigNumber.from(1).shl(256))) throw 'Invalid Token Id';
 
@@ -247,12 +248,10 @@ export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
 
     if (type > 81) throw 'Invalid Token Id';
 
-    const seed = ~~`0b${id.mask(32).toBigInt().toString(2)}`;
-
     if (type < 63) {
         return {
+            id: tokenIdString,
             type,
-            seed,
             category: 'molecule',
             name: MOLECULE_NAMES[type],
             moleculeType: type,
@@ -263,11 +262,11 @@ export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
     const drugType = type - 63;
     const specialWaterIndex = id.shr(240).mask(8).toNumber();
 
-    if (specialWaterIndex > RECIPES[drugType].length) throw 'Invalid Token Id 3';
+    if (specialWaterIndex > RECIPES[drugType].length) throw 'Invalid Token Id';
 
     return {
+        id: tokenIdString,
         type,
-        seed,
         category: 'drug',
         name: DRUG_NAMES[drugType],
         drugType,
@@ -276,8 +275,10 @@ export function getTokenFromId(tokenId: BigNumber | string): Molecule | Drug {
     };
 }
 
-export function canBrew(drugType: number, tokenIds: BigNumber[] | string[]): boolean {
-    const molecules = tokenIds.map(getTokenFromId).filter(({ category }) => category === 'molecule');
+export function canBrew(drugType: number, tokens: Molecule[] | BigNumber[] | BigInt[] | string[]): boolean {
+    const molecules = tokens
+        .map((t): Token => ((t as Token).category ? (t as Token) : getTokenFromId(t.toString())))
+        .filter(({ category }) => category === 'molecule');
 
     return RECIPES[drugType].reduce(
         (accumulator: boolean, moleculeType: number) => accumulator && !!molecules.find(({ type }) => type === moleculeType),
@@ -285,25 +286,94 @@ export function canBrew(drugType: number, tokenIds: BigNumber[] | string[]): boo
     );
 }
 
-export function getMetadata(tokenId: BigNumber | string, mediaUri: string): Metadata {
-    const token = getTokenFromId(tokenId);
+export function getMissingForBrew(drugType: number, tokens: Molecule[] | BigNumber[] | BigInt[] | string[]): number[] {
+    const molecules = tokens
+        .map((t): Token => ((t as Token).category ? (t as Token) : getTokenFromId(t.toString())))
+        .filter(({ category }) => category === 'molecule');
 
-    const { category, name, seed, type } = token;
+    return RECIPES[drugType].reduce(
+        (accumulator: number[], moleculeType: number) =>
+            molecules.find(({ type }) => type === moleculeType) ? accumulator : accumulator.concat(moleculeType),
+        []
+    );
+}
+
+const MOLECULE_LIGHTING_TYPES = ['Mixed', 'Zones'];
+
+const MOLECULE_INTEGRITY_TYPES = ['Medium', 'High', 'Very High', 'Full'];
+
+const DEFORMATION_TYPES = ['None', 'Medium', 'High'];
+
+const STRIPES_AMOUNT_TYPES = ['Low', 'Medium', 'High'];
+
+const BLOB_TYPES = ['Triangle', 'Square', 'Circle'];
+
+const PALETTE_TYPES = ['Monochrome', 'Analogous', 'Complementary', 'S-Complementary', 'Triadic', 'Square'];
+
+export function getMetadata(token: Token | BigNumber | BigInt | string, mediaUri: string): Metadata {
+    const tokenData = (token as Token).category ? (token as Token) : getTokenFromId(token.toString());
+
+    const { id, category, name, type } = tokenData;
+
+    const bigNumberId = BigNumber.from(id);
+
+    const seed = ~~`0b${bigNumberId.mask(32).toBigInt().toString(2)}`;
+    const brt = bigNumberId.shr(32).mask(16).toNumber();
+    const sat = bigNumberId.shr(48).mask(16).toNumber();
+    const hue = bigNumberId.shr(64).mask(16).toNumber();
+
+    const moleculeLightingType = bigNumberId.shr(80).mask(8).toNumber();
+
+    if (moleculeLightingType >= 2) throw Error('Invalid token id.');
+
+    const moleculeIntegrityType = bigNumberId.shr(88).mask(8).toNumber();
+
+    if (moleculeIntegrityType >= 4) throw Error('Invalid token id.');
+
+    const deformationType = bigNumberId.shr(96).mask(8).toNumber();
+
+    if (deformationType >= 3) throw Error('Invalid token id.');
+
+    const stripesColorShiftType = bigNumberId.shr(104).mask(8).toNumber();
+
+    if (stripesColorShiftType >= 2) throw Error('Invalid token id.');
+
+    const stripesAmountType = bigNumberId.shr(112).mask(8).toNumber();
+
+    if (stripesAmountType >= 3) throw Error('Invalid token id.');
+
+    const blobType = bigNumberId.shr(120).mask(8).toNumber();
+
+    if (blobType >= 3) throw Error('Invalid token id.');
+
+    const paletteType = bigNumberId.shr(128).mask(8).toNumber();
+
+    if (paletteType >= 6) throw Error('Invalid token id.');
 
     const attributes: Attribute[] = [
         { trait_type: 'Category', value: category },
         { trait_type: 'Name', value: name },
-        { trait_type: 'Seed', display_type: 'number', value: seed },
         { trait_type: 'Type', display_type: 'number', value: type },
+        { trait_type: 'Hue', display_type: 'number', value: hue },
+        { trait_type: 'Saturation', display_type: 'number', value: sat },
+        { trait_type: 'Brightness', display_type: 'number', value: brt },
+        { trait_type: 'Seed', display_type: 'number', value: seed },
+        { trait_type: 'Deformation', value: DEFORMATION_TYPES[deformationType] },
+        { trait_type: 'Stripes Color Shift', value: stripesColorShiftType ? 'On' : 'Off' },
+        { trait_type: 'Stripes Amount', value: STRIPES_AMOUNT_TYPES[stripesAmountType] },
+        { trait_type: 'Blob', value: BLOB_TYPES[blobType] },
+        { trait_type: 'Palette', value: PALETTE_TYPES[paletteType] },
     ];
 
-    if (token.category === 'drug') {
-        attributes.push({ trait_type: 'Special Water Index', display_type: 'number', value: (token as Drug).specialWaterIndex });
-        attributes.push({ trait_type: 'Description', value: (token as Drug).description });
+    if (tokenData.category === 'drug') {
+        attributes.push({ trait_type: 'Description', value: (tokenData as Drug).description });
+        attributes.push({ trait_type: 'Special Water Index', display_type: 'number', value: (tokenData as Drug).specialWaterIndex });
     }
 
-    if (token.category === 'molecule') {
-        attributes.push({ trait_type: 'Formula', value: (token as Molecule).formula });
+    if (tokenData.category === 'molecule') {
+        attributes.push({ trait_type: 'Formula', value: (tokenData as Molecule).formula });
+        attributes.push({ trait_type: 'Molecule Lighting', value: MOLECULE_LIGHTING_TYPES[moleculeLightingType] });
+        attributes.push({ trait_type: 'Molecule Integrity', value: MOLECULE_INTEGRITY_TYPES[moleculeIntegrityType] });
     }
 
     return {
@@ -311,7 +381,7 @@ export function getMetadata(tokenId: BigNumber | string, mediaUri: string): Meta
         description: `An xSublimatio ${category}`,
         name,
         background_color: 'ffffff',
-        image: `${mediaUri}/${tokenId}.webp`,
-        animation_url: `${mediaUri}/${tokenId}.mp4`,
+        image: `${mediaUri}/${id}.webp`,
+        animation_url: `${mediaUri}/${id}.mp4`,
     };
 }

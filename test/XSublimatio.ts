@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { XSublimatio__factory, XSublimatio, RECIPES, Molecule, Drug, getTokenFromId, getMetadata } from '../src';
+import { XSublimatio__factory, XSublimatio, RECIPES, Molecule, Drug, getTokenFromId } from '../src';
 import { BigNumber, Signer } from 'ethers';
 
 chai.use(chaiAsPromised);
@@ -60,7 +60,6 @@ describe('XSublimatio', () => {
                 const token = getTokenFromId(args?.tokenId) as Molecule;
 
                 expect(token?.type).to.be.lessThan(63);
-                expect(token?.seed).to.not.be.undefined;
                 expect(token?.category).to.equal('molecule');
                 expect(token?.moleculeType).to.lessThan(63);
             });
@@ -167,7 +166,6 @@ describe('XSublimatio', () => {
                         const token = getTokenFromId(args?.tokenId) as Drug;
 
                         expect(token?.type).to.be.equal(drugType + 63);
-                        expect(token?.seed).to.not.be.undefined;
                         expect(token?.category).to.equal('drug');
                         expect(token?.drugType).to.lessThan(19);
                         expect(token?.specialWaterIndex).to.equal(0);
@@ -268,7 +266,6 @@ describe('XSublimatio', () => {
                         const token = getTokenFromId(args?.tokenId) as Drug;
 
                         expect(token?.type).to.be.equal(drugType + 63);
-                        expect(token?.seed).to.not.be.undefined;
                         expect(token?.category).to.equal('drug');
                         expect(token?.drugType).to.lessThan(19);
                         expect(token?.specialWaterIndex).to.equal(recipe.length);
