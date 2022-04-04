@@ -443,6 +443,18 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         }
     }
 
+    function tokensOfOwner(address owner_) external view returns (uint256[] memory tokenIds_) {
+        uint256 balance = balanceOf(owner_);
+
+        tokenIds_ = new uint256[](balance);
+
+        for (uint256 i; i < balance;) {
+            unchecked {
+                tokenIds_[i++] = tokenOfOwnerByIndex(owner_, i);
+            }
+        }
+    }
+
     /**************************/
     /*** Internal Functions ***/
     /**************************/

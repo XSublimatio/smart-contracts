@@ -61,6 +61,7 @@ export interface XSublimatioInterface extends utils.Interface {
         'tokenByIndex(uint256)': FunctionFragment;
         'tokenOfOwnerByIndex(address,uint256)': FunctionFragment;
         'tokenURI(uint256)': FunctionFragment;
+        'tokensOfOwner(address)': FunctionFragment;
         'totalSupply()': FunctionFragment;
         'transferFrom(address,address,uint256)': FunctionFragment;
         'withdrawProceeds(uint256,address)': FunctionFragment;
@@ -106,6 +107,7 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'tokenByIndex', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'tokenOfOwnerByIndex', values: [string, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'tokenURI', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'tokensOfOwner', values: [string]): string;
     encodeFunctionData(functionFragment: 'totalSupply', values?: undefined): string;
     encodeFunctionData(functionFragment: 'transferFrom', values: [string, string, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'withdrawProceeds', values: [BigNumberish, string]): string;
@@ -150,6 +152,7 @@ export interface XSublimatioInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: 'tokenByIndex', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'tokenOfOwnerByIndex', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'tokenURI', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'tokensOfOwner', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'totalSupply', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'transferFrom', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'withdrawProceeds', data: BytesLike): Result;
@@ -367,6 +370,8 @@ export interface XSublimatio extends BaseContract {
 
         tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
 
+        tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<[BigNumber[]] & { tokenIds_: BigNumber[] }>;
+
         totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
 
         transferFrom(
@@ -494,6 +499,8 @@ export interface XSublimatio extends BaseContract {
 
     tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
+    tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<BigNumber[]>;
+
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferFrom(
@@ -607,6 +614,8 @@ export interface XSublimatio extends BaseContract {
         tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
         tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+        tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<BigNumber[]>;
 
         totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -762,6 +771,8 @@ export interface XSublimatio extends BaseContract {
 
         tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
+        tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<BigNumber>;
+
         totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
         transferFrom(
@@ -891,6 +902,8 @@ export interface XSublimatio extends BaseContract {
         tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 

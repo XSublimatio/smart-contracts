@@ -205,6 +205,20 @@ export const DRUG_DESCRIPTIONS: string[] = [
     'Delta-type opioid receptor',
 ];
 
+export const MOLECULE_LIGHTING_TYPES: string[] = ['Mixed', 'Zones'];
+
+export const MOLECULE_INTEGRITY_TYPES: string[] = ['Medium', 'High', 'Very High', 'Full'];
+
+export const DEFORMATION_TYPES: string[] = ['None', 'Medium', 'High'];
+
+export const STRIPES_COLOR_SHIFT_TYPES: string[] = ['Off', 'On'];
+
+export const STRIPES_AMOUNT_TYPES: string[] = ['Low', 'Medium', 'High'];
+
+export const BLOB_TYPES: string[] = ['Triangle', 'Square', 'Circle'];
+
+export const PALETTE_TYPES: string[] = ['Monochrome', 'Analogous', 'Complementary', 'S-Complementary', 'Triadic', 'Square'];
+
 export interface Token {
     id: string;
     type: number;
@@ -298,18 +312,6 @@ export function getMissingForBrew(drugType: number, tokens: Molecule[] | BigNumb
     );
 }
 
-const MOLECULE_LIGHTING_TYPES = ['Mixed', 'Zones'];
-
-const MOLECULE_INTEGRITY_TYPES = ['Medium', 'High', 'Very High', 'Full'];
-
-const DEFORMATION_TYPES = ['None', 'Medium', 'High'];
-
-const STRIPES_AMOUNT_TYPES = ['Low', 'Medium', 'High'];
-
-const BLOB_TYPES = ['Triangle', 'Square', 'Circle'];
-
-const PALETTE_TYPES = ['Monochrome', 'Analogous', 'Complementary', 'S-Complementary', 'Triadic', 'Square'];
-
 export function getMetadata(token: Token | BigNumber | BigInt | string, mediaUri: string): Metadata {
     const tokenData = (token as Token).category ? (token as Token) : getTokenFromId(token.toString());
 
@@ -359,7 +361,7 @@ export function getMetadata(token: Token | BigNumber | BigInt | string, mediaUri
         { trait_type: 'Brightness', display_type: 'number', value: brt },
         { trait_type: 'Seed', display_type: 'number', value: seed },
         { trait_type: 'Deformation', value: DEFORMATION_TYPES[deformationType] },
-        { trait_type: 'Stripes Color Shift', value: stripesColorShiftType ? 'On' : 'Off' },
+        { trait_type: 'Stripes Color Shift', value: STRIPES_COLOR_SHIFT_TYPES[stripesColorShiftType] },
         { trait_type: 'Stripes Amount', value: STRIPES_AMOUNT_TYPES[stripesAmountType] },
         { trait_type: 'Blob', value: BLOB_TYPES[blobType] },
         { trait_type: 'Palette', value: PALETTE_TYPES[paletteType] },

@@ -52,7 +52,7 @@ describe('XSublimatio', () => {
             expect(await contract.moleculesAvailable()).to.equal(3480 - 5);
             expect(await contract.balanceOf(aliceAddress)).to.equal(5);
 
-            tx.events?.forEach(({ event, args }) => {
+            const tokenIds = tx.events?.map(({ event, args }) => {
                 expect(event).to.equal('Transfer');
                 expect(args?.from).to.equal(ethers.constants.AddressZero);
                 expect(args?.to).to.equal(aliceAddress);
@@ -62,7 +62,11 @@ describe('XSublimatio', () => {
                 expect(token?.type).to.be.lessThan(63);
                 expect(token?.category).to.equal('molecule');
                 expect(token?.moleculeType).to.lessThan(63);
+
+                return args?.tokenId;
             });
+
+            expect(await contract.tokensOfOwner(await alice.getAddress())).to.deep.equal(tokenIds);
         });
 
         it('Can purchase all molecules', async () => {

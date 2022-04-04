@@ -178,6 +178,8 @@ export interface XSublimatio extends BaseContract {
 
         tokenURI(tokenId: number | string | BN): NonPayableTransactionObject<string>;
 
+        tokensOfOwner(owner_: string): NonPayableTransactionObject<string[]>;
+
         totalSupply(): NonPayableTransactionObject<string>;
 
         transferFrom(from: string, to: string, tokenId: number | string | BN): NonPayableTransactionObject<void>;
