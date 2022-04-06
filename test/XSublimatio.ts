@@ -57,11 +57,12 @@ describe('XSublimatio', () => {
                 expect(args?.from).to.equal(ethers.constants.AddressZero);
                 expect(args?.to).to.equal(aliceAddress);
 
-                const token = getTokenFromId(args?.tokenId) as Molecule;
+                const { globalType, type, category } = getTokenFromId(args?.tokenId);
 
-                expect(token?.type).to.be.lessThan(63);
-                expect(token?.category).to.equal('molecule');
-                expect(token?.moleculeType).to.lessThan(63);
+                expect(globalType).to.lessThan(63);
+                expect(type).to.be.lessThan(63);
+                expect(globalType).to.equal(type);
+                expect(category).to.equal('molecule');
 
                 return args?.tokenId;
             });
@@ -135,13 +136,13 @@ describe('XSublimatio', () => {
                 moleculesMinted += tx.events?.length ?? 0;
 
                 tx.events?.forEach(({ args }) => {
-                    const token = getTokenFromId(args?.tokenId) as Molecule;
+                    const { type } = getTokenFromId(args?.tokenId);
 
-                    moleculeIds[token?.moleculeType].push(args?.tokenId);
+                    moleculeIds[type].push(args?.tokenId);
 
-                    if (!moleculesNeeded[token?.moleculeType]) return;
+                    if (!moleculesNeeded[type]) return;
 
-                    moleculesNeeded[token?.moleculeType]--;
+                    moleculesNeeded[type]--;
                     totalMoleculesNeeded--;
                 });
             }
@@ -167,12 +168,12 @@ describe('XSublimatio', () => {
                         expect(args?.from).to.equal(ethers.constants.AddressZero);
                         expect(args?.to).to.equal(aliceAddress);
 
-                        const token = getTokenFromId(args?.tokenId) as Drug;
+                        const { globalType, type, category, specialWaterIndex } = getTokenFromId(args?.tokenId);
 
-                        expect(token?.type).to.be.equal(drugType + 63);
-                        expect(token?.category).to.equal('drug');
-                        expect(token?.drugType).to.lessThan(19);
-                        expect(token?.specialWaterIndex).to.equal(0);
+                        expect(globalType).to.be.equal(drugType + 63);
+                        expect(type).to.equal(drugType);
+                        expect(category).to.equal('drug');
+                        expect(specialWaterIndex).to.be.undefined;
                         return;
                     }
 
@@ -235,13 +236,13 @@ describe('XSublimatio', () => {
                 moleculesMinted += tx.events?.length ?? 0;
 
                 tx.events?.forEach(({ args }) => {
-                    const token = getTokenFromId(args?.tokenId) as Molecule;
+                    const { type } = getTokenFromId(args?.tokenId);
 
-                    moleculeIds[token?.moleculeType].push(args?.tokenId);
+                    moleculeIds[type].push(args?.tokenId);
 
-                    if (!moleculesNeeded[token?.moleculeType]) return;
+                    if (!moleculesNeeded[type]) return;
 
-                    moleculesNeeded[token?.moleculeType]--;
+                    moleculesNeeded[type]--;
                     totalMoleculesNeeded--;
                 });
             }
@@ -267,12 +268,12 @@ describe('XSublimatio', () => {
                         expect(args?.from).to.equal(ethers.constants.AddressZero);
                         expect(args?.to).to.equal(aliceAddress);
 
-                        const token = getTokenFromId(args?.tokenId) as Drug;
+                        const { globalType, type, category, specialWaterIndex } = getTokenFromId(args?.tokenId);
 
-                        expect(token?.type).to.be.equal(drugType + 63);
-                        expect(token?.category).to.equal('drug');
-                        expect(token?.drugType).to.lessThan(19);
-                        expect(token?.specialWaterIndex).to.equal(recipe.length);
+                        expect(globalType).to.be.equal(drugType + 63);
+                        expect(type).to.be.equal(drugType);
+                        expect(category).to.equal('drug');
+                        expect(specialWaterIndex).to.equal(recipe.length - 1);
                         return;
                     }
 
@@ -356,13 +357,13 @@ describe('XSublimatio', () => {
                 const tx = await (await contract.purchase(aliceAddress, 0, { value })).wait();
 
                 tx.events?.forEach(({ args }) => {
-                    const token = getTokenFromId(args?.tokenId) as Molecule;
+                    const { type } = getTokenFromId(args?.tokenId);
 
-                    moleculeIds[token?.moleculeType].push(args?.tokenId);
+                    moleculeIds[type].push(args?.tokenId);
 
-                    if (!moleculesNeeded[token?.moleculeType]) return;
+                    if (!moleculesNeeded[type]) return;
 
-                    moleculesNeeded[token?.moleculeType]--;
+                    moleculesNeeded[type]--;
                     totalMoleculesNeeded--;
                 });
             }
@@ -426,13 +427,13 @@ describe('XSublimatio', () => {
                 const tx = await (await contract.purchase(aliceAddress, 0, { value })).wait();
 
                 tx.events?.forEach(({ args }) => {
-                    const token = getTokenFromId(args?.tokenId) as Molecule;
+                    const { type } = getTokenFromId(args?.tokenId);
 
-                    moleculeIds[token?.moleculeType].push(args?.tokenId);
+                    moleculeIds[type].push(args?.tokenId);
 
-                    if (!moleculesNeeded[token?.moleculeType]) return;
+                    if (!moleculesNeeded[type]) return;
 
-                    moleculesNeeded[token?.moleculeType]--;
+                    moleculesNeeded[type]--;
                     totalMoleculesNeeded--;
                 });
             }

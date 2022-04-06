@@ -41,7 +41,9 @@ const config: HardhatUserConfig = {
     },
     networks: {
         hardhat: {},
-        localhost: {},
+        localhost: {
+            url: process.env.RPC_SERVER ?? 'http://127.0.0.1:7545',
+        },
         rinkeby: {
             url: `https://rinkeby.infura.io/v3/${INFURA_API_KEY}`,
             accounts: [RINKEBY_PRIVATE_KEY],

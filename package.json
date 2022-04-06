@@ -1,6 +1,6 @@
 {
     "name": "@faction-nfts/xsublimatio-smart-contracts",
-    "version": "0.5.2",
+    "version": "0.6.0",
     "description": "XSublimatio smart contracts and Typechain bindings",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -11,18 +11,20 @@
         "prepublishOnly": "pinst --disable",
         "postpublish": "pinst --enable",
         "build": "npm run build:cjs && npm run build:esm && npm run build:umd && npm run build:types",
-        "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json",
-        "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json",
-        "build:umd": "node tools/cleanup umd && webpack --config config/webpack.config.js",
-        "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json",
-        "clean": "npx hardhat clean && node tools/cleanup",
+        "build:cjs": "node scripts/cleanup cjs && tsc -p config/tsconfig.cjs.json",
+        "build:esm": "node scripts/cleanup esm && tsc -p config/tsconfig.esm.json",
+        "build:umd": "node scripts/cleanup umd && webpack --config config/webpack.config.js",
+        "build:types": "node scripts/cleanup types && tsc -p config/tsconfig.types.json",
+        "clean": "npx hardhat clean && node scripts/cleanup",
         "package": "npm run build && npm pack",
         "compile": "npm run clean && npx hardhat compile && npm run web3-typechain && npm run ethers-typechain && npm run prettier",
         "test": "npx hardhat test",
+        "test:localhost": "npx hardhat --network localhost test",
         "test:coverage": "npm run compile && npx hardhat coverage --temp artifacts --network coverage",
         "prettier": "prettier --write ./",
         "web3-typechain": "typechain --target web3-v1 --out-dir ./src/web3 './artifacts/contracts/XSublimatio.sol/XSublimatio.json'",
-        "ethers-typechain": "typechain --target ethers-v5 --out-dir ./src/ethers './artifacts/contracts/XSublimatio.sol/XSublimatio.json'"
+        "ethers-typechain": "typechain --target ethers-v5 --out-dir ./src/ethers './artifacts/contracts/XSublimatio.sol/XSublimatio.json'",
+        "deploy:localhost": "npx hardhat run --network localhost scripts/deploy.ts"
     },
     "publishConfig": {
         "access": "public"
