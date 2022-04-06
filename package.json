@@ -24,7 +24,8 @@
         "prettier": "prettier --write ./",
         "web3-typechain": "typechain --target web3-v1 --out-dir ./src/web3 './artifacts/contracts/XSublimatio.sol/XSublimatio.json'",
         "ethers-typechain": "typechain --target ethers-v5 --out-dir ./src/ethers './artifacts/contracts/XSublimatio.sol/XSublimatio.json'",
-        "deploy:localhost": "npx hardhat run --network localhost scripts/deploy.ts"
+        "deploy:localhost": "npx hardhat run --network localhost scripts/deploy.ts",
+        "deploy:docker": "npx hardhat run --network docker scripts/deploy.ts"
     },
     "publishConfig": {
         "access": "public"
