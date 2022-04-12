@@ -23,3 +23,9 @@ export {
     getMoleculeSupply,
     getDrugSupply,
 } from './XSublimatioHelpers';
+
+import { XSublimatio__factory } from './ethers/factories/XSublimatio__factory';
+
+const { abi: ABI } = XSublimatio__factory;
+
+export { ABI };
