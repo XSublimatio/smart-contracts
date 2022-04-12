@@ -339,8 +339,7 @@ export interface Drug {
     maxSupply: number;
     recipe: Molecule[];
     image: string;
-    canBrew: (tokens: Token[] | BigNumber[] | BigInt[] | string[]) => boolean;
-    getMissingForBrew: (tokens: Token[] | BigNumber[] | BigInt[] | string[]) => Molecule[];
+    getBrewPossibility: (tokens: Token[] | BigNumber[] | BigInt[] | string[]) => BrewPossibility;
     getSupply: (available: number) => number;
 }
 
@@ -352,8 +351,7 @@ export const DRUGS: Drug[] = DRUG_MAX_SUPPLIES.map((maxSupply, type) => ({
     maxSupply,
     recipe: RECIPES[type].map((moleculeType) => MOLECULES[moleculeType]),
     image: 'TBD',
-    canBrew: (tokens: Token[] | BigNumber[] | BigInt[] | string[]): boolean => canBrew(type, tokens),
-    getMissingForBrew: (tokens: Token[] | BigNumber[] | BigInt[] | string[]): Molecule[] => getMissingForBrew(type, tokens),
+    getBrewPossibility: (tokens: Token[] | BigNumber[] | BigInt[] | string[]): BrewPossibility => getBrewPossibility(type, tokens),
     getSupply: (available: number): number => getDrugSupply(type, available),
 }));
 
@@ -370,6 +368,7 @@ export interface Metadata {
     background_color: string;
     image: string;
     animation_url: string;
+    artist: string;
 }
 
 export interface Token {
@@ -391,6 +390,12 @@ export interface Token {
     moleculeLightingType?: keyof typeof MOLECULE_LIGHTING_TYPES;
     moleculeIntegrityType?: keyof typeof MOLECULE_INTEGRITY_TYPES;
     metadata: Metadata;
+}
+
+export interface BrewPossibility {
+    canBrew: boolean;
+    useableSpecialWater?: Token;
+    recipeMolecules: Token[][];
 }
 
 export function getTokenFromId(tokenId: BigNumber | BigInt | string, mediaUri = ''): Token {
@@ -489,31 +494,29 @@ export function getTokenFromId(tokenId: BigNumber | BigInt | string, mediaUri = 
             background_color: 'ffffff',
             image: `${mediaUri}/${id}.png`,
             animation_url: `${mediaUri}/${id}.webm`,
+            artist: 'Pierre Pauze',
         },
     };
 }
 
-export function canBrew(drugType: number, tokens: Token[] | BigNumber[] | BigInt[] | string[]): boolean {
-    const molecules = tokens
+function filterMolecules(tokens: Token[] | BigNumber[] | BigInt[] | string[]): Token[] {
+    return tokens
         .map((t): Token => ((t as Token).category ? (t as Token) : getTokenFromId(t.toString())))
         .filter(({ category }) => category === 'molecule');
-
-    return RECIPES[drugType].reduce(
-        (accumulator: boolean, moleculeType: number) => accumulator && !!molecules.find(({ type }) => type === moleculeType),
-        true
-    );
 }
 
-export function getMissingForBrew(drugType: number, tokens: Token[] | BigNumber[] | BigInt[] | string[]): Molecule[] {
-    const molecules = tokens
-        .map((t): Token => ((t as Token).category ? (t as Token) : getTokenFromId(t.toString())))
-        .filter(({ category }) => category === 'molecule');
+export function getBrewPossibility(drugType: number, tokens: Token[] | BigNumber[] | BigInt[] | string[]): BrewPossibility {
+    const molecules = filterMolecules(tokens);
 
-    return RECIPES[drugType].reduce(
-        (accumulator: Molecule[], moleculeType: number) =>
-            molecules.find(({ type }) => type === moleculeType) ? accumulator : accumulator.concat(MOLECULES[moleculeType]),
-        [] as Molecule[]
-    );
+    const useableSpecialWater = molecules.find(({ type }) => type === drugType + 44);
+
+    const recipeMolecules = RECIPES[drugType].map((moleculeType: number) => molecules.filter(({ type }) => type === moleculeType));
+
+    const canBrew =
+        RECIPES[drugType].length <=
+        recipeMolecules.reduce((hits, recipeMolecules) => hits + (recipeMolecules.length ? 1 : 0), 0) + (useableSpecialWater ? 1 : 0);
+
+    return { canBrew, useableSpecialWater, recipeMolecules };
 }
 
 export function getMoleculeSupply(moleculeType: number, available: number): number {

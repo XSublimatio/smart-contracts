@@ -6,7 +6,7 @@ import { XSublimatio } from "../XSublimatio.sol";
 
 contract XSublimatioHarness is XSublimatio {
 
-    constructor (string memory baseURI_, address owner) XSublimatio(baseURI_, owner) {}
+    constructor (string memory baseURI_, address owner_, uint256 decompositionTime_, uint256 pricePerTokenMint_, uint256 purchaseBatchSize_) XSublimatio(baseURI_, owner, decompositionTime_, pricePerTokenMint_, purchaseBatchSize_) {}
 
     function mintDrug(uint256 drugType_, uint256 specialWaterIndex_, uint256 randomNumber_, address destination_) public returns (uint256 tokenId_) {
         COMPACT_STATE_4 = _decrementDrugAvailability(COMPACT_STATE_4, drugType_);

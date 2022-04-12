@@ -22,8 +22,8 @@ export interface XSublimatioInterface extends utils.Interface {
     contractName: 'XSublimatio';
     functions: {
         'DECOMPOSITION_TIME()': FunctionFragment;
-        'MOLECULES_PER_PURCHASE()': FunctionFragment;
-        'PRICE_PER_MOLECULE()': FunctionFragment;
+        'PRICE_PER_TOKEN_MINT()': FunctionFragment;
+        'PURCHASE_BATCH_SIZE()': FunctionFragment;
         'acceptOwnership()': FunctionFragment;
         'approve(address,uint256)': FunctionFragment;
         'availabilities()': FunctionFragment;
@@ -68,8 +68,8 @@ export interface XSublimatioInterface extends utils.Interface {
     };
 
     encodeFunctionData(functionFragment: 'DECOMPOSITION_TIME', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'MOLECULES_PER_PURCHASE', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'PRICE_PER_MOLECULE', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'PRICE_PER_TOKEN_MINT', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'PURCHASE_BATCH_SIZE', values?: undefined): string;
     encodeFunctionData(functionFragment: 'acceptOwnership', values?: undefined): string;
     encodeFunctionData(functionFragment: 'approve', values: [string, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'availabilities', values?: undefined): string;
@@ -113,8 +113,8 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'withdrawProceeds', values: [BigNumberish, string]): string;
 
     decodeFunctionResult(functionFragment: 'DECOMPOSITION_TIME', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'MOLECULES_PER_PURCHASE', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'PRICE_PER_MOLECULE', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'PRICE_PER_TOKEN_MINT', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'PURCHASE_BATCH_SIZE', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'acceptOwnership', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'availabilities', data: BytesLike): Result;
@@ -251,9 +251,9 @@ export interface XSublimatio extends BaseContract {
     functions: {
         DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-        MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<[BigNumber]>;
+        PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-        PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<[BigNumber]>;
+        PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<[BigNumber]>;
 
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
@@ -390,9 +390,9 @@ export interface XSublimatio extends BaseContract {
 
     DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<BigNumber>;
 
-    MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<BigNumber>;
+    PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<BigNumber>;
 
-    PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<BigNumber>;
+    PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
     acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
@@ -519,9 +519,9 @@ export interface XSublimatio extends BaseContract {
     callStatic: {
         DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<BigNumber>;
 
-        MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<BigNumber>;
+        PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<BigNumber>;
 
-        PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<BigNumber>;
+        PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
         acceptOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -667,9 +667,9 @@ export interface XSublimatio extends BaseContract {
     estimateGas: {
         DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<BigNumber>;
 
-        MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<BigNumber>;
+        PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<BigNumber>;
 
-        PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<BigNumber>;
+        PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
 
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
@@ -792,9 +792,9 @@ export interface XSublimatio extends BaseContract {
     populateTransaction: {
         DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        MOLECULES_PER_PURCHASE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        PRICE_PER_MOLECULE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 

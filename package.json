@@ -1,6 +1,6 @@
 {
     "name": "@faction-nfts/xsublimatio-smart-contracts",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "description": "XSublimatio smart contracts and Typechain bindings",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -24,7 +24,8 @@
         "prettier": "prettier --write ./",
         "web3-typechain": "typechain --target web3-v1 --out-dir ./src/web3 './artifacts/contracts/XSublimatio.sol/XSublimatio.json'",
         "ethers-typechain": "typechain --target ethers-v5 --out-dir ./src/ethers './artifacts/contracts/XSublimatio.sol/XSublimatio.json'",
-        "deploy:localhost": "npx hardhat run --network localhost scripts/deploy.ts"
+        "deploy:localhost": "npx hardhat run --network localhost scripts/deploy.ts",
+        "generateConstants": "npx hardhat run scripts/generateConstants.ts"
     },
     "publishConfig": {
         "access": "public"

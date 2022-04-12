@@ -1,7 +1,8 @@
 import { ethers } from 'hardhat';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { XSublimatio__factory, XSublimatio, RECIPES, Molecule, Drug, getTokenFromId } from '../src';
+import { RECIPES, getTokenFromId, MOLECULE_MAX_SUPPLIES, MOLECULE_MAX_SUPPLY } from '../src';
+import { XSublimatio__factory, XSublimatio } from '../src/ethers';
 import { BigNumber, Signer } from 'ethers';
 
 chai.use(chaiAsPromised);
@@ -17,8 +18,17 @@ describe('XSublimatio', () => {
         [alice, bob, charlie] = await ethers.getSigners();
 
         const contractFactory = new XSublimatio__factory(alice);
+        const decompositionTime = 10 * 86400;
+        const pricePerTokenMint = ethers.utils.parseUnits('0.2', 'ether');
+        const purchaseBatchSize = 5;
 
-        contract = await contractFactory.deploy('http://127.0.0.1:8080/', await alice.getAddress());
+        contract = await contractFactory.deploy(
+            'http://127.0.0.1:8080/',
+            await alice.getAddress(),
+            decompositionTime,
+            pricePerTokenMint,
+            purchaseBatchSize
+        );
         await contract.deployed();
 
         expect(contract.address).to.properAddress;
@@ -52,22 +62,29 @@ describe('XSublimatio', () => {
             expect(await contract.moleculesAvailable()).to.equal(3480 - 5);
             expect(await contract.balanceOf(aliceAddress)).to.equal(5);
 
-            const tokenIds = tx.events?.map(({ event, args }) => {
-                expect(event).to.equal('Transfer');
-                expect(args?.from).to.equal(ethers.constants.AddressZero);
-                expect(args?.to).to.equal(aliceAddress);
+            const tokenIds =
+                tx.events?.map(({ event, args }) => {
+                    expect(event).to.equal('Transfer');
+                    expect(args?.from).to.equal(ethers.constants.AddressZero);
+                    expect(args?.to).to.equal(aliceAddress);
 
-                const { globalType, type, category } = getTokenFromId(args?.tokenId);
+                    const { globalType, type, category } = getTokenFromId(args?.tokenId);
 
-                expect(globalType).to.lessThan(63);
-                expect(type).to.be.lessThan(63);
-                expect(globalType).to.equal(type);
-                expect(category).to.equal('molecule');
+                    expect(globalType).to.lessThan(63);
+                    expect(type).to.be.lessThan(63);
+                    expect(globalType).to.equal(type);
+                    expect(category).to.equal('molecule');
 
-                return args?.tokenId;
-            });
+                    return args?.tokenId;
+                }) ?? [];
 
             expect(await contract.tokensOfOwner(await alice.getAddress())).to.deep.equal(tokenIds);
+
+            const availabilities = await contract.moleculeAvailabilities();
+
+            const totalMoleculeAvailability = availabilities.reduce((acc, item) => acc + parseInt(item.toString()), 0);
+
+            expect(totalMoleculeAvailability).to.equal(MOLECULE_MAX_SUPPLY - tokenIds.length);
         });
 
         it('Can purchase all molecules', async () => {

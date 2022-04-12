@@ -33,9 +33,9 @@ interface IXSublimatio is IERC721Enumerable {
 
     function DECOMPOSITION_TIME() external returns (uint256 decompositionTime_);
 
-    function MOLECULES_PER_PURCHASE() external returns (uint256 moleculesPerPurchase_);
+    function PRICE_PER_TOKEN_MINT() external returns (uint256 pricePerTokenMint_);
 
-    function PRICE_PER_MOLECULE() external returns (uint256 pricePerMolecule);
+    function PURCHASE_BATCH_SIZE() external returns (uint256 purchaseBatchSize_);
 
     function baseURI() external returns (string memory baseURI_);
 

@@ -80,9 +80,9 @@ export interface XSublimatio extends BaseContract {
     methods: {
         DECOMPOSITION_TIME(): NonPayableTransactionObject<string>;
 
-        MOLECULES_PER_PURCHASE(): NonPayableTransactionObject<string>;
+        PRICE_PER_TOKEN_MINT(): NonPayableTransactionObject<string>;
 
-        PRICE_PER_MOLECULE(): NonPayableTransactionObject<string>;
+        PURCHASE_BATCH_SIZE(): NonPayableTransactionObject<string>;
 
         acceptOwnership(): NonPayableTransactionObject<void>;
 

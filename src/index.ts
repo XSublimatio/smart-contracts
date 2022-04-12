@@ -1,7 +1,3 @@
-export type { XSublimatio } from './ethers/XSublimatio';
-
-export { XSublimatio__factory } from './ethers/factories/XSublimatio__factory';
-
 export {
     MOLECULE_MAX_SUPPLY,
     MOLECULE_MAX_SUPPLIES,
@@ -21,9 +17,9 @@ export {
     Attribute,
     Metadata,
     Token,
+    BrewPossibility,
     getTokenFromId,
-    canBrew,
-    getMissingForBrew,
+    getBrewPossibility,
     getMoleculeSupply,
     getDrugSupply,
 } from './XSublimatioHelpers';

@@ -14,12 +14,12 @@ import { IXSublimatio } from "./interfaces/IXSublimatio.sol";
 
 contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
-    uint256 public constant DECOMPOSITION_TIME = 10 days;
-    uint256 public constant MOLECULES_PER_PURCHASE = 5;
-    uint256 public constant PRICE_PER_MOLECULE = 0.2 ether;
-
     uint256 internal constant IS_NOT_LOCKED = uint256(1);
     uint256 internal constant IS_LOCKED = uint256(2);
+
+    uint256 public immutable DECOMPOSITION_TIME;
+    uint256 public immutable PRICE_PER_TOKEN_MINT;
+    uint256 public immutable PURCHASE_BATCH_SIZE;
 
     uint256 internal _lockedStatus = IS_NOT_LOCKED;
 
@@ -46,9 +46,12 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     // Contains (left to right) 19 drug availabilities (8 bits each), total drugs available (11 bits), and drug nonce (remaining 93 bits).
     uint256 internal COMPACT_STATE_4 = uint256(6474154468114041304457969074349321919403682697978);
 
-    constructor (string memory baseURI_, address owner_) ERC721("XSublimatio", "XSUB") {
+    constructor (string memory baseURI_, address owner_, uint256 decompositionTime_, uint256 pricePerTokenMint_, uint256 purchaseBatchSize_) ERC721("XSublimatio", "XSUB") {
         baseURI = baseURI_;
         owner = owner_;
+        DECOMPOSITION_TIME = decompositionTime_;
+        PRICE_PER_TOKEN_MINT = pricePerTokenMint_;
+        PURCHASE_BATCH_SIZE = purchaseBatchSize_;
     }
 
     modifier noReenter() {
@@ -236,7 +239,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
         // Get the number of molecules available from compactState3 and determine how many molecules will be purchased in this call.
         uint256 availableMoleculeCount = _getMoleculesAvailable(compactState3);
-        uint256 count = availableMoleculeCount >= MOLECULES_PER_PURCHASE ? MOLECULES_PER_PURCHASE : availableMoleculeCount;
+        uint256 count = availableMoleculeCount >= PURCHASE_BATCH_SIZE ? PURCHASE_BATCH_SIZE : availableMoleculeCount;
 
         // Prevent a purchase fo 0 nfts, as well as a purchase of less nfts than the user expected.
         require(count != 0, "NO_MOLECULES_AVAILABLE");
@@ -245,7 +248,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         // Compute the price this purchase will cost, since it will be needed later, and count will be decremented in a while-loop.
         uint256 totalCost;
         unchecked {
-            totalCost = PRICE_PER_MOLECULE * count;
+            totalCost = PRICE_PER_TOKEN_MINT * count;
         }
 
         // Revert if insufficient ether was provided.
@@ -320,7 +323,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
     function drugAvailabilities() public view returns (uint256[19] memory availabilities_) {
         for (uint256 i; i < 19; ++i) {
-            availabilities_[i] = _getMoleculeAvailability(COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, i);
+            availabilities_[i] = _getDrugAvailability(COMPACT_STATE_4, i);
         }
     }
 
@@ -439,7 +442,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
     function moleculeAvailabilities() public view returns (uint256[63] memory availabilities_) {
         for (uint256 i; i < 63; ++i) {
-            availabilities_[i] = _getDrugAvailability(COMPACT_STATE_4, i);
+            availabilities_[i] = _getMoleculeAvailability(COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, i);
         }
     }
 
