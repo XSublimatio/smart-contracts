@@ -1,9 +1,18 @@
 import { ethers } from 'hardhat';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { RECIPES, getTokenFromId, MOLECULE_MAX_SUPPLIES, MOLECULE_MAX_SUPPLY } from '../src';
-import { XSublimatio__factory, XSublimatio } from '../src/ethers';
 import { BigNumber, Signer } from 'ethers';
+import {
+    MOLECULE_MAX_SUPPLY,
+    MOLECULE_MAX_SUPPLIES,
+    DRUG_MAX_SUPPLY,
+    DRUG_MAX_SUPPLIES,
+    RECIPES,
+    MOLECULES,
+    DRUGS,
+    getTokenFromId,
+} from '../src';
+import { XSublimatio__factory, XSublimatio } from '../src/ethers';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -37,6 +46,44 @@ describe('XSublimatio', () => {
         expect(await contract.symbol()).to.equal('XSUB');
         expect(await contract.drugsAvailable()).to.equal(1134);
         expect(await contract.moleculesAvailable()).to.equal(3480);
+    });
+
+    it('Has proper helpers', async () => {
+        expect(MOLECULE_MAX_SUPPLY).to.equal(3480);
+
+        expect(MOLECULE_MAX_SUPPLIES.reduce((acc, ele) => acc + ele)).to.equal(3480);
+
+        expect(DRUG_MAX_SUPPLY).to.equal(1134);
+
+        expect(DRUG_MAX_SUPPLIES.reduce((acc, ele) => acc + ele)).to.equal(1134);
+
+        expect(RECIPES.length).to.equal(DRUG_MAX_SUPPLIES.length);
+
+        RECIPES.forEach((recipe) => recipe.forEach((moleculeType) => expect(moleculeType).be.lessThan(MOLECULE_MAX_SUPPLIES.length)));
+
+        MOLECULES.forEach((molecule) => {
+            expect(molecule.type).to.be.a('number');
+            expect(molecule.name).to.be.a('string');
+            expect(molecule.description).to.be.a('string');
+            expect(molecule.label).to.be.a('string');
+            expect(molecule.maxSupply).to.be.a('number');
+            expect(molecule.image).to.be.a('string');
+            expect(molecule.getSupply).to.be.a('function');
+        });
+
+        DRUGS.forEach((drug) => {
+            expect(drug.type).to.be.a('number');
+            expect(drug.name).to.be.a('string');
+            expect(drug.description).to.be.a('string');
+            expect(drug.label).to.be.a('string');
+            expect(drug.maxSupply).to.be.a('number');
+
+            drug.recipe.forEach((molecule) => expect(molecule).to.equal(MOLECULES[molecule.type]));
+
+            expect(drug.image).to.be.a('string');
+            expect(drug.getBrewPossibility).to.be.a('function');
+            expect(drug.getSupply).to.be.a('function');
+        });
     });
 
     describe('purchase', () => {
@@ -174,6 +221,12 @@ describe('XSublimatio', () => {
                 const tokenIds = recipe.map((moleculeType) => moleculeIds[moleculeType].pop());
 
                 process.stdout.write(`\r        Brew ${drugType}: ${((100 * drugType) / 18).toFixed(0)}%`);
+
+                const { canBrew, recipeMolecules } = DRUGS[drugType].getBrewPossibility(tokenIds);
+
+                expect(canBrew).to.be.true;
+
+                recipeMolecules.forEach((element) => expect(element.length).to.be.greaterThan(0));
 
                 const tx = await (await contract.brew(tokenIds, drugType, aliceAddress)).wait();
 

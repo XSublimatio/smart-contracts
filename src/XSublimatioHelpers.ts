@@ -321,7 +321,7 @@ export interface Molecule {
     getSupply: (available: number) => number;
 }
 
-export const MOLECULES: Molecule[] = DRUG_MAX_SUPPLIES.map((maxSupply, type) => ({
+export const MOLECULES: Molecule[] = MOLECULE_MAX_SUPPLIES.map((maxSupply, type) => ({
     type,
     name: MOLECULE_NAMES[type],
     description: MOLECULE_DESCRIPTIONS[type],
