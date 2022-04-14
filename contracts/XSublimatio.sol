@@ -14,6 +14,8 @@ import { IXSublimatio } from "./interfaces/IXSublimatio.sol";
 
 contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
+    using Strings for uint256;
+
     uint256 internal constant IS_NOT_LOCKED = uint256(1);
     uint256 internal constant IS_LOCKED = uint256(2);
 
@@ -456,6 +458,14 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
                 tokenIds_[i++] = tokenOfOwnerByIndex(owner_, i);
             }
         }
+    }
+
+    function tokenURI(uint256 tokenId_) public override view returns (string memory tokenURI_) {
+        require(_exists(tokenId_), "ERC721Metadata: URI query for nonexistent token");
+
+        string memory baseURICache = baseURI;
+
+        return bytes(baseURICache).length > 0 ? string(abi.encodePacked(baseURICache, tokenId_.toString())) : "";
     }
 
     /**************************/

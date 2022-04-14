@@ -109,8 +109,8 @@ describe('XSublimatio', () => {
             expect(await contract.moleculesAvailable()).to.equal(3480 - 5);
             expect(await contract.balanceOf(aliceAddress)).to.equal(5);
 
-            const tokenIds =
-                tx.events?.map(({ event, args }) => {
+            const tokenIds = await Promise.all(
+                (tx.events ?? [])?.map(async ({ event, args }) => {
                     expect(event).to.equal('Transfer');
                     expect(args?.from).to.equal(ethers.constants.AddressZero);
                     expect(args?.to).to.equal(aliceAddress);
@@ -122,8 +122,13 @@ describe('XSublimatio', () => {
                     expect(globalType).to.equal(type);
                     expect(category).to.equal('molecule');
 
+                    const tokeURI = await contract.tokenURI(args?.tokenId);
+
+                    expect(tokeURI).to.equal(`http://127.0.0.1:8080/${args?.tokenId.toString()}`);
+
                     return args?.tokenId;
-                }) ?? [];
+                })
+            );
 
             expect(await contract.tokensOfOwner(await alice.getAddress())).to.deep.equal(tokenIds);
 

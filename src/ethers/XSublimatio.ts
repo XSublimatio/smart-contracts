@@ -368,7 +368,7 @@ export interface XSublimatio extends BaseContract {
 
         tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-        tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+        tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<[string] & { tokenURI_: string }>;
 
         tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<[BigNumber[]] & { tokenIds_: BigNumber[] }>;
 
@@ -497,7 +497,7 @@ export interface XSublimatio extends BaseContract {
 
     tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+    tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<BigNumber[]>;
 
@@ -613,7 +613,7 @@ export interface XSublimatio extends BaseContract {
 
         tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-        tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+        tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
         tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<BigNumber[]>;
 
@@ -769,7 +769,7 @@ export interface XSublimatio extends BaseContract {
 
         tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-        tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+        tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
         tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -901,7 +901,7 @@ export interface XSublimatio extends BaseContract {
 
         tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        tokenURI(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
