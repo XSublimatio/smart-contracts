@@ -402,8 +402,8 @@ export function getTokenFromId(
     tokenId: BigNumber | BigInt | string,
     imageUri = '',
     videoUri = '',
-    imageExtension = '',
-    videoExtension = ''
+    imageExtension = 'png',
+    videoExtension = 'webm'
 ): Token {
     const id = BigNumber.from(tokenId.toString());
 
