@@ -9,7 +9,7 @@ import { IXSublimatio } from "./interfaces/IXSublimatio.sol";
 // TODO: Some checks are done implicitly by array out-of-bound errors.
 // TODO: Don't use ERC721Enumerable if no additional UX is desired (and implement totalSupply manually)
 
-// NOTE: despite token ids being generated with a molecule nonce or a drug nonce (which means there can be an overlap),
+// NOTE: Despite token ids being generated with a molecule nonce or a drug nonce (which means there can be an overlap),
 //       the tokenId will eventually be prepended with a number of that molecule or drug type.
 
 contract XSublimatio is IXSublimatio, ERC721Enumerable {
@@ -22,6 +22,8 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     uint256 public immutable DECOMPOSITION_TIME;
     uint256 public immutable PRICE_PER_TOKEN_MINT;
     uint256 public immutable PURCHASE_BATCH_SIZE;
+    uint256 public immutable LAUNCH_TIMESTAMP;
+    uint256 public immutable PUBLIC_TIMESTAMP;
 
     uint256 internal _lockedStatus = IS_NOT_LOCKED;
 
@@ -48,12 +50,24 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     // Contains (left to right) 19 drug availabilities (8 bits each), total drugs available (11 bits), and drug nonce (remaining 93 bits).
     uint256 internal COMPACT_STATE_4 = uint256(6474154468114041304457969074349321919403682697978);
 
-    constructor (string memory baseURI_, address owner_, uint256 decompositionTime_, uint256 pricePerTokenMint_, uint256 purchaseBatchSize_) ERC721("XSublimatio", "XSUB") {
+    mapping(address => bool) public isPrivilegedAccount;
+
+    constructor (
+        string memory baseURI_,
+        address owner_,
+        uint256 decompositionTime_,
+        uint256 pricePerTokenMint_,
+        uint256 purchaseBatchSize_,
+        uint256 launchTimestamp_,
+        uint256 publicTimestamp_
+    ) ERC721("XSublimatio", "XSUB") {
         baseURI = baseURI_;
         owner = owner_;
         DECOMPOSITION_TIME = decompositionTime_;
         PRICE_PER_TOKEN_MINT = pricePerTokenMint_;
         PURCHASE_BATCH_SIZE = purchaseBatchSize_;
+        LAUNCH_TIMESTAMP = launchTimestamp_;
+        PUBLIC_TIMESTAMP = publicTimestamp_;
     }
 
     modifier noReenter() {
@@ -100,6 +114,22 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
     function setBaseURI(string calldata baseURI_) external onlyOwner {
         emit BaseURISet(baseURI = baseURI_);
+    }
+
+    function setPrivilegedAccounts(address[] memory accounts_) external onlyOwner {
+        for (uint256 i; i < accounts_.length; ++i) {
+            address account = accounts_[i];
+            isPrivilegedAccount[account] = true;
+            emit PrivilegedAccountSet(account);
+        }
+    }
+
+    function unsetPrivilegedAccounts(address[] memory accounts_) external onlyOwner {
+        for (uint256 i; i < accounts_.length; ++i) {
+            address account = accounts_[i];
+            isPrivilegedAccount[account] = false;
+            emit PrivilegedAccountUnset(account);
+        }
     }
 
     function withdrawProceeds(uint256 amount_, address destination_) external onlyOwner {
@@ -234,6 +264,9 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     }
 
     function purchase(address destination_, uint256 minQuantity_) external payable returns (uint256[] memory tokenIds_) {
+        require(block.timestamp >= LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
+        require(block.timestamp >= PUBLIC_TIMESTAMP || isPrivilegedAccount[msg.sender], "NOT_PUBLIC_YET");
+
         // Cache relevant compact states from storage.
         uint256 compactState1 = COMPACT_STATE_1;
         uint256 compactState2 = COMPACT_STATE_2;
@@ -316,7 +349,9 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     }
 
     function contractURI() external view returns (string memory contractURI_) {
-        contractURI_ = string(abi.encodePacked(baseURI, "info"));
+        string memory baseURICache = baseURI;
+
+        return bytes(baseURICache).length > 0 ? string(abi.encodePacked(baseURICache, "info")) : "";
     }
 
     function drugsAvailable() external view returns (uint256 drugsAvailable_) {
@@ -465,7 +500,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
         string memory baseURICache = baseURI;
 
-        return bytes(baseURICache).length > 0 ? string(abi.encodePacked(baseURICache, tokenId_.toString())) : "";
+        tokenURI_ = bytes(baseURICache).length > 0 ? string(abi.encodePacked(baseURICache, tokenId_.toString())) : "";
     }
 
     /**************************/

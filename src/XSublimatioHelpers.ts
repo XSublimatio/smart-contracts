@@ -371,6 +371,15 @@ export interface Metadata {
     artist: string;
 }
 
+export interface ContractMetadata {
+    name: string;
+    description: string;
+    image: string;
+    external_link: string;
+    seller_fee_basis_points: number;
+    fee_recipient: string;
+}
+
 export interface Token {
     id: string;
     globalType: number;
@@ -531,4 +540,15 @@ export function getMoleculeSupply(moleculeType: number, available: number): numb
 
 export function getDrugSupply(drugType: number, available: number): number {
     return DRUG_MAX_SUPPLIES[drugType] - available;
+}
+
+export function getContractMetadata(imageUri = '', imageExtension = 'png'): ContractMetadata {
+    return {
+        name: 'xSublimatio',
+        description: 'Lorem Ipsum',
+        image: `${imageUri}/xSublimatio.${imageExtension}`,
+        external_link: 'faction.art/xsublimatio',
+        seller_fee_basis_points: 0,
+        fee_recipient: '',
+    };
 }

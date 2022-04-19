@@ -21,6 +21,12 @@ interface IXSublimatio is IERC721Enumerable {
     /// @notice Emitted when an account has accepted ownership.
     event OwnershipAccepted(address indexed previousOwner, address indexed owner);
 
+    /// @notice Emitted when an account is given the privilege to buy before the public.
+    event PrivilegedAccountSet(address indexed account);
+
+    /// @notice Emitted when an account loses the privilege to buy before the public.
+    event PrivilegedAccountUnset(address indexed account);
+
     /// @notice Emitted when owner proposed an account that can accept ownership.
     event OwnershipProposed(address indexed owner, address indexed pendingOwner);
 
@@ -36,6 +42,10 @@ interface IXSublimatio is IERC721Enumerable {
     function PRICE_PER_TOKEN_MINT() external returns (uint256 pricePerTokenMint_);
 
     function PURCHASE_BATCH_SIZE() external returns (uint256 purchaseBatchSize_);
+
+    function LAUNCH_TIMESTAMP() external returns (uint256 launchTimestamp_);
+
+    function PUBLIC_TIMESTAMP() external returns (uint256 publicTimestamp_);
 
     function baseURI() external returns (string memory baseURI_);
 

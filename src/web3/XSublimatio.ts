@@ -59,6 +59,14 @@ export type OwnershipProposed = ContractEventLog<{
     0: string;
     1: string;
 }>;
+export type PrivilegedAccountSet = ContractEventLog<{
+    account: string;
+    0: string;
+}>;
+export type PrivilegedAccountUnset = ContractEventLog<{
+    account: string;
+    0: string;
+}>;
 export type ProceedsWithdrawn = ContractEventLog<{
     destination: string;
     amount: string;
@@ -80,7 +88,11 @@ export interface XSublimatio extends BaseContract {
     methods: {
         DECOMPOSITION_TIME(): NonPayableTransactionObject<string>;
 
+        LAUNCH_TIMESTAMP(): NonPayableTransactionObject<string>;
+
         PRICE_PER_TOKEN_MINT(): NonPayableTransactionObject<string>;
+
+        PUBLIC_TIMESTAMP(): NonPayableTransactionObject<string>;
 
         PURCHASE_BATCH_SIZE(): NonPayableTransactionObject<string>;
 
@@ -133,6 +145,8 @@ export interface XSublimatio extends BaseContract {
 
         isApprovedForAll(owner: string, operator: string): NonPayableTransactionObject<boolean>;
 
+        isPrivilegedAccount(arg0: string): NonPayableTransactionObject<boolean>;
+
         moleculeAvailabilities(): NonPayableTransactionObject<string[]>;
 
         moleculesAvailable(): NonPayableTransactionObject<string>;
@@ -166,6 +180,8 @@ export interface XSublimatio extends BaseContract {
 
         setBaseURI(baseURI_: string): NonPayableTransactionObject<void>;
 
+        setPrivilegedAccounts(accounts_: string[]): NonPayableTransactionObject<void>;
+
         startDecomposition(tokenId_: number | string | BN): NonPayableTransactionObject<void>;
 
         supportsInterface(interfaceId: string | number[]): NonPayableTransactionObject<boolean>;
@@ -183,6 +199,8 @@ export interface XSublimatio extends BaseContract {
         totalSupply(): NonPayableTransactionObject<string>;
 
         transferFrom(from: string, to: string, tokenId: number | string | BN): NonPayableTransactionObject<void>;
+
+        unsetPrivilegedAccounts(accounts_: string[]): NonPayableTransactionObject<void>;
 
         withdrawProceeds(amount_: number | string | BN, destination_: string): NonPayableTransactionObject<void>;
     };
@@ -210,6 +228,12 @@ export interface XSublimatio extends BaseContract {
 
         OwnershipProposed(cb?: Callback<OwnershipProposed>): EventEmitter;
         OwnershipProposed(options?: EventOptions, cb?: Callback<OwnershipProposed>): EventEmitter;
+
+        PrivilegedAccountSet(cb?: Callback<PrivilegedAccountSet>): EventEmitter;
+        PrivilegedAccountSet(options?: EventOptions, cb?: Callback<PrivilegedAccountSet>): EventEmitter;
+
+        PrivilegedAccountUnset(cb?: Callback<PrivilegedAccountUnset>): EventEmitter;
+        PrivilegedAccountUnset(options?: EventOptions, cb?: Callback<PrivilegedAccountUnset>): EventEmitter;
 
         ProceedsWithdrawn(cb?: Callback<ProceedsWithdrawn>): EventEmitter;
         ProceedsWithdrawn(options?: EventOptions, cb?: Callback<ProceedsWithdrawn>): EventEmitter;
@@ -243,6 +267,12 @@ export interface XSublimatio extends BaseContract {
 
     once(event: 'OwnershipProposed', cb: Callback<OwnershipProposed>): void;
     once(event: 'OwnershipProposed', options: EventOptions, cb: Callback<OwnershipProposed>): void;
+
+    once(event: 'PrivilegedAccountSet', cb: Callback<PrivilegedAccountSet>): void;
+    once(event: 'PrivilegedAccountSet', options: EventOptions, cb: Callback<PrivilegedAccountSet>): void;
+
+    once(event: 'PrivilegedAccountUnset', cb: Callback<PrivilegedAccountUnset>): void;
+    once(event: 'PrivilegedAccountUnset', options: EventOptions, cb: Callback<PrivilegedAccountUnset>): void;
 
     once(event: 'ProceedsWithdrawn', cb: Callback<ProceedsWithdrawn>): void;
     once(event: 'ProceedsWithdrawn', options: EventOptions, cb: Callback<ProceedsWithdrawn>): void;
