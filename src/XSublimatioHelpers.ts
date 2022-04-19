@@ -398,7 +398,13 @@ export interface BrewPossibility {
     recipeMolecules: Token[][];
 }
 
-export function getTokenFromId(tokenId: BigNumber | BigInt | string, mediaUri = ''): Token {
+export function getTokenFromId(
+    tokenId: BigNumber | BigInt | string,
+    imageUri = '',
+    videoUri = '',
+    imageExtension = '',
+    videoExtension = ''
+): Token {
     const id = BigNumber.from(tokenId.toString());
 
     if (id.gte(BigNumber.from(1).shl(256))) throw 'Invalid Token Id';
@@ -492,8 +498,8 @@ export function getTokenFromId(tokenId: BigNumber | BigInt | string, mediaUri = 
             description: `An xSublimatio ${category}`,
             name,
             background_color: 'ffffff',
-            image: `${mediaUri}/${id}.png`,
-            animation_url: `${mediaUri}/${id}.webm`,
+            image: `${imageUri}/${id}.${imageExtension}`,
+            animation_url: `${videoUri}/${id}.${videoExtension}`,
             artist: 'Pierre Pauze',
         },
     };
