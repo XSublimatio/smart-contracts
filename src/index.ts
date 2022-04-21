@@ -16,10 +16,12 @@ export {
     Drug,
     Attribute,
     Metadata,
+    ContractMetadata,
     Token,
     BrewPossibility,
     getTokenFromId,
     getBrewPossibility,
     getMoleculeSupply,
     getDrugSupply,
+    getContractMetadata,
 } from './XSublimatioHelpers';
