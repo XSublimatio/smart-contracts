@@ -36,7 +36,9 @@ describe('XSublimatio', () => {
             await alice.getAddress(),
             decompositionTime,
             pricePerTokenMint,
-            purchaseBatchSize
+            purchaseBatchSize,
+            0,
+            0
         );
         await contract.deployed();
 
