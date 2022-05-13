@@ -21,7 +21,6 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
     uint256 public immutable DECOMPOSITION_TIME;
     uint256 public immutable PRICE_PER_TOKEN_MINT;
-    uint256 public immutable PURCHASE_BATCH_SIZE;
     uint256 public immutable LAUNCH_TIMESTAMP;
     uint256 public immutable PUBLIC_TIMESTAMP;
 
@@ -57,7 +56,6 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         address owner_,
         uint256 decompositionTime_,
         uint256 pricePerTokenMint_,
-        uint256 purchaseBatchSize_,
         uint256 launchTimestamp_,
         uint256 publicTimestamp_
     ) ERC721("XSublimatio", "XSUB") {
@@ -65,7 +63,6 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         owner = owner_;
         DECOMPOSITION_TIME = decompositionTime_;
         PRICE_PER_TOKEN_MINT = pricePerTokenMint_;
-        PURCHASE_BATCH_SIZE = purchaseBatchSize_;
         LAUNCH_TIMESTAMP = launchTimestamp_;
         PUBLIC_TIMESTAMP = publicTimestamp_;
     }
@@ -263,7 +260,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         _burn(tokenId_);
     }
 
-    function purchase(address destination_, uint256 minQuantity_) external payable returns (uint256[] memory tokenIds_) {
+    function purchase(address destination_, uint256 quantity_, uint256 minQuantity_) external payable returns (uint256[] memory tokenIds_) {
         require(block.timestamp >= LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
         require(block.timestamp >= PUBLIC_TIMESTAMP || isPrivilegedAccount[msg.sender], "NOT_PUBLIC_YET");
 
@@ -274,7 +271,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
         // Get the number of molecules available from compactState3 and determine how many molecules will be purchased in this call.
         uint256 availableMoleculeCount = _getMoleculesAvailable(compactState3);
-        uint256 count = availableMoleculeCount >= PURCHASE_BATCH_SIZE ? PURCHASE_BATCH_SIZE : availableMoleculeCount;
+        uint256 count = availableMoleculeCount >= quantity_ ? quantity_ : availableMoleculeCount;
 
         // Prevent a purchase fo 0 nfts, as well as a purchase of less nfts than the user expected.
         require(count != 0, "NO_MOLECULES_AVAILABLE");

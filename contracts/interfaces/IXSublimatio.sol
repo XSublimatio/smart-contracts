@@ -41,8 +41,6 @@ interface IXSublimatio is IERC721Enumerable {
 
     function PRICE_PER_TOKEN_MINT() external returns (uint256 pricePerTokenMint_);
 
-    function PURCHASE_BATCH_SIZE() external returns (uint256 purchaseBatchSize_);
-
     function LAUNCH_TIMESTAMP() external returns (uint256 launchTimestamp_);
 
     function PUBLIC_TIMESTAMP() external returns (uint256 publicTimestamp_);
@@ -83,7 +81,7 @@ interface IXSublimatio is IERC721Enumerable {
 
     function decompose(uint256 tokenId_) external;
 
-    function purchase(address destination_, uint256 minQuantity_) external payable returns (uint256[] memory tokenIds_);
+    function purchase(address destination_, uint256 quantity_, uint256 minQuantity_) external payable returns (uint256[] memory tokenIds_);
 
     function startDecomposition(uint256 tokenId_) external;
 

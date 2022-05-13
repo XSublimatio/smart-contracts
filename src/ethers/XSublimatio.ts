@@ -25,7 +25,6 @@ export interface XSublimatioInterface extends utils.Interface {
         'LAUNCH_TIMESTAMP()': FunctionFragment;
         'PRICE_PER_TOKEN_MINT()': FunctionFragment;
         'PUBLIC_TIMESTAMP()': FunctionFragment;
-        'PURCHASE_BATCH_SIZE()': FunctionFragment;
         'acceptOwnership()': FunctionFragment;
         'approve(address,uint256)': FunctionFragment;
         'availabilities()': FunctionFragment;
@@ -54,7 +53,7 @@ export interface XSublimatioInterface extends utils.Interface {
         'ownerOf(uint256)': FunctionFragment;
         'pendingOwner()': FunctionFragment;
         'proposeOwnership(address)': FunctionFragment;
-        'purchase(address,uint256)': FunctionFragment;
+        'purchase(address,uint256,uint256)': FunctionFragment;
         'safeTransferFrom(address,address,uint256)': FunctionFragment;
         'setApprovalForAll(address,bool)': FunctionFragment;
         'setBaseURI(string)': FunctionFragment;
@@ -76,7 +75,6 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'LAUNCH_TIMESTAMP', values?: undefined): string;
     encodeFunctionData(functionFragment: 'PRICE_PER_TOKEN_MINT', values?: undefined): string;
     encodeFunctionData(functionFragment: 'PUBLIC_TIMESTAMP', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'PURCHASE_BATCH_SIZE', values?: undefined): string;
     encodeFunctionData(functionFragment: 'acceptOwnership', values?: undefined): string;
     encodeFunctionData(functionFragment: 'approve', values: [string, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'availabilities', values?: undefined): string;
@@ -105,7 +103,7 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'ownerOf', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'pendingOwner', values?: undefined): string;
     encodeFunctionData(functionFragment: 'proposeOwnership', values: [string]): string;
-    encodeFunctionData(functionFragment: 'purchase', values: [string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'purchase', values: [string, BigNumberish, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'safeTransferFrom', values: [string, string, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'setApprovalForAll', values: [string, boolean]): string;
     encodeFunctionData(functionFragment: 'setBaseURI', values: [string]): string;
@@ -126,7 +124,6 @@ export interface XSublimatioInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: 'LAUNCH_TIMESTAMP', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'PRICE_PER_TOKEN_MINT', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'PUBLIC_TIMESTAMP', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'PURCHASE_BATCH_SIZE', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'acceptOwnership', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'availabilities', data: BytesLike): Result;
@@ -284,8 +281,6 @@ export interface XSublimatio extends BaseContract {
 
         PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-        PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<[BigNumber]>;
-
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
         approve(
@@ -361,6 +356,7 @@ export interface XSublimatio extends BaseContract {
 
         purchase(
             destination_: string,
+            quantity_: BigNumberish,
             minQuantity_: BigNumberish,
             overrides?: PayableOverrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
@@ -439,8 +435,6 @@ export interface XSublimatio extends BaseContract {
 
     PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
 
-    PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
     acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     approve(to: string, tokenId: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
@@ -509,6 +503,7 @@ export interface XSublimatio extends BaseContract {
 
     purchase(
         destination_: string,
+        quantity_: BigNumberish,
         minQuantity_: BigNumberish,
         overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -578,8 +573,6 @@ export interface XSublimatio extends BaseContract {
 
         PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
 
-        PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
         acceptOwnership(overrides?: CallOverrides): Promise<void>;
 
         approve(to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
@@ -641,7 +634,12 @@ export interface XSublimatio extends BaseContract {
 
         proposeOwnership(newOwner_: string, overrides?: CallOverrides): Promise<void>;
 
-        purchase(destination_: string, minQuantity_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber[]>;
+        purchase(
+            destination_: string,
+            quantity_: BigNumberish,
+            minQuantity_: BigNumberish,
+            overrides?: CallOverrides
+        ): Promise<BigNumber[]>;
 
         'safeTransferFrom(address,address,uint256)'(
             from: string,
@@ -742,8 +740,6 @@ export interface XSublimatio extends BaseContract {
 
         PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
 
-        PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<BigNumber>;
-
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
         approve(to: string, tokenId: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
@@ -807,6 +803,7 @@ export interface XSublimatio extends BaseContract {
 
         purchase(
             destination_: string,
+            quantity_: BigNumberish,
             minQuantity_: BigNumberish,
             overrides?: PayableOverrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
@@ -877,8 +874,6 @@ export interface XSublimatio extends BaseContract {
 
         PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        PURCHASE_BATCH_SIZE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
         approve(
@@ -946,6 +941,7 @@ export interface XSublimatio extends BaseContract {
 
         purchase(
             destination_: string,
+            quantity_: BigNumberish,
             minQuantity_: BigNumberish,
             overrides?: PayableOverrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;

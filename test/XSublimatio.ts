@@ -18,6 +18,9 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 describe('XSublimatio', () => {
+    const decompositionTime = 10 * 86400;
+    const pricePerTokenMint = ethers.utils.parseUnits('0.2', 'ether');
+
     let contract: XSublimatio;
     let alice: Signer;
     let bob: Signer;
@@ -27,16 +30,12 @@ describe('XSublimatio', () => {
         [alice, bob, charlie] = await ethers.getSigners();
 
         const contractFactory = new XSublimatio__factory(alice);
-        const decompositionTime = 10 * 86400;
-        const pricePerTokenMint = ethers.utils.parseUnits('0.2', 'ether');
-        const purchaseBatchSize = 5;
 
         contract = await contractFactory.deploy(
             'http://127.0.0.1:8080/',
             await alice.getAddress(),
             decompositionTime,
             pricePerTokenMint,
-            purchaseBatchSize,
             0,
             0
         );
@@ -93,19 +92,19 @@ describe('XSublimatio', () => {
 
         it('Cannot purchase molecules if cannot fullfil request', async () => {
             const aliceAddress = await alice.getAddress();
-            await expect(contract.purchase(aliceAddress, 6)).to.be.revertedWith('CANNOT_FULLFIL_REQUEST');
+            await expect(contract.purchase(aliceAddress, 3481, 3481)).to.be.revertedWith('CANNOT_FULLFIL_REQUEST');
         });
 
         it('Cannot purchase molecules if insufficient funds provided', async () => {
             const aliceAddress = await alice.getAddress();
-            const value = ethers.utils.parseUnits('0.99999999');
-            await expect(contract.purchase(aliceAddress, 5, { value })).to.be.revertedWith('INCORRECT_VALUE');
+            const value = pricePerTokenMint.mul(4);
+            await expect(contract.purchase(aliceAddress, 5, 5, { value })).to.be.revertedWith('INCORRECT_VALUE');
         });
 
-        it('Can purchase molecules', async () => {
+        it('Can purchase a batch of 5 molecules', async () => {
             const aliceAddress = await alice.getAddress();
-            const value = ethers.utils.parseUnits('1.0');
-            const tx = await (await contract.purchase(aliceAddress, 5, { value })).wait();
+            const value = pricePerTokenMint.mul(5);
+            const tx = await (await contract.purchase(aliceAddress, 5, 5, { value })).wait();
 
             expect(await contract.totalSupply()).to.equal(5);
             expect(await contract.moleculesAvailable()).to.equal(3480 - 5);
@@ -141,14 +140,55 @@ describe('XSublimatio', () => {
             expect(totalMoleculeAvailability).to.equal(MOLECULE_MAX_SUPPLY - tokenIds.length);
         });
 
-        it('Can purchase all molecules', async () => {
+        it('Can purchase a batch of 60 molecules', async () => {
             const aliceAddress = await alice.getAddress();
-            const value = ethers.utils.parseUnits('1.0');
+            const value = pricePerTokenMint.mul(60);
+            const tx = await (await contract.purchase(aliceAddress, 60, 60, { value })).wait();
 
-            for (let i = 1; i <= 696; ++i) {
-                process.stdout.write(`\r        Purchase ${i}: ${((100 * i) / 696).toFixed(0)}%`);
-                const tx = await (await contract.purchase(aliceAddress, 0, { value })).wait();
-                expect(tx.events?.length).to.equal(5);
+            expect(await contract.totalSupply()).to.equal(60);
+            expect(await contract.moleculesAvailable()).to.equal(3480 - 60);
+            expect(await contract.balanceOf(aliceAddress)).to.equal(60);
+
+            const tokenIds = await Promise.all(
+                (tx.events ?? [])?.map(async ({ event, args }) => {
+                    expect(event).to.equal('Transfer');
+                    expect(args?.from).to.equal(ethers.constants.AddressZero);
+                    expect(args?.to).to.equal(aliceAddress);
+
+                    const { globalType, type, category } = getTokenFromId(args?.tokenId);
+
+                    expect(globalType).to.lessThan(63);
+                    expect(type).to.be.lessThan(63);
+                    expect(globalType).to.equal(type);
+                    expect(category).to.equal('molecule');
+
+                    const tokeURI = await contract.tokenURI(args?.tokenId);
+
+                    expect(tokeURI).to.equal(`http://127.0.0.1:8080/${args?.tokenId.toString()}`);
+
+                    return args?.tokenId;
+                })
+            );
+
+            expect(await contract.tokensOfOwner(await alice.getAddress())).to.deep.equal(tokenIds);
+
+            const availabilities = await contract.moleculeAvailabilities();
+
+            const totalMoleculeAvailability = availabilities.reduce((acc, item) => acc + parseInt(item.toString()), 0);
+
+            expect(totalMoleculeAvailability).to.equal(MOLECULE_MAX_SUPPLY - tokenIds.length);
+        });
+
+        it('Can purchase all molecules in batchers of 120', async () => {
+            const aliceAddress = await alice.getAddress();
+            const value = pricePerTokenMint.mul(120);
+
+            const purchases = 3480 / 120;
+
+            for (let i = 1; i <= purchases; ++i) {
+                process.stdout.write(`\r        Purchase ${i} of ${purchases}`);
+                const tx = await (await contract.purchase(aliceAddress, 120, 120, { value })).wait();
+                expect(tx.events?.length).to.equal(120);
             }
 
             process.stdout.write(`\r                                                                                                    `);
@@ -182,7 +222,7 @@ describe('XSublimatio', () => {
 
         it('Can brew one of each drug', async () => {
             const aliceAddress = await alice.getAddress();
-            const value = ethers.utils.parseUnits('1.0');
+            const value = pricePerTokenMint.mul(120);
 
             const moleculesNeeded = RECIPES.flat().reduce((needed, moleculeType) => {
                 needed[moleculeType]++;
@@ -202,7 +242,7 @@ describe('XSublimatio', () => {
             while (totalMoleculesNeeded > 0) {
                 process.stdout.write(`\r        Purchasing since ${totalMoleculesNeeded} specific molecules still needed...`);
 
-                const tx = await (await contract.purchase(aliceAddress, 0, { value })).wait();
+                const tx = await (await contract.purchase(aliceAddress, 120, 0, { value })).wait();
 
                 moleculesMinted += tx.events?.length ?? 0;
 
@@ -280,7 +320,7 @@ describe('XSublimatio', () => {
 
         it('Can brew one of each drug with special water', async () => {
             const aliceAddress = await alice.getAddress();
-            const value = ethers.utils.parseUnits('1.0');
+            const value = pricePerTokenMint.mul(120);
 
             const recipesWithRarestReplacedWithSpecialWater = RECIPES
                 // replace the last needed molecule (and rarest) with the special water for each recipe
@@ -308,7 +348,7 @@ describe('XSublimatio', () => {
             while (totalMoleculesNeeded > 0) {
                 process.stdout.write(`\r        Purchasing since ${totalMoleculesNeeded} specific molecules still needed...`);
 
-                const tx = await (await contract.purchase(aliceAddress, 0, { value })).wait();
+                const tx = await (await contract.purchase(aliceAddress, 120, 0, { value })).wait();
 
                 moleculesMinted += tx.events?.length ?? 0;
 
@@ -387,9 +427,9 @@ describe('XSublimatio', () => {
 
         it('Cannot startDecomposition for non-consumer', async () => {
             const bobAddress = await bob.getAddress();
-            const value = ethers.utils.parseUnits('1.0');
+            const value = pricePerTokenMint;
 
-            const tx = await (await contract.connect(bob).purchase(bobAddress, 0, { value })).wait();
+            const tx = await (await contract.connect(bob).purchase(bobAddress, 1, 0, { value })).wait();
             const tokenIds = tx.events?.map(({ args }) => args?.tokenId) as BigNumber[];
 
             await expect(contract.connect(bob).startDecomposition(tokenIds[0])).to.be.revertedWith('CONSUMER_NOT_ENABLED');
@@ -399,9 +439,9 @@ describe('XSublimatio', () => {
             await (await contract.enableConsumingFor(await bob.getAddress())).wait();
 
             const aliceAddress = await alice.getAddress();
-            const value = ethers.utils.parseUnits('1.0');
+            const value = pricePerTokenMint;
 
-            const tx = await (await contract.purchase(aliceAddress, 0, { value })).wait();
+            const tx = await (await contract.purchase(aliceAddress, 1, 0, { value })).wait();
             const tokenIds = tx.events?.map(({ args }) => args?.tokenId) as BigNumber[];
 
             await expect(contract.connect(bob).startDecomposition(tokenIds[0])).to.be.revertedWith('NOT_OWNER');
@@ -409,9 +449,9 @@ describe('XSublimatio', () => {
 
         it('Cannot startDecomposition for molecule', async () => {
             const aliceAddress = await alice.getAddress();
-            const value = ethers.utils.parseUnits('1.0');
+            const value = pricePerTokenMint;
 
-            const tx = await (await contract.purchase(aliceAddress, 0, { value })).wait();
+            const tx = await (await contract.purchase(aliceAddress, 1, 0, { value })).wait();
             const tokenIds = tx.events?.map(({ args }) => args?.tokenId) as BigNumber[];
 
             await expect(contract.startDecomposition(tokenIds[0])).to.be.revertedWith('NOT_DRUG');
@@ -419,7 +459,7 @@ describe('XSublimatio', () => {
 
         it('Can decompose a drug', async () => {
             const aliceAddress = await alice.getAddress();
-            const value = ethers.utils.parseUnits('1.0');
+            const value = pricePerTokenMint.mul(120);
             const moleculesNeeded = [1, 1];
             let totalMoleculesNeeded = 2;
             const moleculeIds = new Array(63);
@@ -431,7 +471,7 @@ describe('XSublimatio', () => {
             while (totalMoleculesNeeded > 0) {
                 process.stdout.write(`\r        Purchasing since ${totalMoleculesNeeded} specific molecules still needed...`);
 
-                const tx = await (await contract.purchase(aliceAddress, 0, { value })).wait();
+                const tx = await (await contract.purchase(aliceAddress, 120, 0, { value })).wait();
 
                 tx.events?.forEach(({ args }) => {
                     const { type } = getTokenFromId(args?.tokenId);
@@ -484,7 +524,7 @@ describe('XSublimatio', () => {
 
         it('Can decompose a drug with a special water', async () => {
             const aliceAddress = await alice.getAddress();
-            const value = ethers.utils.parseUnits('1.0');
+            const value = pricePerTokenMint.mul(120);
 
             const moleculesNeeded = new Array(63).fill(0);
             moleculesNeeded[0] = 1;
@@ -501,7 +541,7 @@ describe('XSublimatio', () => {
             while (totalMoleculesNeeded > 0) {
                 process.stdout.write(`\r        Purchasing since ${totalMoleculesNeeded} specific molecules still needed...`);
 
-                const tx = await (await contract.purchase(aliceAddress, 0, { value })).wait();
+                const tx = await (await contract.purchase(aliceAddress, 120, 0, { value })).wait();
 
                 tx.events?.forEach(({ args }) => {
                     const { type } = getTokenFromId(args?.tokenId);

@@ -94,8 +94,6 @@ export interface XSublimatio extends BaseContract {
 
         PUBLIC_TIMESTAMP(): NonPayableTransactionObject<string>;
 
-        PURCHASE_BATCH_SIZE(): NonPayableTransactionObject<string>;
-
         acceptOwnership(): NonPayableTransactionObject<void>;
 
         approve(to: string, tokenId: number | string | BN): NonPayableTransactionObject<void>;
@@ -161,7 +159,11 @@ export interface XSublimatio extends BaseContract {
 
         proposeOwnership(newOwner_: string): NonPayableTransactionObject<void>;
 
-        purchase(destination_: string, minQuantity_: number | string | BN): PayableTransactionObject<string[]>;
+        purchase(
+            destination_: string,
+            quantity_: number | string | BN,
+            minQuantity_: number | string | BN
+        ): PayableTransactionObject<string[]>;
 
         'safeTransferFrom(address,address,uint256)'(
             from: string,

@@ -11,10 +11,9 @@ contract XSublimatioHarness is XSublimatio {
         address owner_,
         uint256 decompositionTime_,
         uint256 pricePerTokenMint_,
-        uint256 purchaseBatchSize_,
         uint256 launchTimestamp_,
         uint256 publicTimestamp_
-        ) XSublimatio(baseURI_, owner, decompositionTime_, pricePerTokenMint_, purchaseBatchSize_, launchTimestamp_, publicTimestamp_) {}
+        ) XSublimatio(baseURI_, owner, decompositionTime_, pricePerTokenMint_, launchTimestamp_, publicTimestamp_) {}
 
     function mintDrug(uint256 drugType_, uint256 specialWaterIndex_, uint256 randomNumber_, address destination_) public returns (uint256 tokenId_) {
         COMPACT_STATE_4 = _decrementDrugAvailability(COMPACT_STATE_4, drugType_);
