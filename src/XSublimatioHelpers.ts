@@ -378,6 +378,7 @@ export interface ContractMetadata {
     external_link: string;
     seller_fee_basis_points: number;
     fee_recipient: string;
+    artist: string;
 }
 
 export interface Token {
@@ -550,5 +551,6 @@ export function getContractMetadata(imageUri = '', imageExtension = 'png'): Cont
         external_link: 'faction.art/xsublimatio',
         seller_fee_basis_points: 0,
         fee_recipient: '',
+        artist: 'Pierre Pauze',
     };
 }
