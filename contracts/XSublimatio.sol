@@ -8,6 +8,7 @@ import { IXSublimatio } from "./interfaces/IXSublimatio.sol";
 
 // TODO: Some checks are done implicitly by array out-of-bound errors.
 // TODO: Don't use ERC721Enumerable if no additional UX is desired (and implement totalSupply manually)
+// TODO: metadata/info
 
 // NOTE: Despite token ids being generated with a molecule nonce or a drug nonce (which means there can be an overlap),
 //       the tokenId will eventually be prepended with a number of that molecule or drug type.
