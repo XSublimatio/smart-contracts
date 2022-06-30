@@ -34,6 +34,10 @@ export type ApprovalForAll = ContractEventLog<{
     1: string;
     2: boolean;
 }>;
+export type AssetGeneratorHashSet = ContractEventLog<{
+    assetGeneratorHash: string;
+    0: string;
+}>;
 export type BaseURISet = ContractEventLog<{
     baseURI: string;
     0: string;
@@ -56,9 +60,19 @@ export type OwnershipProposed = ContractEventLog<{
     0: string;
     1: string;
 }>;
+export type PricePerTokenMintSet = ContractEventLog<{
+    price: string;
+    0: string;
+}>;
+export type ProceedsDestinationSet = ContractEventLog<{
+    account: string;
+    0: string;
+}>;
 export type ProceedsWithdrawn = ContractEventLog<{
+    destination: string;
     amount: string;
     0: string;
+    1: string;
 }>;
 export type PromotionAccountSet = ContractEventLog<{
     account: string;
@@ -81,21 +95,13 @@ export interface XSublimatio extends BaseContract {
     constructor(jsonInterface: any[], address?: string, options?: ContractOptions): XSublimatio;
     clone(): XSublimatio;
     methods: {
-        COMPACT_STATE_1(): NonPayableTransactionObject<string>;
-
-        COMPACT_STATE_2(): NonPayableTransactionObject<string>;
-
-        COMPACT_STATE_3(): NonPayableTransactionObject<string>;
-
         LAUNCH_TIMESTAMP(): NonPayableTransactionObject<string>;
-
-        PRICE_PER_TOKEN_MINT(): NonPayableTransactionObject<string>;
-
-        PROCEEDS_DESTINATION(): NonPayableTransactionObject<string>;
 
         acceptOwnership(): NonPayableTransactionObject<void>;
 
         approve(to: string, tokenId: number | string | BN): NonPayableTransactionObject<void>;
+
+        assetGeneratorHash(): NonPayableTransactionObject<string>;
 
         availabilities(): NonPayableTransactionObject<{
             moleculesAvailabilities_: string[];
@@ -114,9 +120,18 @@ export interface XSublimatio extends BaseContract {
             destination_: string
         ): NonPayableTransactionObject<string>;
 
-        canClaimFreeWater(arg0: string): NonPayableTransactionObject<boolean>;
+        canClaimFreeWater(account_: string): NonPayableTransactionObject<boolean>;
 
         claimWater(destination_: string): NonPayableTransactionObject<string>;
+
+        compactStates(): NonPayableTransactionObject<{
+            compactState1_: string;
+            compactState2_: string;
+            compactState3_: string;
+            0: string;
+            1: string;
+            2: string;
+        }>;
 
         contractURI(): NonPayableTransactionObject<string>;
 
@@ -138,9 +153,9 @@ export interface XSublimatio extends BaseContract {
 
         getRecipeOfDrug(drugType_: number | string | BN): NonPayableTransactionObject<string[]>;
 
-        giveMolecules(destinations_: string[], amounts_: (number | string | BN)[]): NonPayableTransactionObject<string[][]>;
+        giveMolecules(destinations_: string[], amounts_: (number | string | BN)[]): NonPayableTransactionObject<void>;
 
-        giveWaters(destinations_: string[], amounts_: (number | string | BN)[]): NonPayableTransactionObject<string[][]>;
+        giveWaters(destinations_: string[], amounts_: (number | string | BN)[]): NonPayableTransactionObject<void>;
 
         isApprovedForAll(owner: string, operator: string): NonPayableTransactionObject<boolean>;
 
@@ -155,6 +170,10 @@ export interface XSublimatio extends BaseContract {
         ownerOf(tokenId: number | string | BN): NonPayableTransactionObject<string>;
 
         pendingOwner(): NonPayableTransactionObject<string>;
+
+        pricePerTokenMint(): NonPayableTransactionObject<string>;
+
+        proceedsDestination(): NonPayableTransactionObject<string>;
 
         proposeOwnership(newOwner_: string): NonPayableTransactionObject<void>;
 
@@ -179,7 +198,13 @@ export interface XSublimatio extends BaseContract {
 
         setApprovalForAll(operator: string, approved: boolean): NonPayableTransactionObject<void>;
 
+        setAssetGeneratorHash(assetGeneratorHash_: string | number[]): NonPayableTransactionObject<void>;
+
         setBaseURI(baseURI_: string): NonPayableTransactionObject<void>;
+
+        setPricePerTokenMint(pricePerTokenMint_: number | string | BN): NonPayableTransactionObject<void>;
+
+        setProceedsDestination(proceedsDestination_: string): NonPayableTransactionObject<void>;
 
         setPromotionAccounts(accounts_: string[]): NonPayableTransactionObject<void>;
 
@@ -213,6 +238,9 @@ export interface XSublimatio extends BaseContract {
         ApprovalForAll(cb?: Callback<ApprovalForAll>): EventEmitter;
         ApprovalForAll(options?: EventOptions, cb?: Callback<ApprovalForAll>): EventEmitter;
 
+        AssetGeneratorHashSet(cb?: Callback<AssetGeneratorHashSet>): EventEmitter;
+        AssetGeneratorHashSet(options?: EventOptions, cb?: Callback<AssetGeneratorHashSet>): EventEmitter;
+
         BaseURISet(cb?: Callback<BaseURISet>): EventEmitter;
         BaseURISet(options?: EventOptions, cb?: Callback<BaseURISet>): EventEmitter;
 
@@ -224,6 +252,12 @@ export interface XSublimatio extends BaseContract {
 
         OwnershipProposed(cb?: Callback<OwnershipProposed>): EventEmitter;
         OwnershipProposed(options?: EventOptions, cb?: Callback<OwnershipProposed>): EventEmitter;
+
+        PricePerTokenMintSet(cb?: Callback<PricePerTokenMintSet>): EventEmitter;
+        PricePerTokenMintSet(options?: EventOptions, cb?: Callback<PricePerTokenMintSet>): EventEmitter;
+
+        ProceedsDestinationSet(cb?: Callback<ProceedsDestinationSet>): EventEmitter;
+        ProceedsDestinationSet(options?: EventOptions, cb?: Callback<ProceedsDestinationSet>): EventEmitter;
 
         ProceedsWithdrawn(cb?: Callback<ProceedsWithdrawn>): EventEmitter;
         ProceedsWithdrawn(options?: EventOptions, cb?: Callback<ProceedsWithdrawn>): EventEmitter;
@@ -249,6 +283,9 @@ export interface XSublimatio extends BaseContract {
     once(event: 'ApprovalForAll', cb: Callback<ApprovalForAll>): void;
     once(event: 'ApprovalForAll', options: EventOptions, cb: Callback<ApprovalForAll>): void;
 
+    once(event: 'AssetGeneratorHashSet', cb: Callback<AssetGeneratorHashSet>): void;
+    once(event: 'AssetGeneratorHashSet', options: EventOptions, cb: Callback<AssetGeneratorHashSet>): void;
+
     once(event: 'BaseURISet', cb: Callback<BaseURISet>): void;
     once(event: 'BaseURISet', options: EventOptions, cb: Callback<BaseURISet>): void;
 
@@ -260,6 +297,12 @@ export interface XSublimatio extends BaseContract {
 
     once(event: 'OwnershipProposed', cb: Callback<OwnershipProposed>): void;
     once(event: 'OwnershipProposed', options: EventOptions, cb: Callback<OwnershipProposed>): void;
+
+    once(event: 'PricePerTokenMintSet', cb: Callback<PricePerTokenMintSet>): void;
+    once(event: 'PricePerTokenMintSet', options: EventOptions, cb: Callback<PricePerTokenMintSet>): void;
+
+    once(event: 'ProceedsDestinationSet', cb: Callback<ProceedsDestinationSet>): void;
+    once(event: 'ProceedsDestinationSet', options: EventOptions, cb: Callback<ProceedsDestinationSet>): void;
 
     once(event: 'ProceedsWithdrawn', cb: Callback<ProceedsWithdrawn>): void;
     once(event: 'ProceedsWithdrawn', options: EventOptions, cb: Callback<ProceedsWithdrawn>): void;
