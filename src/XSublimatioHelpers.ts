@@ -1,9 +1,9 @@
 import { BigNumber } from 'ethers';
 
-export const MOLECULE_MAX_SUPPLY = 3480;
+export const MOLECULE_MAX_SUPPLY = 5748;
 
 export const MOLECULE_MAX_SUPPLIES: number[] = [
-    1134, 250, 142, 121, 121, 120, 120, 120, 107, 97, 95, 95, 95, 95, 82, 50, 36, 36, 36, 34, 34, 34, 32, 32, 32, 29, 29, 29, 29, 24, 24,
+    3402, 250, 142, 121, 121, 120, 120, 120, 107, 97, 95, 95, 95, 95, 82, 50, 36, 36, 36, 34, 34, 34, 32, 32, 32, 29, 29, 29, 29, 24, 24,
     21, 20, 18, 12, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 ];
 
@@ -297,6 +297,28 @@ export const DRUG_LABELS: string[] = [
     'Delta-type opioid receptor',
 ];
 
+export const DRUG_PLACEHOLDERS: string[] = [
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/alcohol.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/chloroquine.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/cocaine.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/ghb.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/ketamine.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/lsd.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/methamphetamine.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/morphine.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/ayahuasca.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/belladonna.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/cannabis.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/khat.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/lactuca-virosa.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/love-elixir.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/magic-truffle.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/mandrake.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/mate.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/opium.png',
+    'https://res.cloudinary.com/faction/image/upload/faction/xsublimatio/placeholders/salvia-divinorum.png',
+];
+
 export const MOLECULE_LIGHTING_TYPES: string[] = ['Mixed', 'Zones'];
 
 export const MOLECULE_INTEGRITY_TYPES: string[] = ['Medium', 'High', 'Very High', 'Full'];
@@ -350,7 +372,7 @@ export const DRUGS: Drug[] = DRUG_MAX_SUPPLIES.map((maxSupply, type) => ({
     label: DRUG_LABELS[type],
     maxSupply,
     recipe: RECIPES[type].map((moleculeType) => MOLECULES[moleculeType]),
-    image: 'TBD',
+    image: DRUG_PLACEHOLDERS[type],
     getBrewPossibility: (tokens: Token[] | BigNumber[] | BigInt[] | string[]): BrewPossibility => getBrewPossibility(type, tokens),
     getSupply: (available: number): number => getDrugSupply(type, available),
 }));
@@ -379,6 +401,7 @@ export interface ContractMetadata {
     seller_fee_basis_points: number;
     fee_recipient: string;
     artist: string;
+    asset_generator_torrent_hash: string;
 }
 
 export interface Token {
@@ -387,7 +410,6 @@ export interface Token {
     type: number;
     name: string;
     category: 'molecule' | 'drug';
-    specialWaterIndex?: number;
     hue: number;
     saturation: number;
     brightness: number;
@@ -419,7 +441,7 @@ export function getTokenFromId(
 
     if (id.gte(BigNumber.from(1).shl(256))) throw 'Invalid Token Id';
 
-    const globalType = id.shr(248).toNumber();
+    const globalType = id.shr(93).toNumber();
 
     if (globalType > 81) throw 'Invalid Token Id';
 
@@ -427,38 +449,36 @@ export function getTokenFromId(
     const category = globalType < 63 ? 'molecule' : 'drug';
     const type = globalType < 63 ? globalType : globalType - 63;
 
-    const specialWaterIndex = id.shr(240).mask(8).toNumber();
-
     const seed = ~~`0b${id.mask(32).toBigInt().toString(2)}`;
     const brightness = id.shr(32).mask(16).toNumber();
     const saturation = id.shr(48).mask(16).toNumber();
     const hue = id.shr(64).mask(16).toNumber();
 
-    const moleculeLightingType = id.shr(80).mask(8).toNumber();
+    const moleculeLightingType = id.shr(80).mask(1).toNumber();
 
     if (moleculeLightingType >= 2) throw Error('Invalid token id.');
 
-    const moleculeIntegrityType = id.shr(88).mask(8).toNumber();
+    const moleculeIntegrityType = id.shr(81).mask(2).toNumber();
 
     if (moleculeIntegrityType >= 4) throw Error('Invalid token id.');
 
-    const deformationType = id.shr(96).mask(8).toNumber();
+    const deformationType = id.shr(83).mask(2).toNumber();
 
     if (deformationType >= 3) throw Error('Invalid token id.');
 
-    const stripesColorShiftType = id.shr(104).mask(8).toNumber();
+    const stripesColorShiftType = id.shr(85).mask(1).toNumber();
 
     if (stripesColorShiftType >= 2) throw Error('Invalid token id.');
 
-    const stripesAmountType = id.shr(112).mask(8).toNumber();
+    const stripesAmountType = id.shr(86).mask(2).toNumber();
 
     if (stripesAmountType >= 3) throw Error('Invalid token id.');
 
-    const blobType = id.shr(120).mask(8).toNumber();
+    const blobType = id.shr(88).mask(2).toNumber();
 
     if (blobType >= 3) throw Error('Invalid token id.');
 
-    const paletteType = id.shr(128).mask(8).toNumber();
+    const paletteType = id.shr(90).mask(3).toNumber();
 
     if (paletteType >= 6) throw Error('Invalid token id.');
 
@@ -476,10 +496,6 @@ export function getTokenFromId(
         { trait_type: 'Palette', value: PALETTE_TYPES[paletteType] },
     ];
 
-    if (category === 'drug' && specialWaterIndex > 0) {
-        attributes.push({ trait_type: 'Special Water Index', display_type: 'number', value: specialWaterIndex - 1 });
-    }
-
     if (category === 'molecule') {
         attributes.push({ trait_type: 'Molecule Lighting', value: MOLECULE_LIGHTING_TYPES[moleculeLightingType] });
         attributes.push({ trait_type: 'Molecule Integrity', value: MOLECULE_INTEGRITY_TYPES[moleculeIntegrityType] });
@@ -491,7 +507,6 @@ export function getTokenFromId(
         type,
         name,
         category,
-        specialWaterIndex: category === 'drug' && specialWaterIndex > 0 ? specialWaterIndex - 1 : undefined,
         hue,
         saturation,
         brightness,
@@ -552,5 +567,6 @@ export function getContractMetadata(imageUri = '', imageExtension = 'png'): Cont
         seller_fee_basis_points: 0,
         fee_recipient: '',
         artist: 'Pierre Pauze',
+        asset_generator_torrent_hash: '',
     };
 }

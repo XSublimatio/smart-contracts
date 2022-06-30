@@ -14,6 +14,10 @@ export interface EventOptions {
     topics?: string[];
 }
 
+export type AirdropSet = ContractEventLog<{
+    account: string;
+    0: string;
+}>;
 export type Approval = ContractEventLog<{
     owner: string;
     approved: string;
@@ -34,18 +38,11 @@ export type BaseURISet = ContractEventLog<{
     baseURI: string;
     0: string;
 }>;
-export type BrewingEnabled = ContractEventLog<{}>;
-export type ConsumingEnabled = ContractEventLog<{
-    consumer: string;
+export type DrugDecomposed = ContractEventLog<{
+    drug: string;
+    molecules: string[];
     0: string;
-}>;
-export type DecompositionStarted = ContractEventLog<{
-    owner: string;
-    tokenId: string;
-    burnDate: string;
-    0: string;
-    1: string;
-    2: string;
+    1: string[];
 }>;
 export type OwnershipAccepted = ContractEventLog<{
     previousOwner: string;
@@ -59,19 +56,17 @@ export type OwnershipProposed = ContractEventLog<{
     0: string;
     1: string;
 }>;
-export type PrivilegedAccountSet = ContractEventLog<{
-    account: string;
-    0: string;
-}>;
-export type PrivilegedAccountUnset = ContractEventLog<{
-    account: string;
-    0: string;
-}>;
 export type ProceedsWithdrawn = ContractEventLog<{
-    destination: string;
     amount: string;
     0: string;
-    1: string;
+}>;
+export type PromotionAccountSet = ContractEventLog<{
+    account: string;
+    0: string;
+}>;
+export type PromotionAccountUnset = ContractEventLog<{
+    account: string;
+    0: string;
 }>;
 export type Transfer = ContractEventLog<{
     from: string;
@@ -86,13 +81,17 @@ export interface XSublimatio extends BaseContract {
     constructor(jsonInterface: any[], address?: string, options?: ContractOptions): XSublimatio;
     clone(): XSublimatio;
     methods: {
-        DECOMPOSITION_TIME(): NonPayableTransactionObject<string>;
+        COMPACT_STATE_1(): NonPayableTransactionObject<string>;
+
+        COMPACT_STATE_2(): NonPayableTransactionObject<string>;
+
+        COMPACT_STATE_3(): NonPayableTransactionObject<string>;
 
         LAUNCH_TIMESTAMP(): NonPayableTransactionObject<string>;
 
         PRICE_PER_TOKEN_MINT(): NonPayableTransactionObject<string>;
 
-        PUBLIC_TIMESTAMP(): NonPayableTransactionObject<string>;
+        PROCEEDS_DESTINATION(): NonPayableTransactionObject<string>;
 
         acceptOwnership(): NonPayableTransactionObject<void>;
 
@@ -110,40 +109,40 @@ export interface XSublimatio extends BaseContract {
         baseURI(): NonPayableTransactionObject<string>;
 
         brew(
-            tokenIds_: (number | string | BN)[],
+            molecules_: (number | string | BN)[],
             drugType_: number | string | BN,
             destination_: string
         ): NonPayableTransactionObject<string>;
 
-        brewingEnabled(): NonPayableTransactionObject<boolean>;
+        canClaimFreeWater(arg0: string): NonPayableTransactionObject<boolean>;
 
-        burnDateFor(arg0: number | string | BN): NonPayableTransactionObject<string>;
-
-        consumingEnabledFor(arg0: string): NonPayableTransactionObject<boolean>;
+        claimWater(destination_: string): NonPayableTransactionObject<string>;
 
         contractURI(): NonPayableTransactionObject<string>;
 
-        decompose(tokenId_: number | string | BN): NonPayableTransactionObject<void>;
+        decompose(drug_: number | string | BN): NonPayableTransactionObject<void>;
 
         drugAvailabilities(): NonPayableTransactionObject<string[]>;
 
         drugsAvailable(): NonPayableTransactionObject<string>;
 
-        enableBrewing(): NonPayableTransactionObject<void>;
-
-        enableConsumingFor(consumer_: string): NonPayableTransactionObject<void>;
-
         getApproved(tokenId: number | string | BN): NonPayableTransactionObject<string>;
 
-        getDrugAvailability(drugType_: number | string | BN): NonPayableTransactionObject<string>;
+        getAvailabilityOfDrug(drugType_: number | string | BN): NonPayableTransactionObject<string>;
 
-        getMoleculeAvailability(moleculeType_: number | string | BN): NonPayableTransactionObject<string>;
+        getAvailabilityOfMolecule(moleculeType_: number | string | BN): NonPayableTransactionObject<string>;
 
-        getRecipe(drugType_: number | string | BN): NonPayableTransactionObject<string[]>;
+        getDrugContainingMolecule(molecule_: number | string | BN): NonPayableTransactionObject<string>;
+
+        getMoleculesWithinDrug(drug_: number | string | BN): NonPayableTransactionObject<string[]>;
+
+        getRecipeOfDrug(drugType_: number | string | BN): NonPayableTransactionObject<string[]>;
+
+        giveMolecules(destinations_: string[], amounts_: (number | string | BN)[]): NonPayableTransactionObject<string[][]>;
+
+        giveWaters(destinations_: string[], amounts_: (number | string | BN)[]): NonPayableTransactionObject<string[][]>;
 
         isApprovedForAll(owner: string, operator: string): NonPayableTransactionObject<boolean>;
-
-        isPrivilegedAccount(arg0: string): NonPayableTransactionObject<boolean>;
 
         moleculeAvailabilities(): NonPayableTransactionObject<string[]>;
 
@@ -175,16 +174,14 @@ export interface XSublimatio extends BaseContract {
             from: string,
             to: string,
             tokenId: number | string | BN,
-            _data: string | number[]
+            data: string | number[]
         ): NonPayableTransactionObject<void>;
 
         setApprovalForAll(operator: string, approved: boolean): NonPayableTransactionObject<void>;
 
         setBaseURI(baseURI_: string): NonPayableTransactionObject<void>;
 
-        setPrivilegedAccounts(accounts_: string[]): NonPayableTransactionObject<void>;
-
-        startDecomposition(tokenId_: number | string | BN): NonPayableTransactionObject<void>;
+        setPromotionAccounts(accounts_: string[]): NonPayableTransactionObject<void>;
 
         supportsInterface(interfaceId: string | number[]): NonPayableTransactionObject<boolean>;
 
@@ -202,11 +199,14 @@ export interface XSublimatio extends BaseContract {
 
         transferFrom(from: string, to: string, tokenId: number | string | BN): NonPayableTransactionObject<void>;
 
-        unsetPrivilegedAccounts(accounts_: string[]): NonPayableTransactionObject<void>;
+        unsetPromotionAccounts(accounts_: string[]): NonPayableTransactionObject<void>;
 
-        withdrawProceeds(amount_: number | string | BN, destination_: string): NonPayableTransactionObject<void>;
+        withdrawProceeds(): NonPayableTransactionObject<void>;
     };
     events: {
+        AirdropSet(cb?: Callback<AirdropSet>): EventEmitter;
+        AirdropSet(options?: EventOptions, cb?: Callback<AirdropSet>): EventEmitter;
+
         Approval(cb?: Callback<Approval>): EventEmitter;
         Approval(options?: EventOptions, cb?: Callback<Approval>): EventEmitter;
 
@@ -216,14 +216,8 @@ export interface XSublimatio extends BaseContract {
         BaseURISet(cb?: Callback<BaseURISet>): EventEmitter;
         BaseURISet(options?: EventOptions, cb?: Callback<BaseURISet>): EventEmitter;
 
-        BrewingEnabled(cb?: Callback<BrewingEnabled>): EventEmitter;
-        BrewingEnabled(options?: EventOptions, cb?: Callback<BrewingEnabled>): EventEmitter;
-
-        ConsumingEnabled(cb?: Callback<ConsumingEnabled>): EventEmitter;
-        ConsumingEnabled(options?: EventOptions, cb?: Callback<ConsumingEnabled>): EventEmitter;
-
-        DecompositionStarted(cb?: Callback<DecompositionStarted>): EventEmitter;
-        DecompositionStarted(options?: EventOptions, cb?: Callback<DecompositionStarted>): EventEmitter;
+        DrugDecomposed(cb?: Callback<DrugDecomposed>): EventEmitter;
+        DrugDecomposed(options?: EventOptions, cb?: Callback<DrugDecomposed>): EventEmitter;
 
         OwnershipAccepted(cb?: Callback<OwnershipAccepted>): EventEmitter;
         OwnershipAccepted(options?: EventOptions, cb?: Callback<OwnershipAccepted>): EventEmitter;
@@ -231,20 +225,23 @@ export interface XSublimatio extends BaseContract {
         OwnershipProposed(cb?: Callback<OwnershipProposed>): EventEmitter;
         OwnershipProposed(options?: EventOptions, cb?: Callback<OwnershipProposed>): EventEmitter;
 
-        PrivilegedAccountSet(cb?: Callback<PrivilegedAccountSet>): EventEmitter;
-        PrivilegedAccountSet(options?: EventOptions, cb?: Callback<PrivilegedAccountSet>): EventEmitter;
-
-        PrivilegedAccountUnset(cb?: Callback<PrivilegedAccountUnset>): EventEmitter;
-        PrivilegedAccountUnset(options?: EventOptions, cb?: Callback<PrivilegedAccountUnset>): EventEmitter;
-
         ProceedsWithdrawn(cb?: Callback<ProceedsWithdrawn>): EventEmitter;
         ProceedsWithdrawn(options?: EventOptions, cb?: Callback<ProceedsWithdrawn>): EventEmitter;
+
+        PromotionAccountSet(cb?: Callback<PromotionAccountSet>): EventEmitter;
+        PromotionAccountSet(options?: EventOptions, cb?: Callback<PromotionAccountSet>): EventEmitter;
+
+        PromotionAccountUnset(cb?: Callback<PromotionAccountUnset>): EventEmitter;
+        PromotionAccountUnset(options?: EventOptions, cb?: Callback<PromotionAccountUnset>): EventEmitter;
 
         Transfer(cb?: Callback<Transfer>): EventEmitter;
         Transfer(options?: EventOptions, cb?: Callback<Transfer>): EventEmitter;
 
         allEvents(options?: EventOptions, cb?: Callback<EventLog>): EventEmitter;
     };
+
+    once(event: 'AirdropSet', cb: Callback<AirdropSet>): void;
+    once(event: 'AirdropSet', options: EventOptions, cb: Callback<AirdropSet>): void;
 
     once(event: 'Approval', cb: Callback<Approval>): void;
     once(event: 'Approval', options: EventOptions, cb: Callback<Approval>): void;
@@ -255,14 +252,8 @@ export interface XSublimatio extends BaseContract {
     once(event: 'BaseURISet', cb: Callback<BaseURISet>): void;
     once(event: 'BaseURISet', options: EventOptions, cb: Callback<BaseURISet>): void;
 
-    once(event: 'BrewingEnabled', cb: Callback<BrewingEnabled>): void;
-    once(event: 'BrewingEnabled', options: EventOptions, cb: Callback<BrewingEnabled>): void;
-
-    once(event: 'ConsumingEnabled', cb: Callback<ConsumingEnabled>): void;
-    once(event: 'ConsumingEnabled', options: EventOptions, cb: Callback<ConsumingEnabled>): void;
-
-    once(event: 'DecompositionStarted', cb: Callback<DecompositionStarted>): void;
-    once(event: 'DecompositionStarted', options: EventOptions, cb: Callback<DecompositionStarted>): void;
+    once(event: 'DrugDecomposed', cb: Callback<DrugDecomposed>): void;
+    once(event: 'DrugDecomposed', options: EventOptions, cb: Callback<DrugDecomposed>): void;
 
     once(event: 'OwnershipAccepted', cb: Callback<OwnershipAccepted>): void;
     once(event: 'OwnershipAccepted', options: EventOptions, cb: Callback<OwnershipAccepted>): void;
@@ -270,14 +261,14 @@ export interface XSublimatio extends BaseContract {
     once(event: 'OwnershipProposed', cb: Callback<OwnershipProposed>): void;
     once(event: 'OwnershipProposed', options: EventOptions, cb: Callback<OwnershipProposed>): void;
 
-    once(event: 'PrivilegedAccountSet', cb: Callback<PrivilegedAccountSet>): void;
-    once(event: 'PrivilegedAccountSet', options: EventOptions, cb: Callback<PrivilegedAccountSet>): void;
-
-    once(event: 'PrivilegedAccountUnset', cb: Callback<PrivilegedAccountUnset>): void;
-    once(event: 'PrivilegedAccountUnset', options: EventOptions, cb: Callback<PrivilegedAccountUnset>): void;
-
     once(event: 'ProceedsWithdrawn', cb: Callback<ProceedsWithdrawn>): void;
     once(event: 'ProceedsWithdrawn', options: EventOptions, cb: Callback<ProceedsWithdrawn>): void;
+
+    once(event: 'PromotionAccountSet', cb: Callback<PromotionAccountSet>): void;
+    once(event: 'PromotionAccountSet', options: EventOptions, cb: Callback<PromotionAccountSet>): void;
+
+    once(event: 'PromotionAccountUnset', cb: Callback<PromotionAccountUnset>): void;
+    once(event: 'PromotionAccountUnset', options: EventOptions, cb: Callback<PromotionAccountUnset>): void;
 
     once(event: 'Transfer', cb: Callback<Transfer>): void;
     once(event: 'Transfer', options: EventOptions, cb: Callback<Transfer>): void;

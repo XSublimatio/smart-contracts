@@ -1,17 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.15;
 
 import { ERC721, ERC721Enumerable, Strings } from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
 import { IXSublimatio } from "./interfaces/IXSublimatio.sol";
-
-// TODO: Some checks are done implicitly by array out-of-bound errors.
-// TODO: Don't use ERC721Enumerable if no additional UX is desired (and implement totalSupply manually)
-// TODO: metadata/info
-
-// NOTE: Despite token ids being generated with a molecule nonce or a drug nonce (which means there can be an overlap),
-//       the tokenId will eventually be prepended with a number of that molecule or drug type.
 
 contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
@@ -20,10 +13,10 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     uint256 internal constant IS_NOT_LOCKED = uint256(1);
     uint256 internal constant IS_LOCKED = uint256(2);
 
-    uint256 public immutable DECOMPOSITION_TIME;
+    address public immutable PROCEEDS_DESTINATION;
+
     uint256 public immutable PRICE_PER_TOKEN_MINT;
     uint256 public immutable LAUNCH_TIMESTAMP;
-    uint256 public immutable PUBLIC_TIMESTAMP;
 
     uint256 internal _lockedStatus = IS_NOT_LOCKED;
 
@@ -32,40 +25,30 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
     string public baseURI;
 
-    mapping(uint256 => uint256) public burnDateFor;
+    // Contains first 21 molecule availabilities (12 bits each).
+    uint256 public COMPACT_STATE_1 = uint256(60087470205620319587750252891185586116542855063423969629534558109603704138);
 
-    bool public brewingEnabled;
+    // Contains next 42 molecule availabilities (6 bits each).
+    uint256 public COMPACT_STATE_2 = uint256(114873104402099400223353432978706708436353982610412083425164130989245597730);
 
-    mapping(address => bool) public consumingEnabledFor;
+    // Contains (right to left) 19 drug availabilities (8 bits each), total drugs available (11 bits), total molecules available (13 bits), and nonce (remaining 80 bits).
+    uint256 public COMPACT_STATE_3 = uint256(67212165445492353831982701316699907697777805738906362);
 
-    // Contains first 23 molecule availabilities (11 bits each).
-    uint256 internal COMPACT_STATE_1 = uint256(226273811297403348448206775794466307537893312132982461222617777606987601006);
-
-    // Contains second 23 molecule availabilities (11 bits each).
-    uint256 internal COMPACT_STATE_2 = uint256(14158944431179587954315785150066846781080893273451554704200278596944724000);
-
-    // Contains (left to right) last 17 molecule availabilities (11 bits each), total molecules available (12 bits), and molecule nonce (remaining 57 bits).
-    uint256 internal COMPACT_STATE_3 = uint256(682634909551063736698687712801884272452926746664400702148610);
-
-    // Contains (left to right) 19 drug availabilities (8 bits each), total drugs available (11 bits), and drug nonce (remaining 93 bits).
-    uint256 internal COMPACT_STATE_4 = uint256(6474154468114041304457969074349321919403682697978);
-
-    mapping(address => bool) public isPrivilegedAccount;
+    mapping(address => bool) public canClaimFreeWater;
 
     constructor (
         string memory baseURI_,
         address owner_,
-        uint256 decompositionTime_,
+        address proceedsDestination_,
         uint256 pricePerTokenMint_,
-        uint256 launchTimestamp_,
-        uint256 publicTimestamp_
+        uint256 launchTimestamp_
     ) ERC721("XSublimatio", "XSUB") {
         baseURI = baseURI_;
         owner = owner_;
-        DECOMPOSITION_TIME = decompositionTime_;
         PRICE_PER_TOKEN_MINT = pricePerTokenMint_;
         LAUNCH_TIMESTAMP = launchTimestamp_;
-        PUBLIC_TIMESTAMP = publicTimestamp_;
+
+        require((PROCEEDS_DESTINATION = proceedsDestination_) != address(0), "INVALID_PROCEEDS_DESTINATION");
     }
 
     modifier noReenter() {
@@ -94,18 +77,6 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         pendingOwner = address(0);
     }
 
-    function enableBrewing() external onlyOwner {
-        require(!brewingEnabled, "BREWING_ENABLED");
-        brewingEnabled = true;
-        emit BrewingEnabled();
-    }
-
-    function enableConsumingFor(address consumer_) external onlyOwner {
-        require(!consumingEnabledFor[consumer_], "CONSUMING_ENABLED");
-        consumingEnabledFor[consumer_] = true;
-        emit ConsumingEnabled(consumer_);
-    }
-
     function proposeOwnership(address newOwner_) external onlyOwner {
         emit OwnershipProposed(owner, pendingOwner = newOwner_);
     }
@@ -114,49 +85,43 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         emit BaseURISet(baseURI = baseURI_);
     }
 
-    function setPrivilegedAccounts(address[] memory accounts_) external onlyOwner {
+    function setPromotionAccounts(address[] memory accounts_) external onlyOwner {
         for (uint256 i; i < accounts_.length; ++i) {
             address account = accounts_[i];
-            isPrivilegedAccount[account] = true;
-            emit PrivilegedAccountSet(account);
+            canClaimFreeWater[account] = true;
+            emit PromotionAccountSet(account);
         }
     }
 
-    function unsetPrivilegedAccounts(address[] memory accounts_) external onlyOwner {
+    function unsetPromotionAccounts(address[] memory accounts_) external onlyOwner {
         for (uint256 i; i < accounts_.length; ++i) {
             address account = accounts_[i];
-            isPrivilegedAccount[account] = false;
-            emit PrivilegedAccountUnset(account);
+            canClaimFreeWater[account] = false;
+            emit PromotionAccountUnset(account);
         }
     }
 
-    function withdrawProceeds(uint256 amount_, address destination_) external onlyOwner {
-        require(_transferEther(destination_, amount_), "ETHER_TRANSFER_FAILED");
-        emit ProceedsWithdrawn(destination_, amount_);
+    function withdrawProceeds() external {
+        uint256 amount = address(this).balance;
+        require(_transferEther(PROCEEDS_DESTINATION, amount), "ETHER_TRANSFER_FAILED");
+        emit ProceedsWithdrawn(amount);
     }
 
     /**************************/
     /*** External Functions ***/
     /**************************/
 
-    function brew(uint256[] calldata tokenIds_, uint256 drugType_, address destination_) external returns (uint256 tokenId_) {
-        // Check that brewing is enabled.
-        require(brewingEnabled, "BREWING_NOT_YET_ENABLED");
-
+    function brew(uint256[] calldata molecules_, uint256 drugType_, address destination_) external returns (uint256 drug_) {
         // Check that drugType_ is valid.
         require(drugType_ < 19, "INVALID_DRUG_TYPE");
 
         // Cache relevant compact state from storage.
-        uint256 compactState4 = COMPACT_STATE_4;
+        uint256 compactState3 = COMPACT_STATE_3;
 
         // Check that drug is available.
-        require(_getDrugAvailability(compactState4, drugType_) != 0, "DRUG_NOT_AVAILABLE");
-
-        // Decrement it's availability, decrement the total amount of drugs available, and increment the drug nonce, and set storage.
-        COMPACT_STATE_4 = _decrementDrugAvailability(compactState4, drugType_);
+        require(_getDrugAvailability(compactState3, drugType_) != 0, "DRUG_NOT_AVAILABLE");
 
         uint256 specialWater;
-        uint256 specialWaterIndex;
 
         unchecked {
             // The specific special water moleculeType for this drug is 44 more than the drugType.
@@ -164,33 +129,38 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         }
 
         // Fetch the recipe from the pure function.
-        uint8[] memory recipe = getRecipe(drugType_);
+        uint8[] memory recipe = getRecipeOfDrug(drugType_);
 
         uint256 index;
 
         // For each moleculeType defined by the recipe, check that the provided moleculeType at that index is as expected, or the special water.
         while (index < recipe.length) {
-            uint256 tokenId = tokenIds_[index];
+            uint256 molecule = molecules_[index];
 
             // Check that the caller owns the token.
-            require(ownerOf(tokenId) == msg.sender, "NOT_OWNER");
+            require(ownerOf(molecule) == msg.sender, "NOT_OWNER");
 
             // Extract molecule type from token id.
-            uint256 moleculeType = tokenId >> 248;
+            uint256 moleculeType = molecule >> 93;
 
             // Check that the molecule type matches what the recipe calls for, or the molecule is the special water.
-            if (moleculeType == specialWater) {
-                // There is only 1 of molecule of a special water for a specific drug, so no need to worry about overlap here.
-                unchecked {
-                    // Save recipe index where a special water was used (1-based index, since a zero in this space would mean "none used").
-                    specialWaterIndex = index + 1;
-                }
-            } else {
-                require(recipe[index] == moleculeType, "INVALID_MOLECULE");
-            }
+            require(moleculeType == specialWater || recipe[index] == moleculeType, "INVALID_MOLECULE");
 
-            // Burn the molecule.
-            _burn(tokenId);
+            unchecked {
+                ++index;
+            }
+        }
+
+        index = 0;
+
+        address drugAsAddress = address(uint160(drug_ = _generateTokenId(drugType_ + 63, _generatePseudoRandomNumber(_getTokenNonce(compactState3)))));
+
+        // Make the drug itself own all the molecules used.
+        while (index < recipe.length) {
+            uint256 molecule = molecules_[index];
+
+            // Transfer the molecule.
+            _transfer(msg.sender, drugAsAddress, molecule);
 
             unchecked {
                 ++index;
@@ -198,72 +168,120 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         }
 
         // Put token type as the leftmost 8 bits in the token id and mint the drug NFT (drugType + 63).
-        _mint(destination_, tokenId_ = _generateTokenId(drugType_ + 63, specialWaterIndex, _generatePseudoRandomNumber(_getDrugNonce(compactState4))));
+        _mint(destination_, drug_);
+
+        // Decrement it's availability, decrement the total amount of drugs available, and increment the drug nonce, and set storage.
+        COMPACT_STATE_3 = _decrementDrugAvailability(compactState3, drugType_);
     }
 
-    function decompose(uint256 tokenId_) external {
-        // Extract drug type from token id.
-        uint256 drugType = (tokenId_ >> 248) - 63;
+    function claimWater(address destination_) external returns (uint256 molecule_) {
+        require(block.timestamp < LAUNCH_TIMESTAMP && canClaimFreeWater[msg.sender], "CANNOT_CLAIM");
 
-        // Extract index of the special water used in the recipe, if any. If is the second set of leftmost 8 bits in the tokenId.
-        uint256 specialWaterIndex = (tokenId_ >> 240) & type(uint8).max;
+        canClaimFreeWater[msg.sender] = false;
 
-        // Check the token is marked for burning and that the burn date has been reached/passed.
-        require(block.timestamp >= burnDateFor[tokenId_], "CANNOT_BURN_YET");
+        ( COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, molecule_ ) = _giveMolecule(COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, 0, destination_);
+    }
 
-        // Delete the burnDate for this token.
-        delete burnDateFor[tokenId_];
+    function decompose(uint256 drug_) external {
+        // Check that the caller owns the token.
+        require(ownerOf(drug_) == msg.sender, "NOT_OWNER");
+
+        uint256 drugType = (drug_ >> 93);
+
+        // Check that the token is a drug.
+        require(drugType >= 63 && drugType < 82, "NOT_DRUG");
+
+        drugType -= 63;
+
+        address drugAsAddress = address(uint160(drug_));
+        uint256 moleculeCount = balanceOf(drugAsAddress);
+
+        for (uint256 i = moleculeCount; i > 0;) {
+            uint256 molecule = tokenOfOwnerByIndex(drugAsAddress, --i);
+
+            if (i == 0) {
+                // Burn the water (which should be the first token).
+                _burn(molecule);
+                continue;
+            }
+
+            // Transfer the molecule to the owner.
+            _transfer(drugAsAddress, msg.sender, molecule);
+        }
+
+        unchecked {
+            // Increment the drugs' availability, increment the total amount of drugs available, and set storage.
+            COMPACT_STATE_3 = _incrementDrugAvailability(COMPACT_STATE_3, drugType);
+        }
+
+        // Burn the drug.
+        _burn(drug_);
+    }
+
+    function giveWaters(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner returns (uint256[][] memory molecules_) {
+        require(block.timestamp < LAUNCH_TIMESTAMP, "ALREADY_LAUNCHED");
 
         // Cache relevant compact states from storage.
         uint256 compactState1 = COMPACT_STATE_1;
         uint256 compactState2 = COMPACT_STATE_2;
         uint256 compactState3 = COMPACT_STATE_3;
 
-        uint256 specialWater;
+        molecules_ = new uint256[][](destinations_.length);
 
-        unchecked {
-            // The specific special water moleculeType for this drug is 44 more than the drugType.
-            specialWater = drugType + 44;
-        }
+        for (uint256 i; i < destinations_.length; ++i) {
+            uint256 count = amounts_[i];
 
-        // Fetch the recipe from the pure function.
-        uint8[] memory recipe = getRecipe(drugType);
-
-        uint256 index;
-
-        // For each moleculeType defined by the recipe, make the moleculeType at that index, or the special water if used, available again to be purchased.
-        while (index < recipe.length) {
-            uint256 moleculeType;
-
-            unchecked {
-                // Molecule type used in this drug, at this index in the recipe, was either a special water or whatever the recipe called for.
-                moleculeType = specialWaterIndex == (index + 1) ? specialWater : recipe[index];
-
-                ++index;
+            while (count > 0) {
+                ( compactState1, compactState2, compactState3, molecules_[i][--count] ) = _giveMolecule(compactState1, compactState2, compactState3, 0, destinations_[i]);
             }
-
-            // Increment the availability of this molecule and increment the total amount of available molecules.
-            // Give this pure function the relevant cached compact states and get back updated compact states.
-            ( compactState1, compactState2, compactState3 ) = _incrementMoleculeAvailability(compactState1, compactState2, compactState3, moleculeType);
         }
 
         // Set relevant storage state fromm the cache ones.
         COMPACT_STATE_1 = compactState1;
         COMPACT_STATE_2 = compactState2;
         COMPACT_STATE_3 = compactState3;
-
-        unchecked {
-            // Increment the drugs' availability, increment the total amount of drugs available, and set storage.
-            COMPACT_STATE_4 = _incrementDrugAvailability(COMPACT_STATE_4, drugType);
-        }
-
-        // Burn the drug.
-        _burn(tokenId_);
     }
 
-    function purchase(address destination_, uint256 quantity_, uint256 minQuantity_) external payable returns (uint256[] memory tokenIds_) {
+    function giveMolecules(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner returns (uint256[][] memory molecules_) {
+        require(block.timestamp < LAUNCH_TIMESTAMP, "ALREADY_LAUNCHED");
+
+        // Cache relevant compact states from storage.
+        uint256 compactState1 = COMPACT_STATE_1;
+        uint256 compactState2 = COMPACT_STATE_2;
+        uint256 compactState3 = COMPACT_STATE_3;
+
+        // Get the number of molecules available from compactState3.
+        uint256 availableMoleculeCount = _getMoleculesAvailable(compactState3);
+
+        molecules_ = new uint256[][](destinations_.length);
+
+        for (uint256 i; i < destinations_.length; ++i) {
+            uint256 count = amounts_[i];
+
+            while (count > 0) {
+                // Get a pseudo random number.
+                uint256 randomNumber = _generatePseudoRandomNumber(_getTokenNonce(compactState3));
+                uint256 moleculeType;
+
+                unchecked {
+                    // Provide _drawMolecule with the 3 relevant cached compact states, and a random number between 0 and availableMoleculeCount - 1, inclusively.
+                    // The result is newly updated cached compact states. Also, availableMoleculeCount is pre-decremented so that each random number is within correct bounds.
+                    ( compactState1, compactState2, compactState3, moleculeType ) = _drawMolecule(compactState1, compactState2, compactState3, _limitTo(randomNumber, --availableMoleculeCount));
+
+                    // Generate a token id from the moleculeType and randomNumber (saving it in the array of token IDs) and mint the molecule NFT.
+                    _mint(destinations_[i], molecules_[i][--count] = _generateTokenId(moleculeType, randomNumber));
+                }
+            }
+        }
+
+        // Set relevant storage state fromm the cache ones.
+        COMPACT_STATE_1 = compactState1;
+        COMPACT_STATE_2 = compactState2;
+        COMPACT_STATE_3 = compactState3;
+    }
+
+    function purchase(address destination_, uint256 quantity_, uint256 minQuantity_) external payable returns (uint256[] memory molecules_) {
         require(block.timestamp >= LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
-        require(block.timestamp >= PUBLIC_TIMESTAMP || isPrivilegedAccount[msg.sender], "NOT_PUBLIC_YET");
 
         // Cache relevant compact states from storage.
         uint256 compactState1 = COMPACT_STATE_1;
@@ -284,15 +302,20 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
             totalCost = PRICE_PER_TOKEN_MINT * count;
         }
 
-        // Revert if insufficient ether was provided.
+        // Require that enough ether was provided,
         require(msg.value >= totalCost, "INCORRECT_VALUE");
 
+        if (msg.value > totalCost) {
+            // If extra, require that it is successfully returned to the caller.
+            require(_transferEther(msg.sender, msg.value - totalCost), "TRANSFER_FAILED");
+        }
+
         // Initialize the array of token IDs to a length of the nfts to be purchased.
-        tokenIds_ = new uint256[](count);
+        molecules_ = new uint256[](count);
 
         while (count > 0) {
             // Get a pseudo random number.
-            uint256 randomNumber = _generatePseudoRandomNumber(_getMoleculeNonce(compactState3));
+            uint256 randomNumber = _generatePseudoRandomNumber(_getTokenNonce(compactState3));
             uint256 moleculeType;
 
             unchecked {
@@ -301,7 +324,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
                 ( compactState1, compactState2, compactState3, moleculeType ) = _drawMolecule(compactState1, compactState2, compactState3, _limitTo(randomNumber, --availableMoleculeCount));
 
                 // Generate a token id from the moleculeType and randomNumber (saving it in the array of token IDs) and mint the molecule NFT.
-                _mint(destination_, tokenIds_[--count] = _generateTokenId(moleculeType, 0, randomNumber));
+                _mint(destination_, molecules_[--count] = _generateTokenId(moleculeType, randomNumber));
             }
         }
 
@@ -309,32 +332,6 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         COMPACT_STATE_1 = compactState1;
         COMPACT_STATE_2 = compactState2;
         COMPACT_STATE_3 = compactState3;
-
-        // Require that exact ether was provided, or that extra ether is successfully returned to the caller,
-        require(msg.value == totalCost || _transferEther(msg.sender, msg.value - totalCost), "ETHER_TRANSFER_FAILED");
-    }
-
-    function startDecomposition(uint256 tokenId_) external {
-        // Check that consuming is enabled at the caller.
-        require(consumingEnabledFor[msg.sender], "CONSUMER_NOT_ENABLED");
-
-        // Check that the caller owns the token.
-        require(ownerOf(tokenId_) == msg.sender, "NOT_OWNER");
-
-        // Extract drug type from token id and check that it is in fact a drug.
-        require((tokenId_ >> 248) >= 63, "NOT_DRUG");
-
-        unchecked {
-            // Add the token to `burnDateFor` so it can be burned after DECOMPOSITION_TIME, and emit the event.
-            emit DecompositionStarted(
-                msg.sender,
-                tokenId_,
-                burnDateFor[tokenId_] = block.timestamp + DECOMPOSITION_TIME
-            );
-        }
-
-        // Take possession of the token.
-        _transfer(msg.sender, address(this), tokenId_);
     }
 
     /***************/
@@ -352,25 +349,36 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         return bytes(baseURICache).length > 0 ? string(abi.encodePacked(baseURICache, "info")) : "";
     }
 
-    function drugsAvailable() external view returns (uint256 drugsAvailable_) {
-        drugsAvailable_ = _getDrugsAvailable(COMPACT_STATE_4);
-    }
-
     function drugAvailabilities() public view returns (uint256[19] memory availabilities_) {
+        // Cache relevant compact states from storage.
+        uint256 compactState3 = COMPACT_STATE_3;
+
         for (uint256 i; i < 19; ++i) {
-            availabilities_[i] = _getDrugAvailability(COMPACT_STATE_4, i);
+            availabilities_[i] = _getDrugAvailability(compactState3, i);
         }
     }
 
-    function getDrugAvailability(uint256 drugType_) external view returns (uint256 availability_) {
-        availability_ = _getDrugAvailability(COMPACT_STATE_4, drugType_);
+    function drugsAvailable() external view returns (uint256 drugsAvailable_) {
+        drugsAvailable_ = _getDrugsAvailable(COMPACT_STATE_3);
     }
 
-    function getMoleculeAvailability(uint256 moleculeType_) external view returns (uint256 availability_) {
-        availability_ = _getMoleculeAvailability(COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, moleculeType_);
+    function getAvailabilityOfDrug(uint256 drugType_) external view returns (uint256 availability_) {
+        availability_ = _getDrugAvailability(COMPACT_STATE_3, drugType_);
     }
 
-    function getRecipe(uint256 drugType_) public pure returns(uint8[] memory recipe_) {
+    function getAvailabilityOfMolecule(uint256 moleculeType_) external view returns (uint256 availability_) {
+        availability_ = _getMoleculeAvailability(COMPACT_STATE_1, COMPACT_STATE_2, moleculeType_);
+    }
+
+    function getDrugContainingMolecule(uint256 molecule_) external view returns (uint256 drug_) {
+        drug_ = uint256(uint160(ownerOf(molecule_)));
+    }
+
+    function getMoleculesWithinDrug(uint256 drug_) external view returns (uint256[] memory molecules_) {
+        molecules_ = tokensOfOwner(address(uint160(drug_)));
+    }
+
+    function getRecipeOfDrug(uint256 drugType_) public pure returns (uint8[] memory recipe_) {
         if (drugType_ <= 7) {
             recipe_ = new uint8[](2);
 
@@ -476,12 +484,16 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     }
 
     function moleculeAvailabilities() public view returns (uint256[63] memory availabilities_) {
+        // Cache relevant compact states from storage.
+        uint256 compactState1 = COMPACT_STATE_1;
+        uint256 compactState2 = COMPACT_STATE_2;
+
         for (uint256 i; i < 63; ++i) {
-            availabilities_[i] = _getMoleculeAvailability(COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, i);
+            availabilities_[i] = _getMoleculeAvailability(compactState1, compactState2, i);
         }
     }
 
-    function tokensOfOwner(address owner_) external view returns (uint256[] memory tokenIds_) {
+    function tokensOfOwner(address owner_) public view returns (uint256[] memory tokenIds_) {
         uint256 balance = balanceOf(owner_);
 
         tokenIds_ = new uint256[](balance);
@@ -505,13 +517,31 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     /*** Internal Functions ***/
     /**************************/
 
-    function _decrementDrugAvailability(uint256 compactState4_, uint256 drugType_) internal pure returns (uint256 newCompactState4_) {
+    function _beforeTokenTransfer(address from_, address to_, uint256 tokenId_) internal override {
+        require(block.timestamp >= LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
+        super._beforeTokenTransfer(from_, to_, tokenId_);
+    }
+
+    function _clearBits(uint256 input_, uint256 mask_, uint256 shift_) internal pure returns (uint256 output_) {
+        // Clear out bits in input with mask.
+        output_ = (input_ & ~(mask_ << shift_));
+    }
+
+    function _constrainBits(uint256 input_, uint256 mask_, uint256 shift_, uint256 max_) internal pure returns (uint256 output_) {
+        // Clear out bits in input with mask, and replace them with the removed bits constrained to some max.
+        output_ = _clearBits(input_, mask_, shift_) | ((((input_ >> shift_) & mask_) % max_) << shift_);
+    }
+
+    function _decrementDrugAvailability(uint256 compactState3_, uint256 drugType_) internal pure returns (uint256 newCompactState3_) {
         unchecked {
-            // Increment the drug nonce, which is located left of 19 8-bit individual drug availabilities and an 11-bit total drug availability.
+            // Increment the token nonce, which is located left of 19 8-bit individual drug availabilities, an 11-bit total drug availability, and a 13-bit total molecule availability.
             // Decrement the total drug availability, which is located left of 19 8-bit individual drug availabilities.
             // Decrement the corresponding availability of a specific drug.
-            // Clearer: newCompactState4_ = compactState4_ + (1 << (19 * 8 + 11)) - (1 << (19 * 8)) - (1 << (drugType_ * 8));
-            newCompactState4_ = compactState4_ + 11686304107876399506105245517852466176701929357312 - (1 << (drugType_ * 8));
+            // Clearer: newCompactState3_ = compactState4_
+            //            + (1 << (19 * 8 + 11 + 13))
+            //            - (1 << (19 * 8))
+            //            - (1 << (drugType_ * 8));
+            newCompactState3_ = compactState3_ + 95780965595127282823557164963750446178190649605488640 - (1 << (drugType_ * 8));
         }
     }
 
@@ -522,17 +552,17 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         uint256 moleculeType_
     ) internal pure returns (uint256 newCompactState1_, uint256 newCompactState2_, uint256 newCompactState3_) {
         unchecked {
-            // Increment the molecule nonce, which is located left of 17 11-bit individual molecule availabilities and a 12-bit total molecule availability.
-            // Decrement the total molecule availability, which is located left of 17 11-bit individual molecule availabilities.
-            // Clearer: compactState3_ = compactState3_ + (1 << (17 * 11 + 12)) - (1 << (17 * 11));
-            compactState3_ = compactState3_ + 803272862700264303997111177751106061685598298283756916572160;
+            // Increment the token nonce, which is located left of 19 8-bit individual drug availabilities, an 11-bit total drug availability, and a 13-bit total molecule availability.
+            // Decrement the total molecule availability, which is located left of 19 8-bit individual drug availabilities and an 11-bit total drug availability.
+            // Clearer: compactState3_ = compactState3_
+            //            + (1 << (19 * 8 + 11 + 13))
+            //            - (1 << (19 * 8 + 11));
+            compactState3_ = compactState3_ + 95769279291019406424051059718232593712013947676131328;
 
             // Decrement the corresponding availability of a specific molecule, in a compact state given the molecule type.
-            if (moleculeType_ <= 22) return (compactState1_ - (1 << ((moleculeType_ % 23) * 11)), compactState2_, compactState3_);
+            if (moleculeType_ < 21) return (compactState1_ - (1 << (moleculeType_ * 12)), compactState2_, compactState3_);
 
-            if (moleculeType_ <= 45) return (compactState1_, compactState2_ - (1 << ((moleculeType_ % 23) * 11)), compactState3_);
-
-            return (compactState1_, compactState2_, compactState3_ - (1 << ((moleculeType_ % 23) * 11)));
+            return (compactState1_, compactState2_ - (1 << ((moleculeType_ - 21) * 6)), compactState3_);
         }
     }
 
@@ -547,7 +577,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         while (moleculeType_ < 63) {
             unchecked {
                 // Increment the offset by the availability of the molecule defined by moleculeType, and break if randomNumber is less than it.
-                if (randomNumber_ < (offset += _getMoleculeAvailability(compactState1_, compactState2_, compactState3_, moleculeType_))) break;
+                if (randomNumber_ < (offset += _getMoleculeAvailability(compactState1_, compactState2_, moleculeType_))) break;
 
                 // If not (i.e. randomNumber does not corresponding to picking moleculeType), increment the moleculeType and try again.
                 ++moleculeType_;
@@ -561,14 +591,14 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
     function _generatePseudoRandomNumber(uint256 nonce_) internal view returns (uint256 pseudoRandomNumber_) {
         unchecked {
-            pseudoRandomNumber_ = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, nonce_)));
+            pseudoRandomNumber_ = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, nonce_, gasleft())));
         }
     }
 
-    function _generateTokenId(uint256 type_, uint256 specialWaterIndex_, uint256 pseudoRandomNumber_) internal pure returns (uint256 tokenId_) {
+    function _generateTokenId(uint256 type_, uint256 pseudoRandomNumber_) internal pure returns (uint256 tokenId_) {
         unchecked {
-            // First 8 bits are the type, next 8 bits are the special water index, and last 136 bits are from the pseudo random number.
-            tokenId_ = (type_ << 248) | (specialWaterIndex_ << 240) | (pseudoRandomNumber_ >> 120);
+            // In right-most 100 bits, first 7 bits are the type and last 93 bits are from the pseudo random number.
+            tokenId_ = (type_ << 93) | (pseudoRandomNumber_ >> 163);
         }
 
         // From right to left:
@@ -577,103 +607,95 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         //  - 16 bits are to be used as an unsigned 16-bit for sat.
         //  - 16 bits are to be used as an unsigned 16-bit for hue.
 
-        //  - 8 bits are to be used for 2 lighting types.
-        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16, 2);
+        if (type_ > 62) {
+            tokenId_ = _clearBits(tokenId_, 1, 32 + 16 + 16 + 16);
+            tokenId_ = _clearBits(tokenId_, 3, 32 + 16 + 16 + 16 + 1);
+        } else {
+            //  - 1 bit is to be used for 2 lighting types.
+            tokenId_ = _constrainBits(tokenId_, 1, 32 + 16 + 16 + 16, 2);
 
-        //  - 8 bits are to be used for 4 molecule integrity types.
-        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8, 4);
+            //  - 2 bits are to be used for 4 molecule integrity types.
+            tokenId_ = _constrainBits(tokenId_, 3, 32 + 16 + 16 + 16 + 1, 4);
+        }
 
-        //  - 8 bits are to be used for 3 deformation types.
-        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8, 3);
+        //  - 2 bits are to be used for 3 deformation types.
+        tokenId_ = _constrainBits(tokenId_, 3, 32 + 16 + 16 + 16 + 1 + 2, 3);
 
-        //  - 8 bits are to be used for 2 color shift types.
-        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8 + 8, 2);
+        //  - 1 bit is to be used for 2 color shift types.
+        tokenId_ = _constrainBits(tokenId_, 1, 32 + 16 + 16 + 16 + 1 + 2 + 2, 2);
 
-        //  - 8 bits are to be used for 3 stripe amount types.
-        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8 + 8 + 8, 3);
+        //  - 2 bits are to be used for 3 stripe amount types.
+        tokenId_ = _constrainBits(tokenId_, 3, 32 + 16 + 16 + 16 + 1 + 2 + 2 + 1, 3);
 
-        //  - 8 bits are to be used for 3 blob types.
-        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8 + 8 + 8 + 8, 3);
+        //  - 2 bits are to be used for 3 blob types.
+        tokenId_ = _constrainBits(tokenId_, 3, 32 + 16 + 16 + 16 + 1 + 2 + 2 + 1 + 2, 3);
 
-        //  - 8 bits are to be used for 6 palette types.
-        tokenId_ = _constrainBits(tokenId_, type(uint8).max, 32 + 16 + 16 + 16 + 8 + 8 + 8 + 8 + 8 + 8, 6);
+        //  - 3 bits are to be used for 6 palette types.
+        tokenId_ = _constrainBits(tokenId_, 7, 32 + 16 + 16 + 16 + 1 + 2 + 2 + 1 + 2 + 2, 6);
     }
 
-    function _constrainBits(uint256 input_, uint256 mask_, uint256 shift_, uint256 max_) internal pure returns (uint256 output_) {
-        // Clear out bits in input with mask, and replace them with the removed bits constrained to some max.
-        output_ = (input_ & ~(mask_ << shift_)) | ((((input_ >> shift_) & mask_) % max_) << shift_);
-    }
-
-    function _getDrugAvailability(uint256 compactState4_, uint256 drugType_) internal pure returns (uint256 availability_) {
+    function _getDrugAvailability(uint256 compactState3_, uint256 drugType_) internal pure returns (uint256 availability_) {
         unchecked {
-            availability_ = (compactState4_ >> (drugType_ * 8)) & 255;
+            availability_ = (compactState3_ >> (drugType_ * 8)) & 255;
         }
     }
 
-    function _getDrugNonce(uint256 compactState4_) internal pure returns (uint256 drugNonce_) {
-        // Shift out 19 8-bit values (19 molecule availabilities) and an 11-bit value (total drugs available).
-        drugNonce_ = compactState4_ >> 163;
-    }
-
-    function _getDrugsAvailable(uint256 compactState4_) internal pure returns (uint256 drugsAvailable_) {
+    function _getDrugsAvailable(uint256 compactState3_) internal pure returns (uint256 drugsAvailable_) {
         // Shift out 19 8-bit values (19 drug availabilities) from the right of the compact state, and mask as 11 bits.
-        drugsAvailable_ = (compactState4_ >> 152) & 2047;
+        drugsAvailable_ = (compactState3_ >> 152) & 2047;
     }
 
     function _getMoleculeAvailability(
         uint256 compactState1_,
         uint256 compactState2_,
-        uint256 compactState3_,
         uint256 moleculeType_
     ) internal pure returns (uint256 availability_) {
         unchecked {
-            availability_ =
-                (
-                    (
-                        moleculeType_ <= 22 ? compactState1_ : moleculeType_ <= 45 ? compactState2_ : compactState3_
-                    ) >> (
-                        (moleculeType_ % 23) * 11
-                    )
-                ) & 2047;
-        }
-    }
+            if (moleculeType_ < 21) return (compactState1_ >> (moleculeType_ * 12)) & 4095;
 
-    function _getMoleculeNonce(uint256 compactState3_) internal pure returns (uint256 moleculeNonce_) {
-        // Shift out 17 11-bit values (17 molecule availabilities) and a 12-bit value (total molecules available).
-        moleculeNonce_ = compactState3_ >> 199;
+            return (compactState2_ >> ((moleculeType_ - 21) * 6)) & 63;
+        }
     }
 
     function _getMoleculesAvailable(uint256 compactState3_) internal pure returns (uint256 moleculesAvailable_) {
-        // Shift out 17 11-bit values (17 molecule availabilities) from the right of the compact state, and mask as 12 bits.
-        moleculesAvailable_ = (compactState3_ >> 187) & 4095;
+        // Shift out 19 8-bit values (19 drug availabilities) and an 11-bit value (total drugs available), and mask as 13 bits.
+        moleculesAvailable_ = (compactState3_ >> 163) & 8191;
     }
 
-    function _incrementDrugAvailability(uint256 compactState4_, uint256 drugType_) internal pure returns (uint256 newCompactState4_) {
-        unchecked {
-            // Increment the total drug availability, which is located left of 19 8-bit individual drug availabilities.
-            // Increment the corresponding availability of a specific drug.
-            // Clearer: newCompactState4_ = compactState4_ + (1 << (19 * 8)) + (1 << (drugType_ * 8));
-            newCompactState4_ = compactState4_ + 5708990770823839524233143877797980545530986496 + (1 << (drugType_ * 8));
-        }
+    function _getTokenNonce(uint256 compactState3_) internal pure returns (uint256 moleculeNonce_) {
+        // Shift out 19 8-bit values (19 drug availabilities), an 11-bit value (total drugs available), and a 13-bit value (total molecules available).
+        moleculeNonce_ = compactState3_ >> 176;
     }
 
-    function _incrementMoleculeAvailability(
+    function _giveMolecule(
         uint256 compactState1_,
         uint256 compactState2_,
         uint256 compactState3_,
-        uint256 moleculeType_
-    ) internal pure returns (uint256 newCompactState1_, uint256 newCompactState2_, uint256 newCompactState3_) {
+        uint256 moleculeType_,
+        address destination_
+    ) internal returns (uint256 newCompactState1_, uint256 newCompactState2_, uint256 newCompactState3_, uint256 molecule_) {
+        require(_getMoleculeAvailability(compactState1_, compactState2_, moleculeType_) > 0, "NO_AVAILABILITY");
+
+        // Get a pseudo random number.
+        uint256 randomNumber = _generatePseudoRandomNumber(_getTokenNonce(compactState3_));
+
+        // Decrement the availability of the molecule, decrement the total amount of available molecules, and increment some molecule nonce.
+        // Give this pure function the relevant cached compact states and get back updated compact states.
+        // Set relevant storage state fromm the cache ones.
+        ( newCompactState1_, newCompactState2_, newCompactState3_ ) = _decrementMoleculeAvailability(compactState1_, compactState2_, compactState3_, moleculeType_);
+
+        // Generate a token id from the moleculeType and randomNumber (saving it in the array of token IDs) and mint the molecule NFT.
+        _mint(destination_, molecule_ = _generateTokenId(moleculeType_, randomNumber));
+    }
+
+    function _incrementDrugAvailability(uint256 compactState3_, uint256 drugType_) internal pure returns (uint256 newCompactState3_) {
         unchecked {
-            // Increment the total molecule availability, which is located left of 17 11-bit individual molecule availabilities.
-            // Clearer: compactState3_ = compactState3_ + (1 << (17 * 11));
-            compactState3_ = compactState3_ + 196159429230833773869868419475239575503198607639501078528;
-
-            // Increment the corresponding availability of a specific molecule, in a compact state given the molecule type.
-            if (moleculeType_ <= 22) return (compactState1_ + (1 << ((moleculeType_ % 23) * 11)), compactState2_, compactState3_);
-
-            if (moleculeType_ <= 45) return (compactState1_, compactState2_ + (1 << ((moleculeType_ % 23) * 11)), compactState3_);
-
-            return (compactState1_, compactState2_, compactState3_ + (1 << ((moleculeType_ % 23) * 11)));
+            // Increment the total drug availability, which is located left of 19 8-bit individual drug availabilities.
+            // Increment the corresponding availability of a specific drug.
+            // Clearer: newCompactState3_ = compactState3_
+            //            + (1 << (19 * 8))
+            //            + (1 << (drugType_ * 8));
+            newCompactState3_ = compactState3_ + 5708990770823839524233143877797980545530986496 + (1 << (drugType_ * 8));
         }
     }
 

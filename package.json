@@ -1,6 +1,6 @@
 {
     "name": "@faction-nfts/xsublimatio-smart-contracts",
-    "version": "0.7.9",
+    "version": "0.8.0",
     "description": "XSublimatio smart contracts and Typechain bindings",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
@@ -53,7 +53,7 @@
         "@commitlint/config-conventional": "^13.1.0",
         "@nomiclabs/hardhat-ethers": "^2.0.4",
         "@nomiclabs/hardhat-waffle": "^2.0.2",
-        "@openzeppelin/contracts": "^4.4.2",
+        "@openzeppelin/contracts": "^4.7.0",
         "@typechain/ethers-v5": "^9.0.0",
         "@typechain/hardhat": "^4.0.0",
         "@typechain/web3-v1": "^5.0.0",

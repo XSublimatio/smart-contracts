@@ -17,9 +17,51 @@ import { XSublimatio__factory, XSublimatio } from '../src/ethers';
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const checkInvariants = async (instance: XSublimatio) => {
+    const compactState3 = await instance.COMPACT_STATE_3();
+    const drugsAvailable = compactState3.shr(152).mask(11);
+    const moleculesAvailable = compactState3.shr(163).mask(13);
+
+    const [moleculeAvailabilities, drugAvailabilities] = await instance.availabilities();
+
+    const { check: check1, count: count1 } = moleculeAvailabilities.reduce(
+        ({ check, count }, availability, index) => {
+            return {
+                check: check && availability.toNumber() <= MOLECULE_MAX_SUPPLIES[index],
+                count: count + availability.toNumber(),
+            };
+        },
+        { check: true, count: 0 }
+    );
+
+    if (!check1) return false;
+
+    if (count1 > MOLECULE_MAX_SUPPLY) return false;
+
+    if (count1 !== moleculesAvailable.toNumber()) return false;
+
+    const { check: check2, count: count2 } = drugAvailabilities.reduce(
+        ({ check, count }, availability, index) => {
+            return {
+                check: check && availability.toNumber() <= DRUG_MAX_SUPPLIES[index],
+                count: count + availability.toNumber(),
+            };
+        },
+        { check: true, count: 0 }
+    );
+
+    if (!check2) return false;
+
+    if (count2 > DRUG_MAX_SUPPLY) return false;
+
+    if (count2 !== drugsAvailable.toNumber()) return false;
+
+    return true;
+};
+
 describe('XSublimatio', () => {
-    const decompositionTime = 10 * 86400;
     const pricePerTokenMint = ethers.utils.parseUnits('0.2', 'ether');
+    const contractURI = 'http://127.0.0.1:8080/';
 
     let contract: XSublimatio;
     let alice: Signer;
@@ -31,28 +73,59 @@ describe('XSublimatio', () => {
 
         const contractFactory = new XSublimatio__factory(alice);
 
-        contract = await contractFactory.deploy(
-            'http://127.0.0.1:8080/',
-            await alice.getAddress(),
-            decompositionTime,
-            pricePerTokenMint,
-            0,
-            0
-        );
-        await contract.deployed();
+        contract = await contractFactory.deploy(contractURI, await alice.getAddress(), await bob.getAddress(), pricePerTokenMint, 0);
 
+        await contract.deployed();
+    });
+
+    it('Correctly initialized', async () => {
         expect(contract.address).to.properAddress;
-        expect(await contract.baseURI()).to.equal('http://127.0.0.1:8080/');
+
         expect(await contract.name()).to.equal('XSublimatio');
         expect(await contract.symbol()).to.equal('XSUB');
+        expect(await contract.totalSupply()).to.equal(0);
+
+        expect(await contract.PROCEEDS_DESTINATION()).to.equal(await bob.getAddress());
+        expect(await contract.PRICE_PER_TOKEN_MINT()).to.equal(pricePerTokenMint);
+        expect(await contract.LAUNCH_TIMESTAMP()).to.equal(0);
+
+        expect(await contract.owner()).to.equal(await alice.getAddress());
+        expect(await contract.pendingOwner()).to.equal(ethers.constants.AddressZero);
+        expect(await contract.baseURI()).to.equal('http://127.0.0.1:8080/');
+
+        expect(await contract.COMPACT_STATE_1()).to.equal('60087470205620319587750252891185586116542855063423969629534558109603704138');
+        expect(await contract.COMPACT_STATE_2()).to.equal('114873104402099400223353432978706708436353982610412083425164130989245597730');
+        expect(await contract.COMPACT_STATE_3()).to.equal('67212165445492353831982701316699907697777805738906362');
+
+        const [moleculeAvailabilities, drugAvailabilities] = await contract.availabilities();
+
+        expect(moleculeAvailabilities.map((x) => x.toNumber())).to.deep.equal(MOLECULE_MAX_SUPPLIES);
+        expect(drugAvailabilities.map((x) => x.toNumber())).to.deep.equal(DRUG_MAX_SUPPLIES);
+
+        expect(await contract.contractURI()).to.equal(`${contractURI}info`);
         expect(await contract.drugsAvailable()).to.equal(1134);
-        expect(await contract.moleculesAvailable()).to.equal(3480);
+
+        for (let i = 0; i < 19; ++i) {
+            expect(await contract.getAvailabilityOfDrug(i)).to.equal(DRUG_MAX_SUPPLIES[i]);
+        }
+
+        for (let i = 0; i < 63; ++i) {
+            expect(await contract.getAvailabilityOfMolecule(i)).to.equal(MOLECULE_MAX_SUPPLIES[i]);
+        }
+
+        for (let i = 0; i < 19; ++i) {
+            expect(await contract.getRecipeOfDrug(i)).to.deep.equal(RECIPES[i]);
+        }
+
+        expect(await contract.moleculesAvailable()).to.equal(5748);
+
+        expect(await checkInvariants(contract)).to.be.true;
     });
 
     it('Has proper helpers', async () => {
-        expect(MOLECULE_MAX_SUPPLY).to.equal(3480);
+        expect(MOLECULE_MAX_SUPPLY).to.equal(5748);
 
-        expect(MOLECULE_MAX_SUPPLIES.reduce((acc, ele) => acc + ele)).to.equal(3480);
+        expect(MOLECULE_MAX_SUPPLIES.reduce((acc, ele) => acc + ele)).to.equal(5748);
 
         expect(DRUG_MAX_SUPPLY).to.equal(1134);
 
@@ -92,7 +165,7 @@ describe('XSublimatio', () => {
 
         it('Cannot purchase molecules if cannot fullfil request', async () => {
             const aliceAddress = await alice.getAddress();
-            await expect(contract.purchase(aliceAddress, 3481, 3481)).to.be.revertedWith('CANNOT_FULLFIL_REQUEST');
+            await expect(contract.purchase(aliceAddress, 5749, 5749)).to.be.revertedWith('CANNOT_FULLFIL_REQUEST');
         });
 
         it('Cannot purchase molecules if insufficient funds provided', async () => {
@@ -107,7 +180,7 @@ describe('XSublimatio', () => {
             const tx = await (await contract.purchase(aliceAddress, 5, 5, { value })).wait();
 
             expect(await contract.totalSupply()).to.equal(5);
-            expect(await contract.moleculesAvailable()).to.equal(3480 - 5);
+            expect(await contract.moleculesAvailable()).to.equal(5748 - 5);
             expect(await contract.balanceOf(aliceAddress)).to.equal(5);
 
             const tokenIds = await Promise.all(
@@ -138,6 +211,8 @@ describe('XSublimatio', () => {
             const totalMoleculeAvailability = availabilities.reduce((acc, item) => acc + parseInt(item.toString()), 0);
 
             expect(totalMoleculeAvailability).to.equal(MOLECULE_MAX_SUPPLY - tokenIds.length);
+
+            expect(await checkInvariants(contract)).to.be.true;
         });
 
         it('Can purchase a batch of 60 molecules', async () => {
@@ -146,7 +221,7 @@ describe('XSublimatio', () => {
             const tx = await (await contract.purchase(aliceAddress, 60, 60, { value })).wait();
 
             expect(await contract.totalSupply()).to.equal(60);
-            expect(await contract.moleculesAvailable()).to.equal(3480 - 60);
+            expect(await contract.moleculesAvailable()).to.equal(5748 - 60);
             expect(await contract.balanceOf(aliceAddress)).to.equal(60);
 
             const tokenIds = await Promise.all(
@@ -177,38 +252,42 @@ describe('XSublimatio', () => {
             const totalMoleculeAvailability = availabilities.reduce((acc, item) => acc + parseInt(item.toString()), 0);
 
             expect(totalMoleculeAvailability).to.equal(MOLECULE_MAX_SUPPLY - tokenIds.length);
+
+            expect(await checkInvariants(contract)).to.be.true;
         });
 
         it('Can purchase all molecules in batchers of 120', async () => {
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint.mul(120);
 
-            const purchases = 3480 / 120;
+            const purchases = Math.ceil(5748 / 120);
 
             for (let i = 1; i <= purchases; ++i) {
                 process.stdout.write(`\r        Purchase ${i} of ${purchases}`);
-                const tx = await (await contract.purchase(aliceAddress, 120, 120, { value })).wait();
-                expect(tx.events?.length).to.equal(120);
+                const tx = await (await contract.purchase(aliceAddress, 120, 0, { value })).wait();
+                expect(tx.events?.length).to.equal(i == purchases ? 5748 % 120 : 120);
+
+                if (i % 8 === 0) {
+                    expect(await checkInvariants(contract)).to.be.true;
+                }
             }
 
             process.stdout.write(`\r                                                                                                    `);
             process.stdout.write(`\r`);
 
-            expect(await contract.totalSupply()).to.equal(3480);
+            expect(await contract.totalSupply()).to.equal(5748);
             expect(await contract.moleculesAvailable()).to.equal(0);
-            expect(await contract.balanceOf(aliceAddress)).to.equal(3480);
+            expect(await contract.balanceOf(aliceAddress)).to.equal(5748);
 
             for (let moleculeType = 0; moleculeType < 63; ++moleculeType) {
-                expect(await contract.getMoleculeAvailability(moleculeType)).to.equal(0);
+                expect(await contract.getAvailabilityOfMolecule(moleculeType)).to.equal(0);
             }
+
+            expect(await checkInvariants(contract)).to.be.true;
         }).timeout(1_000_000);
     });
 
     describe('purchase and brew', () => {
-        beforeEach(async () => {
-            await (await contract.enableBrewing()).wait();
-        });
-
         it('Cannot brew an invalid drug type', async () => {
             const aliceAddress = await alice.getAddress();
             await expect(contract.brew([0, 1, 2], 19, aliceAddress)).to.be.revertedWith('INVALID_DRUG_TYPE');
@@ -279,18 +358,19 @@ describe('XSublimatio', () => {
 
                 moleculesConsumed += tokenIds.length;
 
+                const drugToken = tx.events?.[recipe.length * 2].args?.tokenId;
+
                 tx.events?.forEach(({ event, args }, eventIndex) => {
                     if (eventIndex == recipe.length * 2) {
                         expect(event).to.equal('Transfer');
                         expect(args?.from).to.equal(ethers.constants.AddressZero);
                         expect(args?.to).to.equal(aliceAddress);
 
-                        const { globalType, type, category, specialWaterIndex } = getTokenFromId(args?.tokenId);
+                        const { globalType, type, category } = getTokenFromId(args?.tokenId);
 
                         expect(globalType).to.be.equal(drugType + 63);
                         expect(type).to.equal(drugType);
                         expect(category).to.equal('drug');
-                        expect(specialWaterIndex).to.be.undefined;
                         return;
                     }
 
@@ -305,16 +385,16 @@ describe('XSublimatio', () => {
 
                     expect(event).to.equal('Transfer');
                     expect(args?.from).to.equal(aliceAddress);
-                    expect(args?.to).to.equal(ethers.constants.AddressZero);
+                    expect(BigNumber.from(args?.to)).to.equal(drugToken);
                 });
             }
 
             process.stdout.write(`\r                                                                                                    `);
             process.stdout.write(`\r`);
 
-            expect(await contract.totalSupply()).to.equal(moleculesMinted - moleculesConsumed + 19);
+            expect(await contract.totalSupply()).to.equal(moleculesMinted + 19);
             expect(await contract.drugsAvailable()).to.equal(1134 - 19);
-            expect(await contract.moleculesAvailable()).to.equal(3480 - moleculesMinted);
+            expect(await contract.moleculesAvailable()).to.equal(5748 - moleculesMinted);
             expect(await contract.balanceOf(aliceAddress)).to.equal(moleculesMinted - moleculesConsumed + 19);
         }).timeout(1_000_000);
 
@@ -379,18 +459,19 @@ describe('XSublimatio', () => {
 
                 moleculesConsumed += tokenIds.length;
 
+                const drugToken = tx.events?.[recipe.length * 2].args?.tokenId;
+
                 tx.events?.forEach(({ event, args }, eventIndex) => {
                     if (eventIndex == recipe.length * 2) {
                         expect(event).to.equal('Transfer');
                         expect(args?.from).to.equal(ethers.constants.AddressZero);
                         expect(args?.to).to.equal(aliceAddress);
 
-                        const { globalType, type, category, specialWaterIndex } = getTokenFromId(args?.tokenId);
+                        const { globalType, type, category } = getTokenFromId(args?.tokenId);
 
                         expect(globalType).to.be.equal(drugType + 63);
                         expect(type).to.be.equal(drugType);
                         expect(category).to.equal('drug');
-                        expect(specialWaterIndex).to.equal(recipe.length - 1);
                         return;
                     }
 
@@ -405,56 +486,41 @@ describe('XSublimatio', () => {
 
                     expect(event).to.equal('Transfer');
                     expect(args?.from).to.equal(aliceAddress);
-                    expect(args?.to).to.equal(ethers.constants.AddressZero);
+                    expect(BigNumber.from(args?.to)).to.equal(drugToken);
                 });
+
+                expect(await checkInvariants(contract)).to.be.true;
             }
 
             process.stdout.write(`\r                                                                                                    `);
             process.stdout.write(`\r`);
 
-            expect(await contract.totalSupply()).to.equal(moleculesMinted - moleculesConsumed + 11);
+            expect(await contract.totalSupply()).to.equal(moleculesMinted + 11);
             expect(await contract.drugsAvailable()).to.equal(1134 - 11);
-            expect(await contract.moleculesAvailable()).to.equal(3480 - moleculesMinted);
+            expect(await contract.moleculesAvailable()).to.equal(5748 - moleculesMinted);
             expect(await contract.balanceOf(aliceAddress)).to.equal(moleculesMinted - moleculesConsumed + 11);
         }).timeout(1_000_000);
     });
 
-    describe('purchase, brew, startDecomposition, and decompose', () => {
-        beforeEach(async () => {
-            await (await contract.enableBrewing()).wait();
-            await (await contract.enableConsumingFor(await alice.getAddress())).wait();
-        });
-
-        it('Cannot startDecomposition for non-consumer', async () => {
-            const bobAddress = await bob.getAddress();
-            const value = pricePerTokenMint;
-
-            const tx = await (await contract.connect(bob).purchase(bobAddress, 1, 0, { value })).wait();
-            const tokenIds = tx.events?.map(({ args }) => args?.tokenId) as BigNumber[];
-
-            await expect(contract.connect(bob).startDecomposition(tokenIds[0])).to.be.revertedWith('CONSUMER_NOT_ENABLED');
-        });
-
-        it('Cannot startDecomposition for token not owned', async () => {
-            await (await contract.enableConsumingFor(await bob.getAddress())).wait();
-
+    describe('purchase, brew, and decompose', () => {
+        it('Cannot decompose for token not owned', async () => {
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint;
 
             const tx = await (await contract.purchase(aliceAddress, 1, 0, { value })).wait();
             const tokenIds = tx.events?.map(({ args }) => args?.tokenId) as BigNumber[];
 
-            await expect(contract.connect(bob).startDecomposition(tokenIds[0])).to.be.revertedWith('NOT_OWNER');
+            await expect(contract.connect(bob).decompose(tokenIds[0])).to.be.revertedWith('NOT_OWNER');
         });
 
-        it('Cannot startDecomposition for molecule', async () => {
+        it('Cannot decompose for molecule', async () => {
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint;
 
             const tx = await (await contract.purchase(aliceAddress, 1, 0, { value })).wait();
             const tokenIds = tx.events?.map(({ args }) => args?.tokenId) as BigNumber[];
 
-            await expect(contract.startDecomposition(tokenIds[0])).to.be.revertedWith('NOT_DRUG');
+            await expect(contract.decompose(tokenIds[0])).to.be.revertedWith('NOT_DRUG');
         });
 
         it('Can decompose a drug', async () => {
@@ -491,116 +557,86 @@ describe('XSublimatio', () => {
             const tokenIds = [moleculeIds[0].pop(), moleculeIds[1].pop()];
             const brewTx = await (await contract.brew(tokenIds, 0, aliceAddress)).wait();
             const drugToken = brewTx.events?.[4]?.args?.tokenId;
-
-            const startDecompositionTx = await (await contract.startDecomposition(drugToken)).wait();
-            const decompositionEvent = startDecompositionTx.events?.[0];
-
-            expect(decompositionEvent?.event).to.equal('DecompositionStarted');
-            expect(decompositionEvent?.args?.owner).to.equal(aliceAddress);
-            expect(decompositionEvent?.args?.tokenId).to.equal(drugToken);
-
-            const { timestamp } = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
-
-            expect(decompositionEvent?.args?.burnDate).to.equal(timestamp + 864000);
-            expect(await contract.ownerOf(drugToken)).to.equal(contract.address);
-
-            await ethers.provider.send('evm_increaseTime', [864000]);
-
-            const molecule0Availability = await contract.getMoleculeAvailability(0);
-            const molecule1Availability = await contract.getMoleculeAvailability(1);
-
             const decomposeTx = await (await contract.decompose(drugToken)).wait();
-            const burnEvent = decomposeTx.events?.[1];
 
-            expect(burnEvent?.event).to.equal('Transfer');
-            expect(burnEvent?.args?.from).to.equal(contract.address);
-            expect(burnEvent?.args?.to).to.equal(ethers.constants.AddressZero);
-            expect(burnEvent?.args?.tokenId).to.equal(drugToken);
+            decomposeTx.events?.forEach(({ event, args }, eventIndex, events) => {
+                // 4th last event is clearing of water approval
+                if (eventIndex == events.length - 4) {
+                    expect(event).to.equal('Approval');
+                    expect(BigNumber.from(args?.owner)).to.equal(drugToken);
+                    expect(args?.approved).to.equal(ethers.constants.AddressZero);
+                    expect(args?.tokenId).to.equal(tokenIds[0]);
+                    return;
+                }
 
-            expect(await contract.getMoleculeAvailability(0)).to.equal(molecule0Availability.add(1));
-            expect(await contract.getMoleculeAvailability(1)).to.equal(molecule1Availability.add(1));
-            expect(await contract.getDrugAvailability(0)).to.equal(250);
-        }).timeout(1_000_000);
+                // 3rd last event is burning of water
+                if (eventIndex == events.length - 3) {
+                    expect(event).to.equal('Transfer');
+                    expect(BigNumber.from(args?.from)).to.equal(drugToken);
+                    expect(args?.to).to.equal(ethers.constants.AddressZero);
 
-        it('Can decompose a drug with a special water', async () => {
-            const aliceAddress = await alice.getAddress();
-            const value = pricePerTokenMint.mul(120);
+                    const { globalType, type, category } = getTokenFromId(args?.tokenId);
 
-            const moleculesNeeded = new Array(63).fill(0);
-            moleculesNeeded[0] = 1;
-            moleculesNeeded[3] = 1;
-            moleculesNeeded[60] = 1;
+                    expect(globalType).to.be.equal(0);
+                    expect(type).to.equal(0);
+                    expect(category).to.equal('molecule');
+                    return;
+                }
 
-            let totalMoleculesNeeded = 3;
-            const moleculeIds = new Array(63);
+                // 2nd last event is clearing of drug approval
+                if (eventIndex == events.length - 2) {
+                    expect(event).to.equal('Approval');
+                    expect(args?.owner).to.equal(aliceAddress);
+                    expect(args?.approved).to.equal(ethers.constants.AddressZero);
+                    expect(args?.tokenId).to.equal(drugToken);
+                    return;
+                }
 
-            for (let moleculeType = 0; moleculeType < 63; ++moleculeType) {
-                moleculeIds[moleculeType] = [];
-            }
+                // Last event is burning of drug
+                if (eventIndex == events.length - 1) {
+                    expect(event).to.equal('Transfer');
+                    expect(args?.from).to.equal(aliceAddress);
+                    expect(args?.to).to.equal(ethers.constants.AddressZero);
 
-            while (totalMoleculesNeeded > 0) {
-                process.stdout.write(`\r        Purchasing since ${totalMoleculesNeeded} specific molecules still needed...`);
+                    const { globalType, type, category } = getTokenFromId(args?.tokenId);
 
-                const tx = await (await contract.purchase(aliceAddress, 120, 0, { value })).wait();
+                    expect(globalType).to.be.equal(63);
+                    expect(type).to.equal(0);
+                    expect(category).to.equal('drug');
+                    return;
+                }
 
-                tx.events?.forEach(({ args }) => {
-                    const { type } = getTokenFromId(args?.tokenId);
+                expect(args?.tokenId).to.equal(tokenIds[1 - (eventIndex >> 1)]);
 
-                    moleculeIds[type].push(args?.tokenId);
+                if (eventIndex % 2 === 0) {
+                    expect(event).to.equal('Approval');
+                    expect(BigNumber.from(args?.owner)).to.equal(drugToken);
+                    expect(args?.approved).to.equal(ethers.constants.AddressZero);
+                    return;
+                }
 
-                    if (!moleculesNeeded[type]) return;
+                expect(event).to.equal('Transfer');
+                expect(BigNumber.from(args?.from)).to.equal(drugToken);
+                expect(args?.to).to.equal(aliceAddress);
+            });
 
-                    moleculesNeeded[type]--;
-                    totalMoleculesNeeded--;
-                });
-            }
+            await expect(contract.ownerOf(drugToken)).to.be.revertedWith('ERC721: invalid token ID');
+            await expect(contract.ownerOf(tokenIds[0])).to.be.revertedWith('ERC721: invalid token ID');
+            expect(await contract.ownerOf(tokenIds[1])).to.equal(aliceAddress);
 
-            process.stdout.write(`\r                                                                                                    `);
-            process.stdout.write(`\r`);
-
-            const tokenIds = [moleculeIds[0].pop(), moleculeIds[3].pop(), moleculeIds[60].pop()];
-            const brewTx = await (await contract.brew(tokenIds, 16, aliceAddress)).wait();
-            const drugToken = brewTx.events?.[6]?.args?.tokenId;
-
-            const startDecompositionTx = await (await contract.startDecomposition(drugToken)).wait();
-            const decompositionEvent = startDecompositionTx.events?.[0];
-
-            expect(decompositionEvent?.event).to.equal('DecompositionStarted');
-            expect(decompositionEvent?.args?.owner).to.equal(aliceAddress);
-            expect(decompositionEvent?.args?.tokenId).to.equal(drugToken);
-
-            const { timestamp } = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
-
-            expect(decompositionEvent?.args?.burnDate).to.equal(timestamp + 864000);
-            expect(await contract.ownerOf(drugToken)).to.equal(contract.address);
-
-            await ethers.provider.send('evm_increaseTime', [864000]);
-
-            const molecule0Availability = await contract.getMoleculeAvailability(0);
-            const molecule3Availability = await contract.getMoleculeAvailability(3);
-            const molecule60Availability = await contract.getMoleculeAvailability(60);
-
-            const decomposeTx = await (await contract.decompose(drugToken)).wait();
-            const burnEvent = decomposeTx.events?.[1];
-
-            expect(burnEvent?.event).to.equal('Transfer');
-            expect(burnEvent?.args?.from).to.equal(contract.address);
-            expect(burnEvent?.args?.to).to.equal(ethers.constants.AddressZero);
-            expect(burnEvent?.args?.tokenId).to.equal(drugToken);
-
-            expect(await contract.getMoleculeAvailability(0)).to.equal(molecule0Availability.add(1));
-            expect(await contract.getMoleculeAvailability(3)).to.equal(molecule3Availability.add(1));
-            expect(await contract.getMoleculeAvailability(60)).to.equal(molecule60Availability.add(1));
-            expect(await contract.getDrugAvailability(0)).to.equal(250);
+            expect(await checkInvariants(contract)).to.be.true;
         }).timeout(1_000_000);
     });
 
-    describe('getters', () => {
-        it('Can provide correct recipes', async () => {
-            for (let drugType = 0; drugType < 19; ++drugType) {
-                const recipe = await contract.getRecipe(drugType);
-                expect(recipe).to.deep.equal(RECIPES[drugType]);
-            }
+    describe('claim water', () => {
+        it('Cannot decompose for token not owned', async () => {
+            const aliceAddress = await alice.getAddress();
+            const value = pricePerTokenMint;
+
+            const tx = await (await contract.purchase(aliceAddress, 1, 0, { value })).wait();
+            const tokenIds = tx.events?.map(({ args }) => args?.tokenId) as BigNumber[];
+
+            await expect(contract.connect(bob).decompose(tokenIds[0])).to.be.revertedWith('NOT_OWNER');
         });
     });
 });

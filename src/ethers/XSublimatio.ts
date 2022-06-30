@@ -21,31 +21,33 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
 export interface XSublimatioInterface extends utils.Interface {
     contractName: 'XSublimatio';
     functions: {
-        'DECOMPOSITION_TIME()': FunctionFragment;
+        'COMPACT_STATE_1()': FunctionFragment;
+        'COMPACT_STATE_2()': FunctionFragment;
+        'COMPACT_STATE_3()': FunctionFragment;
         'LAUNCH_TIMESTAMP()': FunctionFragment;
         'PRICE_PER_TOKEN_MINT()': FunctionFragment;
-        'PUBLIC_TIMESTAMP()': FunctionFragment;
+        'PROCEEDS_DESTINATION()': FunctionFragment;
         'acceptOwnership()': FunctionFragment;
         'approve(address,uint256)': FunctionFragment;
         'availabilities()': FunctionFragment;
         'balanceOf(address)': FunctionFragment;
         'baseURI()': FunctionFragment;
         'brew(uint256[],uint256,address)': FunctionFragment;
-        'brewingEnabled()': FunctionFragment;
-        'burnDateFor(uint256)': FunctionFragment;
-        'consumingEnabledFor(address)': FunctionFragment;
+        'canClaimFreeWater(address)': FunctionFragment;
+        'claimWater(address)': FunctionFragment;
         'contractURI()': FunctionFragment;
         'decompose(uint256)': FunctionFragment;
         'drugAvailabilities()': FunctionFragment;
         'drugsAvailable()': FunctionFragment;
-        'enableBrewing()': FunctionFragment;
-        'enableConsumingFor(address)': FunctionFragment;
         'getApproved(uint256)': FunctionFragment;
-        'getDrugAvailability(uint256)': FunctionFragment;
-        'getMoleculeAvailability(uint256)': FunctionFragment;
-        'getRecipe(uint256)': FunctionFragment;
+        'getAvailabilityOfDrug(uint256)': FunctionFragment;
+        'getAvailabilityOfMolecule(uint256)': FunctionFragment;
+        'getDrugContainingMolecule(uint256)': FunctionFragment;
+        'getMoleculesWithinDrug(uint256)': FunctionFragment;
+        'getRecipeOfDrug(uint256)': FunctionFragment;
+        'giveMolecules(address[],uint256[])': FunctionFragment;
+        'giveWaters(address[],uint256[])': FunctionFragment;
         'isApprovedForAll(address,address)': FunctionFragment;
-        'isPrivilegedAccount(address)': FunctionFragment;
         'moleculeAvailabilities()': FunctionFragment;
         'moleculesAvailable()': FunctionFragment;
         'name()': FunctionFragment;
@@ -57,8 +59,7 @@ export interface XSublimatioInterface extends utils.Interface {
         'safeTransferFrom(address,address,uint256)': FunctionFragment;
         'setApprovalForAll(address,bool)': FunctionFragment;
         'setBaseURI(string)': FunctionFragment;
-        'setPrivilegedAccounts(address[])': FunctionFragment;
-        'startDecomposition(uint256)': FunctionFragment;
+        'setPromotionAccounts(address[])': FunctionFragment;
         'supportsInterface(bytes4)': FunctionFragment;
         'symbol()': FunctionFragment;
         'tokenByIndex(uint256)': FunctionFragment;
@@ -67,35 +68,37 @@ export interface XSublimatioInterface extends utils.Interface {
         'tokensOfOwner(address)': FunctionFragment;
         'totalSupply()': FunctionFragment;
         'transferFrom(address,address,uint256)': FunctionFragment;
-        'unsetPrivilegedAccounts(address[])': FunctionFragment;
-        'withdrawProceeds(uint256,address)': FunctionFragment;
+        'unsetPromotionAccounts(address[])': FunctionFragment;
+        'withdrawProceeds()': FunctionFragment;
     };
 
-    encodeFunctionData(functionFragment: 'DECOMPOSITION_TIME', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'COMPACT_STATE_1', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'COMPACT_STATE_2', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'COMPACT_STATE_3', values?: undefined): string;
     encodeFunctionData(functionFragment: 'LAUNCH_TIMESTAMP', values?: undefined): string;
     encodeFunctionData(functionFragment: 'PRICE_PER_TOKEN_MINT', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'PUBLIC_TIMESTAMP', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'PROCEEDS_DESTINATION', values?: undefined): string;
     encodeFunctionData(functionFragment: 'acceptOwnership', values?: undefined): string;
     encodeFunctionData(functionFragment: 'approve', values: [string, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'availabilities', values?: undefined): string;
     encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
     encodeFunctionData(functionFragment: 'baseURI', values?: undefined): string;
     encodeFunctionData(functionFragment: 'brew', values: [BigNumberish[], BigNumberish, string]): string;
-    encodeFunctionData(functionFragment: 'brewingEnabled', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'burnDateFor', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'consumingEnabledFor', values: [string]): string;
+    encodeFunctionData(functionFragment: 'canClaimFreeWater', values: [string]): string;
+    encodeFunctionData(functionFragment: 'claimWater', values: [string]): string;
     encodeFunctionData(functionFragment: 'contractURI', values?: undefined): string;
     encodeFunctionData(functionFragment: 'decompose', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'drugAvailabilities', values?: undefined): string;
     encodeFunctionData(functionFragment: 'drugsAvailable', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'enableBrewing', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'enableConsumingFor', values: [string]): string;
     encodeFunctionData(functionFragment: 'getApproved', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'getDrugAvailability', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'getMoleculeAvailability', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'getRecipe', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getAvailabilityOfDrug', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getAvailabilityOfMolecule', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getDrugContainingMolecule', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getMoleculesWithinDrug', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'getRecipeOfDrug', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'giveMolecules', values: [string[], BigNumberish[]]): string;
+    encodeFunctionData(functionFragment: 'giveWaters', values: [string[], BigNumberish[]]): string;
     encodeFunctionData(functionFragment: 'isApprovedForAll', values: [string, string]): string;
-    encodeFunctionData(functionFragment: 'isPrivilegedAccount', values: [string]): string;
     encodeFunctionData(functionFragment: 'moleculeAvailabilities', values?: undefined): string;
     encodeFunctionData(functionFragment: 'moleculesAvailable', values?: undefined): string;
     encodeFunctionData(functionFragment: 'name', values?: undefined): string;
@@ -107,8 +110,7 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'safeTransferFrom', values: [string, string, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'setApprovalForAll', values: [string, boolean]): string;
     encodeFunctionData(functionFragment: 'setBaseURI', values: [string]): string;
-    encodeFunctionData(functionFragment: 'setPrivilegedAccounts', values: [string[]]): string;
-    encodeFunctionData(functionFragment: 'startDecomposition', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'setPromotionAccounts', values: [string[]]): string;
     encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
     encodeFunctionData(functionFragment: 'symbol', values?: undefined): string;
     encodeFunctionData(functionFragment: 'tokenByIndex', values: [BigNumberish]): string;
@@ -117,34 +119,36 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'tokensOfOwner', values: [string]): string;
     encodeFunctionData(functionFragment: 'totalSupply', values?: undefined): string;
     encodeFunctionData(functionFragment: 'transferFrom', values: [string, string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'unsetPrivilegedAccounts', values: [string[]]): string;
-    encodeFunctionData(functionFragment: 'withdrawProceeds', values: [BigNumberish, string]): string;
+    encodeFunctionData(functionFragment: 'unsetPromotionAccounts', values: [string[]]): string;
+    encodeFunctionData(functionFragment: 'withdrawProceeds', values?: undefined): string;
 
-    decodeFunctionResult(functionFragment: 'DECOMPOSITION_TIME', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'COMPACT_STATE_1', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'COMPACT_STATE_2', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'COMPACT_STATE_3', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'LAUNCH_TIMESTAMP', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'PRICE_PER_TOKEN_MINT', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'PUBLIC_TIMESTAMP', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'PROCEEDS_DESTINATION', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'acceptOwnership', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'availabilities', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'baseURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'brew', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'brewingEnabled', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'burnDateFor', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'consumingEnabledFor', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'canClaimFreeWater', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'claimWater', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'contractURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'decompose', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'drugAvailabilities', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'drugsAvailable', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'enableBrewing', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'enableConsumingFor', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'getApproved', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'getDrugAvailability', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'getMoleculeAvailability', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'getRecipe', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getAvailabilityOfDrug', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getAvailabilityOfMolecule', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getDrugContainingMolecule', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getMoleculesWithinDrug', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'getRecipeOfDrug', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'giveMolecules', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'giveWaters', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'isApprovedForAll', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'isPrivilegedAccount', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'moleculeAvailabilities', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'moleculesAvailable', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result;
@@ -156,8 +160,7 @@ export interface XSublimatioInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: 'safeTransferFrom', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'setApprovalForAll', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'setBaseURI', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'setPrivilegedAccounts', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'startDecomposition', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'setPromotionAccounts', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'symbol', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'tokenByIndex', data: BytesLike): Result;
@@ -166,37 +169,39 @@ export interface XSublimatioInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: 'tokensOfOwner', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'totalSupply', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'transferFrom', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'unsetPrivilegedAccounts', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'unsetPromotionAccounts', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'withdrawProceeds', data: BytesLike): Result;
 
     events: {
+        'AirdropSet(address)': EventFragment;
         'Approval(address,address,uint256)': EventFragment;
         'ApprovalForAll(address,address,bool)': EventFragment;
         'BaseURISet(string)': EventFragment;
-        'BrewingEnabled()': EventFragment;
-        'ConsumingEnabled(address)': EventFragment;
-        'DecompositionStarted(address,uint256,uint256)': EventFragment;
+        'DrugDecomposed(uint256,uint256[])': EventFragment;
         'OwnershipAccepted(address,address)': EventFragment;
         'OwnershipProposed(address,address)': EventFragment;
-        'PrivilegedAccountSet(address)': EventFragment;
-        'PrivilegedAccountUnset(address)': EventFragment;
-        'ProceedsWithdrawn(address,uint256)': EventFragment;
+        'ProceedsWithdrawn(uint256)': EventFragment;
+        'PromotionAccountSet(address)': EventFragment;
+        'PromotionAccountUnset(address)': EventFragment;
         'Transfer(address,address,uint256)': EventFragment;
     };
 
+    getEvent(nameOrSignatureOrTopic: 'AirdropSet'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'BaseURISet'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'BrewingEnabled'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'ConsumingEnabled'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'DecompositionStarted'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'DrugDecomposed'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'OwnershipAccepted'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'OwnershipProposed'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'PrivilegedAccountSet'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'PrivilegedAccountUnset'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'ProceedsWithdrawn'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'PromotionAccountSet'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'PromotionAccountUnset'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
 }
+
+export type AirdropSetEvent = TypedEvent<[string], { account: string }>;
+
+export type AirdropSetEventFilter = TypedEventFilter<AirdropSetEvent>;
 
 export type ApprovalEvent = TypedEvent<[string, string, BigNumber], { owner: string; approved: string; tokenId: BigNumber }>;
 
@@ -210,20 +215,9 @@ export type BaseURISetEvent = TypedEvent<[string], { baseURI: string }>;
 
 export type BaseURISetEventFilter = TypedEventFilter<BaseURISetEvent>;
 
-export type BrewingEnabledEvent = TypedEvent<[], {}>;
+export type DrugDecomposedEvent = TypedEvent<[BigNumber, BigNumber[]], { drug: BigNumber; molecules: BigNumber[] }>;
 
-export type BrewingEnabledEventFilter = TypedEventFilter<BrewingEnabledEvent>;
-
-export type ConsumingEnabledEvent = TypedEvent<[string], { consumer: string }>;
-
-export type ConsumingEnabledEventFilter = TypedEventFilter<ConsumingEnabledEvent>;
-
-export type DecompositionStartedEvent = TypedEvent<
-    [string, BigNumber, BigNumber],
-    { owner: string; tokenId: BigNumber; burnDate: BigNumber }
->;
-
-export type DecompositionStartedEventFilter = TypedEventFilter<DecompositionStartedEvent>;
+export type DrugDecomposedEventFilter = TypedEventFilter<DrugDecomposedEvent>;
 
 export type OwnershipAcceptedEvent = TypedEvent<[string, string], { previousOwner: string; owner: string }>;
 
@@ -233,17 +227,17 @@ export type OwnershipProposedEvent = TypedEvent<[string, string], { owner: strin
 
 export type OwnershipProposedEventFilter = TypedEventFilter<OwnershipProposedEvent>;
 
-export type PrivilegedAccountSetEvent = TypedEvent<[string], { account: string }>;
-
-export type PrivilegedAccountSetEventFilter = TypedEventFilter<PrivilegedAccountSetEvent>;
-
-export type PrivilegedAccountUnsetEvent = TypedEvent<[string], { account: string }>;
-
-export type PrivilegedAccountUnsetEventFilter = TypedEventFilter<PrivilegedAccountUnsetEvent>;
-
-export type ProceedsWithdrawnEvent = TypedEvent<[string, BigNumber], { destination: string; amount: BigNumber }>;
+export type ProceedsWithdrawnEvent = TypedEvent<[BigNumber], { amount: BigNumber }>;
 
 export type ProceedsWithdrawnEventFilter = TypedEventFilter<ProceedsWithdrawnEvent>;
+
+export type PromotionAccountSetEvent = TypedEvent<[string], { account: string }>;
+
+export type PromotionAccountSetEventFilter = TypedEventFilter<PromotionAccountSetEvent>;
+
+export type PromotionAccountUnsetEvent = TypedEvent<[string], { account: string }>;
+
+export type PromotionAccountUnsetEventFilter = TypedEventFilter<PromotionAccountUnsetEvent>;
 
 export type TransferEvent = TypedEvent<[string, string, BigNumber], { from: string; to: string; tokenId: BigNumber }>;
 
@@ -273,13 +267,17 @@ export interface XSublimatio extends BaseContract {
     removeListener: OnEvent<this>;
 
     functions: {
-        DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<[BigNumber]>;
+        COMPACT_STATE_1(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        COMPACT_STATE_2(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        COMPACT_STATE_3(overrides?: CallOverrides): Promise<[BigNumber]>;
 
         LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<[BigNumber]>;
 
         PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-        PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<[BigNumber]>;
+        PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<[string]>;
 
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
@@ -301,44 +299,52 @@ export interface XSublimatio extends BaseContract {
         baseURI(overrides?: CallOverrides): Promise<[string]>;
 
         brew(
-            tokenIds_: BigNumberish[],
+            molecules_: BigNumberish[],
             drugType_: BigNumberish,
             destination_: string,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
 
-        brewingEnabled(overrides?: CallOverrides): Promise<[boolean]>;
+        canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
-        burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
-
-        consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+        claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
         contractURI(overrides?: CallOverrides): Promise<[string] & { contractURI_: string }>;
 
-        decompose(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+        decompose(drug_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
         drugAvailabilities(overrides?: CallOverrides): Promise<[BigNumber[]] & { availabilities_: BigNumber[] }>;
 
         drugsAvailable(overrides?: CallOverrides): Promise<[BigNumber] & { drugsAvailable_: BigNumber }>;
 
-        enableBrewing(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
-        enableConsumingFor(consumer_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
 
-        getDrugAvailability(drugType_: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber] & { availability_: BigNumber }>;
+        getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber] & { availability_: BigNumber }>;
 
-        getMoleculeAvailability(
+        getAvailabilityOfMolecule(
             moleculeType_: BigNumberish,
             overrides?: CallOverrides
         ): Promise<[BigNumber] & { availability_: BigNumber }>;
 
-        getRecipe(drugType_: BigNumberish, overrides?: CallOverrides): Promise<[number[]] & { recipe_: number[] }>;
+        getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber] & { drug_: BigNumber }>;
+
+        getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber[]] & { molecules_: BigNumber[] }>;
+
+        getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<[number[]] & { recipe_: number[] }>;
+
+        giveMolecules(
+            destinations_: string[],
+            amounts_: BigNumberish[],
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<ContractTransaction>;
+
+        giveWaters(
+            destinations_: string[],
+            amounts_: BigNumberish[],
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<ContractTransaction>;
 
         isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<[boolean]>;
-
-        isPrivilegedAccount(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
         moleculeAvailabilities(overrides?: CallOverrides): Promise<[BigNumber[]] & { availabilities_: BigNumber[] }>;
 
@@ -372,7 +378,7 @@ export interface XSublimatio extends BaseContract {
             from: string,
             to: string,
             tokenId: BigNumberish,
-            _data: BytesLike,
+            data: BytesLike,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
 
@@ -384,13 +390,8 @@ export interface XSublimatio extends BaseContract {
 
         setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
-        setPrivilegedAccounts(
+        setPromotionAccounts(
             accounts_: string[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
-
-        startDecomposition(
-            tokenId_: BigNumberish,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
 
@@ -415,25 +416,25 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
 
-        unsetPrivilegedAccounts(
+        unsetPromotionAccounts(
             accounts_: string[],
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
 
-        withdrawProceeds(
-            amount_: BigNumberish,
-            destination_: string,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+        withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
     };
 
-    DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<BigNumber>;
+    COMPACT_STATE_1(overrides?: CallOverrides): Promise<BigNumber>;
+
+    COMPACT_STATE_2(overrides?: CallOverrides): Promise<BigNumber>;
+
+    COMPACT_STATE_3(overrides?: CallOverrides): Promise<BigNumber>;
 
     LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
 
     PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<BigNumber>;
 
-    PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
+    PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<string>;
 
     acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
@@ -451,41 +452,49 @@ export interface XSublimatio extends BaseContract {
     baseURI(overrides?: CallOverrides): Promise<string>;
 
     brew(
-        tokenIds_: BigNumberish[],
+        molecules_: BigNumberish[],
         drugType_: BigNumberish,
         destination_: string,
         overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    brewingEnabled(overrides?: CallOverrides): Promise<boolean>;
+    canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
-    burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-    consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+    claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     contractURI(overrides?: CallOverrides): Promise<string>;
 
-    decompose(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    decompose(drug_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
     drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
-    enableBrewing(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
-    enableConsumingFor(consumer_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
     getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-    getDrugAvailability(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    getMoleculeAvailability(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    getAvailabilityOfMolecule(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-    getRecipe(drugType_: BigNumberish, overrides?: CallOverrides): Promise<number[]>;
+    getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+    getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber[]>;
+
+    getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<number[]>;
+
+    giveMolecules(
+        destinations_: string[],
+        amounts_: BigNumberish[],
+        overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    giveWaters(
+        destinations_: string[],
+        amounts_: BigNumberish[],
+        overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
-
-    isPrivilegedAccount(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
@@ -519,7 +528,7 @@ export interface XSublimatio extends BaseContract {
         from: string,
         to: string,
         tokenId: BigNumberish,
-        _data: BytesLike,
+        data: BytesLike,
         overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -531,9 +540,7 @@ export interface XSublimatio extends BaseContract {
 
     setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
-    setPrivilegedAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
-    startDecomposition(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    setPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
@@ -556,22 +563,22 @@ export interface XSublimatio extends BaseContract {
         overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    unsetPrivilegedAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    unsetPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
-    withdrawProceeds(
-        amount_: BigNumberish,
-        destination_: string,
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     callStatic: {
-        DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<BigNumber>;
+        COMPACT_STATE_1(overrides?: CallOverrides): Promise<BigNumber>;
+
+        COMPACT_STATE_2(overrides?: CallOverrides): Promise<BigNumber>;
+
+        COMPACT_STATE_3(overrides?: CallOverrides): Promise<BigNumber>;
 
         LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
 
         PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<BigNumber>;
 
-        PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
+        PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<string>;
 
         acceptOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -588,37 +595,37 @@ export interface XSublimatio extends BaseContract {
 
         baseURI(overrides?: CallOverrides): Promise<string>;
 
-        brew(tokenIds_: BigNumberish[], drugType_: BigNumberish, destination_: string, overrides?: CallOverrides): Promise<BigNumber>;
+        brew(molecules_: BigNumberish[], drugType_: BigNumberish, destination_: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-        brewingEnabled(overrides?: CallOverrides): Promise<boolean>;
+        canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
-        burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+        claimWater(destination_: string, overrides?: CallOverrides): Promise<BigNumber>;
 
         contractURI(overrides?: CallOverrides): Promise<string>;
 
-        decompose(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        decompose(drug_: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
         drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
         drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
-        enableBrewing(overrides?: CallOverrides): Promise<void>;
-
-        enableConsumingFor(consumer_: string, overrides?: CallOverrides): Promise<void>;
-
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
-        getDrugAvailability(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+        getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-        getMoleculeAvailability(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+        getAvailabilityOfMolecule(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-        getRecipe(drugType_: BigNumberish, overrides?: CallOverrides): Promise<number[]>;
+        getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber[]>;
+
+        getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<number[]>;
+
+        giveMolecules(destinations_: string[], amounts_: BigNumberish[], overrides?: CallOverrides): Promise<BigNumber[][]>;
+
+        giveWaters(destinations_: string[], amounts_: BigNumberish[], overrides?: CallOverrides): Promise<BigNumber[][]>;
 
         isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
-
-        isPrivilegedAccount(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
         moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
@@ -652,7 +659,7 @@ export interface XSublimatio extends BaseContract {
             from: string,
             to: string,
             tokenId: BigNumberish,
-            _data: BytesLike,
+            data: BytesLike,
             overrides?: CallOverrides
         ): Promise<void>;
 
@@ -660,9 +667,7 @@ export interface XSublimatio extends BaseContract {
 
         setBaseURI(baseURI_: string, overrides?: CallOverrides): Promise<void>;
 
-        setPrivilegedAccounts(accounts_: string[], overrides?: CallOverrides): Promise<void>;
-
-        startDecomposition(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<void>;
+        setPromotionAccounts(accounts_: string[], overrides?: CallOverrides): Promise<void>;
 
         supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
 
@@ -680,12 +685,15 @@ export interface XSublimatio extends BaseContract {
 
         transferFrom(from: string, to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-        unsetPrivilegedAccounts(accounts_: string[], overrides?: CallOverrides): Promise<void>;
+        unsetPromotionAccounts(accounts_: string[], overrides?: CallOverrides): Promise<void>;
 
-        withdrawProceeds(amount_: BigNumberish, destination_: string, overrides?: CallOverrides): Promise<void>;
+        withdrawProceeds(overrides?: CallOverrides): Promise<void>;
     };
 
     filters: {
+        'AirdropSet(address)'(account?: string | null): AirdropSetEventFilter;
+        AirdropSet(account?: string | null): AirdropSetEventFilter;
+
         'Approval(address,address,uint256)'(
             owner?: string | null,
             approved?: string | null,
@@ -699,18 +707,8 @@ export interface XSublimatio extends BaseContract {
         'BaseURISet(string)'(baseURI?: null): BaseURISetEventFilter;
         BaseURISet(baseURI?: null): BaseURISetEventFilter;
 
-        'BrewingEnabled()'(): BrewingEnabledEventFilter;
-        BrewingEnabled(): BrewingEnabledEventFilter;
-
-        'ConsumingEnabled(address)'(consumer?: null): ConsumingEnabledEventFilter;
-        ConsumingEnabled(consumer?: null): ConsumingEnabledEventFilter;
-
-        'DecompositionStarted(address,uint256,uint256)'(
-            owner?: string | null,
-            tokenId?: BigNumberish | null,
-            burnDate?: null
-        ): DecompositionStartedEventFilter;
-        DecompositionStarted(owner?: string | null, tokenId?: BigNumberish | null, burnDate?: null): DecompositionStartedEventFilter;
+        'DrugDecomposed(uint256,uint256[])'(drug?: BigNumberish | null, molecules?: null): DrugDecomposedEventFilter;
+        DrugDecomposed(drug?: BigNumberish | null, molecules?: null): DrugDecomposedEventFilter;
 
         'OwnershipAccepted(address,address)'(previousOwner?: string | null, owner?: string | null): OwnershipAcceptedEventFilter;
         OwnershipAccepted(previousOwner?: string | null, owner?: string | null): OwnershipAcceptedEventFilter;
@@ -718,27 +716,31 @@ export interface XSublimatio extends BaseContract {
         'OwnershipProposed(address,address)'(owner?: string | null, pendingOwner?: string | null): OwnershipProposedEventFilter;
         OwnershipProposed(owner?: string | null, pendingOwner?: string | null): OwnershipProposedEventFilter;
 
-        'PrivilegedAccountSet(address)'(account?: string | null): PrivilegedAccountSetEventFilter;
-        PrivilegedAccountSet(account?: string | null): PrivilegedAccountSetEventFilter;
+        'ProceedsWithdrawn(uint256)'(amount?: null): ProceedsWithdrawnEventFilter;
+        ProceedsWithdrawn(amount?: null): ProceedsWithdrawnEventFilter;
 
-        'PrivilegedAccountUnset(address)'(account?: string | null): PrivilegedAccountUnsetEventFilter;
-        PrivilegedAccountUnset(account?: string | null): PrivilegedAccountUnsetEventFilter;
+        'PromotionAccountSet(address)'(account?: string | null): PromotionAccountSetEventFilter;
+        PromotionAccountSet(account?: string | null): PromotionAccountSetEventFilter;
 
-        'ProceedsWithdrawn(address,uint256)'(destination?: string | null, amount?: null): ProceedsWithdrawnEventFilter;
-        ProceedsWithdrawn(destination?: string | null, amount?: null): ProceedsWithdrawnEventFilter;
+        'PromotionAccountUnset(address)'(account?: string | null): PromotionAccountUnsetEventFilter;
+        PromotionAccountUnset(account?: string | null): PromotionAccountUnsetEventFilter;
 
         'Transfer(address,address,uint256)'(from?: string | null, to?: string | null, tokenId?: BigNumberish | null): TransferEventFilter;
         Transfer(from?: string | null, to?: string | null, tokenId?: BigNumberish | null): TransferEventFilter;
     };
 
     estimateGas: {
-        DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<BigNumber>;
+        COMPACT_STATE_1(overrides?: CallOverrides): Promise<BigNumber>;
+
+        COMPACT_STATE_2(overrides?: CallOverrides): Promise<BigNumber>;
+
+        COMPACT_STATE_3(overrides?: CallOverrides): Promise<BigNumber>;
 
         LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
 
         PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<BigNumber>;
 
-        PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
+        PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<BigNumber>;
 
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
@@ -751,41 +753,49 @@ export interface XSublimatio extends BaseContract {
         baseURI(overrides?: CallOverrides): Promise<BigNumber>;
 
         brew(
-            tokenIds_: BigNumberish[],
+            molecules_: BigNumberish[],
             drugType_: BigNumberish,
             destination_: string,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
 
-        brewingEnabled(overrides?: CallOverrides): Promise<BigNumber>;
+        canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-        burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+        claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
         contractURI(overrides?: CallOverrides): Promise<BigNumber>;
 
-        decompose(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+        decompose(drug_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
         drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber>;
 
         drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
-        enableBrewing(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        enableConsumingFor(consumer_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-        getDrugAvailability(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+        getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-        getMoleculeAvailability(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+        getAvailabilityOfMolecule(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
 
-        getRecipe(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+        getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
+        giveMolecules(
+            destinations_: string[],
+            amounts_: BigNumberish[],
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<BigNumber>;
+
+        giveWaters(
+            destinations_: string[],
+            amounts_: BigNumberish[],
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<BigNumber>;
 
         isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-        isPrivilegedAccount(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
         moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -819,7 +829,7 @@ export interface XSublimatio extends BaseContract {
             from: string,
             to: string,
             tokenId: BigNumberish,
-            _data: BytesLike,
+            data: BytesLike,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
 
@@ -831,9 +841,7 @@ export interface XSublimatio extends BaseContract {
 
         setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
-        setPrivilegedAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        startDecomposition(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+        setPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
         supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -856,23 +864,23 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
 
-        unsetPrivilegedAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+        unsetPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
-        withdrawProceeds(
-            amount_: BigNumberish,
-            destination_: string,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
+        withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
     };
 
     populateTransaction: {
-        DECOMPOSITION_TIME(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        COMPACT_STATE_1(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        COMPACT_STATE_2(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        COMPACT_STATE_3(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        PUBLIC_TIMESTAMP(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
@@ -889,41 +897,49 @@ export interface XSublimatio extends BaseContract {
         baseURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         brew(
-            tokenIds_: BigNumberish[],
+            molecules_: BigNumberish[],
             drugType_: BigNumberish,
             destination_: string,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
 
-        brewingEnabled(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        burnDateFor(arg0: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        consumingEnabledFor(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
         contractURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        decompose(tokenId_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
+        decompose(drug_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
         drugAvailabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         drugsAvailable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        enableBrewing(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
-
-        enableConsumingFor(consumer_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
-
         getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        getDrugAvailability(drugType_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        getMoleculeAvailability(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        getAvailabilityOfMolecule(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-        getRecipe(drugType_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        giveMolecules(
+            destinations_: string[],
+            amounts_: BigNumberish[],
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<PopulatedTransaction>;
+
+        giveWaters(
+            destinations_: string[],
+            amounts_: BigNumberish[],
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<PopulatedTransaction>;
 
         isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        isPrivilegedAccount(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         moleculeAvailabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -957,7 +973,7 @@ export interface XSublimatio extends BaseContract {
             from: string,
             to: string,
             tokenId: BigNumberish,
-            _data: BytesLike,
+            data: BytesLike,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
 
@@ -969,13 +985,8 @@ export interface XSublimatio extends BaseContract {
 
         setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
-        setPrivilegedAccounts(
+        setPromotionAccounts(
             accounts_: string[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        startDecomposition(
-            tokenId_: BigNumberish,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
 
@@ -1000,15 +1011,11 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
 
-        unsetPrivilegedAccounts(
+        unsetPromotionAccounts(
             accounts_: string[],
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
 
-        withdrawProceeds(
-            amount_: BigNumberish,
-            destination_: string,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
+        withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
     };
 }
