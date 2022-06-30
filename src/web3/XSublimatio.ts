@@ -114,7 +114,7 @@ export interface XSublimatio extends BaseContract {
             destination_: string
         ): NonPayableTransactionObject<string>;
 
-        canClaimFreeWater(arg0: string): NonPayableTransactionObject<boolean>;
+        canClaimFreeWater(account_: string): NonPayableTransactionObject<boolean>;
 
         claimWater(destination_: string): NonPayableTransactionObject<string>;
 

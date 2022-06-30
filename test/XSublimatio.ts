@@ -21,6 +21,7 @@ const checkInvariants = async (instance: XSublimatio) => {
     const compactState3 = await instance.COMPACT_STATE_3();
     const drugsAvailable = compactState3.shr(152).mask(11);
     const moleculesAvailable = compactState3.shr(163).mask(13);
+    // const tokenNonce = compactState3.shr(176).mask(80);
 
     const [moleculeAvailabilities, drugAvailabilities] = await instance.availabilities();
 
@@ -628,15 +629,13 @@ describe('XSublimatio', () => {
         }).timeout(1_000_000);
     });
 
-    describe('claim water', () => {
-        it('Cannot decompose for token not owned', async () => {
-            const aliceAddress = await alice.getAddress();
-            const value = pricePerTokenMint;
+    describe.only('claim water', () => {
+        beforeEach(async () => {
+            await (await contract.setPromotionAccounts([await alice.getAddress(), await bob.getAddress()])).wait();
+        });
 
-            const tx = await (await contract.purchase(aliceAddress, 1, 0, { value })).wait();
-            const tokenIds = tx.events?.map(({ args }) => args?.tokenId) as BigNumber[];
-
-            await expect(contract.connect(bob).decompose(tokenIds[0])).to.be.revertedWith('NOT_OWNER');
+        it('Cannot claim water if not whitelisted', async () => {
+            await expect(contract.connect(charlie).claimWater(await charlie.getAddress())).to.be.revertedWith('CANNOT_CLAIM');
         });
     });
 });

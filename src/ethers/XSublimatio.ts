@@ -305,7 +305,7 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
 
-        canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+        canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<[boolean] & { canClaimFreeWater_: boolean }>;
 
         claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
@@ -458,7 +458,7 @@ export interface XSublimatio extends BaseContract {
         overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+    canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<boolean>;
 
     claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
@@ -597,7 +597,7 @@ export interface XSublimatio extends BaseContract {
 
         brew(molecules_: BigNumberish[], drugType_: BigNumberish, destination_: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-        canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+        canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<boolean>;
 
         claimWater(destination_: string, overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -759,7 +759,7 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
 
-        canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+        canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<BigNumber>;
 
         claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
@@ -903,7 +903,7 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
 
-        canClaimFreeWater(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+        canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 

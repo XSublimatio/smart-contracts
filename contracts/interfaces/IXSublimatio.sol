@@ -9,6 +9,9 @@ interface IXSublimatio is IERC721Enumerable {
     /// @notice Emitted when the base URI is set (or re-set).
     event AirdropSet(address indexed account);
 
+    /// @notice Emitted when the hash of the asset generator is set.
+    event AssetGeneratorHashSet(bytes32 indexed assetGeneratorHash);
+
     /// @notice Emitted when the base URI is set (or re-set).
     event BaseURISet(string baseURI);
 
@@ -22,7 +25,7 @@ interface IXSublimatio is IERC721Enumerable {
     event OwnershipProposed(address indexed owner, address indexed pendingOwner);
 
     /// @notice Emitted when proceeds have been withdrawn to proceeds destination.
-    event ProceedsWithdrawn(uint256 amount);
+    event ProceedsWithdrawn(address indexed destination, uint256 amount);
 
     /// @notice Emitted when an account is given the right to claim a free water molecule as a promotion.
     event PromotionAccountSet(address indexed account);
@@ -30,13 +33,14 @@ interface IXSublimatio is IERC721Enumerable {
     /// @notice Emitted when an account is loses the right to claim a free water molecule as a promotion.
     event PromotionAccountUnset(address indexed account);
 
+    /// @notice Emitted when an account is set as the destination where proceeds will be withdrawn to.
+    event ProceedsDestinationSet(address indexed account);
+
     /*************/
     /*** State ***/
     /*************/
 
     function PRICE_PER_TOKEN_MINT() external returns (uint256 pricePerTokenMint_);
-
-    function PROCEEDS_DESTINATION() external returns (address proceedsDestination_);
 
     function LAUNCH_TIMESTAMP() external returns (uint256 launchTimestamp_);
 
@@ -48,6 +52,8 @@ interface IXSublimatio is IERC721Enumerable {
 
     function pendingOwner() external returns (address pendingOwner_);
 
+    function proceedsDestination() external returns (address proceedsDestination_);
+
     /***********************/
     /*** Admin Functions ***/
     /***********************/
@@ -56,7 +62,11 @@ interface IXSublimatio is IERC721Enumerable {
 
     function proposeOwnership(address newOwner_) external;
 
+    function setAssetGeneratorHash(bytes32 assetGeneratorHash_) external;
+
     function setBaseURI(string calldata baseURI_) external;
+
+    function setProceedsDestination(address proceedsDestination_) external;
 
     function setPromotionAccounts(address[] memory accounts_) external;
 

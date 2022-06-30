@@ -558,15 +558,23 @@ export function getDrugSupply(drugType: number, available: number): number {
     return DRUG_MAX_SUPPLIES[drugType] - available;
 }
 
-export function getContractMetadata(imageUri = '', imageExtension = 'png'): ContractMetadata {
+// TODO: description in ContractMetadata
+
+export function getContractMetadata(
+    imageUri = '',
+    imageExtension = 'png',
+    feeBasisPoints = 0,
+    feeRecipient = '',
+    torrentHash = ''
+): ContractMetadata {
     return {
         name: 'xSublimatio',
-        description: 'Lorem Ipsum',
+        description: 'A digital drug experience as NFTs',
         image: `${imageUri}/xSublimatio.${imageExtension}`,
         external_link: 'faction.art/xsublimatio',
-        seller_fee_basis_points: 0,
-        fee_recipient: '',
+        seller_fee_basis_points: feeBasisPoints,
+        fee_recipient: feeRecipient,
         artist: 'Pierre Pauze',
-        asset_generator_torrent_hash: '',
+        asset_generator_torrent_hash: torrentHash,
     };
 }

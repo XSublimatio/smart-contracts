@@ -13,8 +13,6 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     uint256 internal constant IS_NOT_LOCKED = uint256(1);
     uint256 internal constant IS_LOCKED = uint256(2);
 
-    address public immutable PROCEEDS_DESTINATION;
-
     uint256 public immutable PRICE_PER_TOKEN_MINT;
     uint256 public immutable LAUNCH_TIMESTAMP;
 
@@ -22,8 +20,11 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
     address public owner;
     address public pendingOwner;
+    address public proceedsDestination;
 
     string public baseURI;
+
+    bytes32 public assetGeneratorHash;
 
     // Contains first 21 molecule availabilities (12 bits each).
     uint256 public COMPACT_STATE_1 = uint256(60087470205620319587750252891185586116542855063423969629534558109603704138);
@@ -34,7 +35,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     // Contains (right to left) 19 drug availabilities (8 bits each), total drugs available (11 bits), total molecules available (13 bits), and nonce (remaining 80 bits).
     uint256 public COMPACT_STATE_3 = uint256(67212165445492353831982701316699907697777805738906362);
 
-    mapping(address => bool) public canClaimFreeWater;
+    mapping(address => bool) internal _canClaimFreeWater;
 
     constructor (
         string memory baseURI_,
@@ -48,7 +49,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         PRICE_PER_TOKEN_MINT = pricePerTokenMint_;
         LAUNCH_TIMESTAMP = launchTimestamp_;
 
-        require((PROCEEDS_DESTINATION = proceedsDestination_) != address(0), "INVALID_PROCEEDS_DESTINATION");
+        require((proceedsDestination = proceedsDestination_) != address(0), "INVALID_PROCEEDS_DESTINATION");
     }
 
     modifier noReenter() {
@@ -57,6 +58,16 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         _lockedStatus = IS_LOCKED;
         _;
         _lockedStatus = IS_NOT_LOCKED;
+    }
+
+    modifier onlyAfterLaunch() {
+        require(block.timestamp > LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
+        _;
+    }
+
+    modifier onlyBeforeLaunch() {
+        require(block.timestamp < LAUNCH_TIMESTAMP, "ALREADY_LAUNCHED");
+        _;
     }
 
     modifier onlyOwner() {
@@ -81,37 +92,48 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         emit OwnershipProposed(owner, pendingOwner = newOwner_);
     }
 
+    function setAssetGeneratorHash(bytes32 assetGeneratorHash_) external onlyOwner onlyBeforeLaunch {
+        emit AssetGeneratorHashSet(assetGeneratorHash = assetGeneratorHash_);
+    }
+
     function setBaseURI(string calldata baseURI_) external onlyOwner {
         emit BaseURISet(baseURI = baseURI_);
     }
 
-    function setPromotionAccounts(address[] memory accounts_) external onlyOwner {
+    function setProceedsDestination(address proceedsDestination_) external onlyOwner onlyBeforeLaunch {
+        emit ProceedsDestinationSet(proceedsDestination = proceedsDestination_);
+    }
+
+    function setPromotionAccounts(address[] memory accounts_) external onlyOwner onlyBeforeLaunch {
         for (uint256 i; i < accounts_.length; ++i) {
             address account = accounts_[i];
-            canClaimFreeWater[account] = true;
+            _canClaimFreeWater[account] = true;
             emit PromotionAccountSet(account);
         }
     }
 
-    function unsetPromotionAccounts(address[] memory accounts_) external onlyOwner {
+    function unsetPromotionAccounts(address[] memory accounts_) external onlyOwner onlyBeforeLaunch {
         for (uint256 i; i < accounts_.length; ++i) {
             address account = accounts_[i];
-            canClaimFreeWater[account] = false;
+            _canClaimFreeWater[account] = false;
             emit PromotionAccountUnset(account);
         }
     }
 
     function withdrawProceeds() external {
         uint256 amount = address(this).balance;
-        require(_transferEther(PROCEEDS_DESTINATION, amount), "ETHER_TRANSFER_FAILED");
-        emit ProceedsWithdrawn(amount);
+        address destination = proceedsDestination;
+        destination = destination == address(0) ? owner : destination;
+
+        require(_transferEther(destination, amount), "ETHER_TRANSFER_FAILED");
+        emit ProceedsWithdrawn(destination, amount);
     }
 
     /**************************/
     /*** External Functions ***/
     /**************************/
 
-    function brew(uint256[] calldata molecules_, uint256 drugType_, address destination_) external returns (uint256 drug_) {
+    function brew(uint256[] calldata molecules_, uint256 drugType_, address destination_) external onlyAfterLaunch returns (uint256 drug_) {
         // Check that drugType_ is valid.
         require(drugType_ < 19, "INVALID_DRUG_TYPE");
 
@@ -175,14 +197,15 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     }
 
     function claimWater(address destination_) external returns (uint256 molecule_) {
-        require(block.timestamp < LAUNCH_TIMESTAMP && canClaimFreeWater[msg.sender], "CANNOT_CLAIM");
+        // NOTE: no need for the onlyAfterLaunch modifier since `canClaimFreeWater` already checks the timestamp
+        require(canClaimFreeWater(msg.sender), "CANNOT_CLAIM");
 
-        canClaimFreeWater[msg.sender] = false;
+        _canClaimFreeWater[msg.sender] = false;
 
         ( COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, molecule_ ) = _giveMolecule(COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, 0, destination_);
     }
 
-    function decompose(uint256 drug_) external {
+    function decompose(uint256 drug_) external onlyAfterLaunch {
         // Check that the caller owns the token.
         require(ownerOf(drug_) == msg.sender, "NOT_OWNER");
 
@@ -218,9 +241,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         _burn(drug_);
     }
 
-    function giveWaters(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner returns (uint256[][] memory molecules_) {
-        require(block.timestamp < LAUNCH_TIMESTAMP, "ALREADY_LAUNCHED");
-
+    function giveWaters(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner onlyBeforeLaunch returns (uint256[][] memory molecules_) {
         // Cache relevant compact states from storage.
         uint256 compactState1 = COMPACT_STATE_1;
         uint256 compactState2 = COMPACT_STATE_2;
@@ -242,7 +263,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         COMPACT_STATE_3 = compactState3;
     }
 
-    function giveMolecules(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner returns (uint256[][] memory molecules_) {
+    function giveMolecules(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner onlyBeforeLaunch returns (uint256[][] memory molecules_) {
         require(block.timestamp < LAUNCH_TIMESTAMP, "ALREADY_LAUNCHED");
 
         // Cache relevant compact states from storage.
@@ -280,9 +301,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         COMPACT_STATE_3 = compactState3;
     }
 
-    function purchase(address destination_, uint256 quantity_, uint256 minQuantity_) external payable returns (uint256[] memory molecules_) {
-        require(block.timestamp >= LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
-
+    function purchase(address destination_, uint256 quantity_, uint256 minQuantity_) external payable onlyAfterLaunch returns (uint256[] memory molecules_) {
         // Cache relevant compact states from storage.
         uint256 compactState1 = COMPACT_STATE_1;
         uint256 compactState2 = COMPACT_STATE_2;
@@ -343,10 +362,12 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         drugAvailabilities_ = drugAvailabilities();
     }
 
-    function contractURI() external view returns (string memory contractURI_) {
-        string memory baseURICache = baseURI;
+    function canClaimFreeWater(address account_) public view returns (bool canClaimFreeWater_) {
+        return block.timestamp < LAUNCH_TIMESTAMP && _canClaimFreeWater[account_];
+    }
 
-        return bytes(baseURICache).length > 0 ? string(abi.encodePacked(baseURICache, "info")) : "";
+    function contractURI() external view returns (string memory contractURI_) {
+        return baseURI;
     }
 
     function drugAvailabilities() public view returns (uint256[19] memory availabilities_) {
