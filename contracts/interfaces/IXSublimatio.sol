@@ -24,6 +24,9 @@ interface IXSublimatio is IERC721Enumerable {
     /// @notice Emitted when owner proposed an account that can accept ownership.
     event OwnershipProposed(address indexed owner, address indexed pendingOwner);
 
+    /// @notice Emitted when the price per token mint has been decreased.
+    event PricePerTokenMintSet(uint256 price);
+
     /// @notice Emitted when proceeds have been withdrawn to proceeds destination.
     event ProceedsWithdrawn(address indexed destination, uint256 amount);
 
@@ -40,9 +43,9 @@ interface IXSublimatio is IERC721Enumerable {
     /*** State ***/
     /*************/
 
-    function PRICE_PER_TOKEN_MINT() external returns (uint256 pricePerTokenMint_);
-
     function LAUNCH_TIMESTAMP() external returns (uint256 launchTimestamp_);
+
+    function assetGeneratorHash() external returns (bytes32 assetGeneratorHash_);
 
     function baseURI() external returns (string memory baseURI_);
 
@@ -53,6 +56,8 @@ interface IXSublimatio is IERC721Enumerable {
     function pendingOwner() external returns (address pendingOwner_);
 
     function proceedsDestination() external returns (address proceedsDestination_);
+
+    function pricePerTokenMint() external returns (uint256 pricePerTokenMint_);
 
     /***********************/
     /*** Admin Functions ***/
@@ -65,6 +70,8 @@ interface IXSublimatio is IERC721Enumerable {
     function setAssetGeneratorHash(bytes32 assetGeneratorHash_) external;
 
     function setBaseURI(string calldata baseURI_) external;
+
+    function setPricePerTokenMint(uint256 pricePerTokenMint_) external;
 
     function setProceedsDestination(address proceedsDestination_) external;
 
@@ -84,9 +91,9 @@ interface IXSublimatio is IERC721Enumerable {
 
     function decompose(uint256 drug_) external;
 
-    function giveWaters(address[] memory destinations_, uint256[] memory amounts_) external returns (uint256[][] memory molecules_);
+    function giveWaters(address[] memory destinations_, uint256[] memory amounts_) external;
 
-    function giveMolecules(address[] memory destinations_, uint256[] memory amounts_) external returns (uint256[][] memory molecules_);
+    function giveMolecules(address[] memory destinations_, uint256[] memory amounts_) external;
 
     function purchase(address destination_, uint256 quantity_, uint256 minQuantity_) external payable returns (uint256[] memory molecules_);
 
@@ -95,6 +102,8 @@ interface IXSublimatio is IERC721Enumerable {
     /***************/
 
     function availabilities() external view returns (uint256[63] memory moleculesAvailabilities_, uint256[19] memory drugAvailabilities_);
+
+    function compactStates() external view returns (uint256 compactState1_, uint256 compactState2_, uint256 compactState3_);
 
     function contractURI() external view returns (string memory contractURI_);
 

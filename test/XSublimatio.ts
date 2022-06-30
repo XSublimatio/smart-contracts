@@ -18,7 +18,7 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const checkInvariants = async (instance: XSublimatio) => {
-    const compactState3 = await instance.COMPACT_STATE_3();
+    const [compactState1, compactState2, compactState3] = await instance.compactStates();
     const drugsAvailable = compactState3.shr(152).mask(11);
     const moleculesAvailable = compactState3.shr(163).mask(13);
     // const tokenNonce = compactState3.shr(176).mask(80);
@@ -60,6 +60,12 @@ const checkInvariants = async (instance: XSublimatio) => {
     return true;
 };
 
+const getBlockTimestamp = async () => {
+    const blockNumBefore = await ethers.provider.getBlockNumber();
+    const blockBefore = await ethers.provider.getBlock(blockNumBefore);
+    return blockBefore.timestamp;
+};
+
 describe('XSublimatio', () => {
     const pricePerTokenMint = ethers.utils.parseUnits('0.2', 'ether');
     const contractURI = 'http://127.0.0.1:8080/';
@@ -69,113 +75,221 @@ describe('XSublimatio', () => {
     let bob: Signer;
     let charlie: Signer;
 
+    let launchTimestamp: number;
+
     beforeEach(async () => {
         [alice, bob, charlie] = await ethers.getSigners();
 
         const contractFactory = new XSublimatio__factory(alice);
 
-        contract = await contractFactory.deploy(contractURI, await alice.getAddress(), await bob.getAddress(), pricePerTokenMint, 0);
+        launchTimestamp = (await getBlockTimestamp()) + 1000;
+
+        contract = await contractFactory.deploy(contractURI, await alice.getAddress(), pricePerTokenMint, launchTimestamp);
 
         await contract.deployed();
     });
 
-    it('Correctly initialized', async () => {
-        expect(contract.address).to.properAddress;
+    describe('miscellaneous', () => {
+        it('Correctly initialized', async () => {
+            expect(contract.address).to.properAddress;
 
-        expect(await contract.name()).to.equal('XSublimatio');
-        expect(await contract.symbol()).to.equal('XSUB');
-        expect(await contract.totalSupply()).to.equal(0);
+            expect(await contract.name()).to.equal('XSublimatio');
+            expect(await contract.symbol()).to.equal('XSUB');
+            expect(await contract.totalSupply()).to.equal(0);
 
-        expect(await contract.PROCEEDS_DESTINATION()).to.equal(await bob.getAddress());
-        expect(await contract.PRICE_PER_TOKEN_MINT()).to.equal(pricePerTokenMint);
-        expect(await contract.LAUNCH_TIMESTAMP()).to.equal(0);
+            expect(await contract.LAUNCH_TIMESTAMP()).to.equal(launchTimestamp);
 
-        expect(await contract.owner()).to.equal(await alice.getAddress());
-        expect(await contract.pendingOwner()).to.equal(ethers.constants.AddressZero);
-        expect(await contract.baseURI()).to.equal('http://127.0.0.1:8080/');
+            expect(await contract.owner()).to.equal(await alice.getAddress());
+            expect(await contract.pendingOwner()).to.equal(ethers.constants.AddressZero);
+            expect(await contract.proceedsDestination()).to.equal(ethers.constants.AddressZero);
+            expect(await contract.baseURI()).to.equal('http://127.0.0.1:8080/');
+            expect(await contract.pricePerTokenMint()).to.equal(pricePerTokenMint);
 
-        expect(await contract.COMPACT_STATE_1()).to.equal('60087470205620319587750252891185586116542855063423969629534558109603704138');
-        expect(await contract.COMPACT_STATE_2()).to.equal('114873104402099400223353432978706708436353982610412083425164130989245597730');
-        expect(await contract.COMPACT_STATE_3()).to.equal('67212165445492353831982701316699907697777805738906362');
+            const [compactState1, compactState2, compactState3] = await contract.compactStates();
 
-        const [moleculeAvailabilities, drugAvailabilities] = await contract.availabilities();
+            expect(compactState1).to.equal('60087470205620319587750252891185586116542855063423969629534558109603704138');
+            expect(compactState2).to.equal('114873104402099400223353432978706708436353982610412083425164130989245597730');
+            expect(compactState3).to.equal('67212165445492353831982701316699907697777805738906362');
 
-        expect(moleculeAvailabilities.map((x) => x.toNumber())).to.deep.equal(MOLECULE_MAX_SUPPLIES);
-        expect(drugAvailabilities.map((x) => x.toNumber())).to.deep.equal(DRUG_MAX_SUPPLIES);
+            const [moleculeAvailabilities, drugAvailabilities] = await contract.availabilities();
 
-        expect(await contract.contractURI()).to.equal(`${contractURI}info`);
-        expect(await contract.drugsAvailable()).to.equal(1134);
+            expect(moleculeAvailabilities.map((x) => x.toNumber())).to.deep.equal(MOLECULE_MAX_SUPPLIES);
+            expect(drugAvailabilities.map((x) => x.toNumber())).to.deep.equal(DRUG_MAX_SUPPLIES);
 
-        for (let i = 0; i < 19; ++i) {
-            expect(await contract.getAvailabilityOfDrug(i)).to.equal(DRUG_MAX_SUPPLIES[i]);
-        }
+            expect(await contract.contractURI()).to.equal(`${contractURI}`);
+            expect(await contract.drugsAvailable()).to.equal(1134);
 
-        for (let i = 0; i < 63; ++i) {
-            expect(await contract.getAvailabilityOfMolecule(i)).to.equal(MOLECULE_MAX_SUPPLIES[i]);
-        }
+            for (let i = 0; i < 19; ++i) {
+                expect(await contract.getAvailabilityOfDrug(i)).to.equal(DRUG_MAX_SUPPLIES[i]);
+            }
 
-        for (let i = 0; i < 19; ++i) {
-            expect(await contract.getRecipeOfDrug(i)).to.deep.equal(RECIPES[i]);
-        }
+            for (let i = 0; i < 63; ++i) {
+                expect(await contract.getAvailabilityOfMolecule(i)).to.equal(MOLECULE_MAX_SUPPLIES[i]);
+            }
 
-        expect(await contract.moleculesAvailable()).to.equal(5748);
+            for (let i = 0; i < 19; ++i) {
+                expect(await contract.getRecipeOfDrug(i)).to.deep.equal(RECIPES[i]);
+            }
 
-        expect(await checkInvariants(contract)).to.be.true;
-    });
+            expect(await contract.moleculesAvailable()).to.equal(5748);
 
-    it('Has proper helpers', async () => {
-        expect(MOLECULE_MAX_SUPPLY).to.equal(5748);
-
-        expect(MOLECULE_MAX_SUPPLIES.reduce((acc, ele) => acc + ele)).to.equal(5748);
-
-        expect(DRUG_MAX_SUPPLY).to.equal(1134);
-
-        expect(DRUG_MAX_SUPPLIES.reduce((acc, ele) => acc + ele)).to.equal(1134);
-
-        expect(RECIPES.length).to.equal(DRUG_MAX_SUPPLIES.length);
-
-        RECIPES.forEach((recipe) => recipe.forEach((moleculeType) => expect(moleculeType).be.lessThan(MOLECULE_MAX_SUPPLIES.length)));
-
-        MOLECULES.forEach((molecule) => {
-            expect(molecule.type).to.be.a('number');
-            expect(molecule.name).to.be.a('string');
-            expect(molecule.description).to.be.a('string');
-            expect(molecule.label).to.be.a('string');
-            expect(molecule.maxSupply).to.be.a('number');
-            expect(molecule.image).to.be.a('string');
-            expect(molecule.getSupply).to.be.a('function');
+            expect(await checkInvariants(contract)).to.be.true;
         });
 
-        DRUGS.forEach((drug) => {
-            expect(drug.type).to.be.a('number');
-            expect(drug.name).to.be.a('string');
-            expect(drug.description).to.be.a('string');
-            expect(drug.label).to.be.a('string');
-            expect(drug.maxSupply).to.be.a('number');
+        it('Has proper helpers', async () => {
+            expect(MOLECULE_MAX_SUPPLY).to.equal(5748);
 
-            drug.recipe.forEach((molecule) => expect(molecule).to.equal(MOLECULES[molecule.type]));
+            expect(MOLECULE_MAX_SUPPLIES.reduce((acc, ele) => acc + ele)).to.equal(5748);
 
-            expect(drug.image).to.be.a('string');
-            expect(drug.getBrewPossibility).to.be.a('function');
-            expect(drug.getSupply).to.be.a('function');
+            expect(DRUG_MAX_SUPPLY).to.equal(1134);
+
+            expect(DRUG_MAX_SUPPLIES.reduce((acc, ele) => acc + ele)).to.equal(1134);
+
+            expect(RECIPES.length).to.equal(DRUG_MAX_SUPPLIES.length);
+
+            RECIPES.forEach((recipe) => recipe.forEach((moleculeType) => expect(moleculeType).be.lessThan(MOLECULE_MAX_SUPPLIES.length)));
+
+            MOLECULES.forEach((molecule) => {
+                expect(molecule.type).to.be.a('number');
+                expect(molecule.name).to.be.a('string');
+                expect(molecule.description).to.be.a('string');
+                expect(molecule.label).to.be.a('string');
+                expect(molecule.maxSupply).to.be.a('number');
+                expect(molecule.image).to.be.a('string');
+                expect(molecule.getSupply).to.be.a('function');
+            });
+
+            DRUGS.forEach((drug) => {
+                expect(drug.type).to.be.a('number');
+                expect(drug.name).to.be.a('string');
+                expect(drug.description).to.be.a('string');
+                expect(drug.label).to.be.a('string');
+                expect(drug.maxSupply).to.be.a('number');
+
+                drug.recipe.forEach((molecule) => expect(molecule).to.equal(MOLECULES[molecule.type]));
+
+                expect(drug.image).to.be.a('string');
+                expect(drug.getBrewPossibility).to.be.a('function');
+                expect(drug.getSupply).to.be.a('function');
+            });
+        });
+
+        it('Can change owner', async () => {
+            await (await contract.proposeOwnership(await bob.getAddress())).wait();
+            await (await contract.connect(bob).acceptOwnership()).wait();
+            expect(await contract.owner()).to.equal(await bob.getAddress());
+            expect(await contract.pendingOwner()).to.equal(ethers.constants.AddressZero);
+        });
+
+        it('Cannot propose owner if not owner', async () => {
+            await expect(contract.connect(bob).proposeOwnership(await bob.getAddress())).to.be.revertedWith('UNAUTHORIZED');
+        });
+
+        it('Cannot accept owner if not pending owner', async () => {
+            await (await contract.proposeOwnership(await bob.getAddress())).wait();
+            await expect(contract.connect(charlie).acceptOwnership()).to.be.revertedWith('UNAUTHORIZED');
+        });
+
+        it('Cannot set asset generator hash if not owner', async () => {
+            expect(
+                contract.connect(bob).setAssetGeneratorHash('0x1234567812345678123456781234567812345678123456781234567812345678')
+            ).to.be.revertedWith('UNAUTHORIZED');
+        });
+
+        it('Can set asset generator hash before launch', async () => {
+            await (await contract.setAssetGeneratorHash('0x1234567812345678123456781234567812345678123456781234567812345678')).wait();
+            expect(await contract.assetGeneratorHash()).to.equal('0x1234567812345678123456781234567812345678123456781234567812345678');
+        });
+
+        it('Cannot set base URI if not owner', async () => {
+            expect(contract.connect(bob).setBaseURI('test')).to.be.revertedWith('UNAUTHORIZED');
+        });
+
+        it('Can set base URI', async () => {
+            await (await contract.setBaseURI('test')).wait();
+            expect(await contract.baseURI()).to.equal('test');
+        });
+
+        it('Cannot set proceeds destination if not owner', async () => {
+            const charlieAddress = await charlie.getAddress();
+            expect(contract.connect(bob).setProceedsDestination(charlieAddress)).to.be.revertedWith('UNAUTHORIZED');
+        });
+
+        it('Can set proceeds destination before launch', async () => {
+            const charlieAddress = await charlie.getAddress();
+            await (await contract.setProceedsDestination(charlieAddress)).wait();
+            expect(await contract.proceedsDestination()).to.equal(charlieAddress);
+        });
+
+        it('Can set asset generator hash after launch, if it has not yet been set', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+            await (await contract.setAssetGeneratorHash('0x1234567812345678123456781234567812345678123456781234567812345678')).wait();
+            expect(await contract.assetGeneratorHash()).to.equal('0x1234567812345678123456781234567812345678123456781234567812345678');
+        });
+
+        it('Can set proceeds destination after launch, if it has not yet been set', async () => {
+            const charlieAddress = await charlie.getAddress();
+            await (await contract.setProceedsDestination(charlieAddress)).wait();
+
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+            expect(await contract.proceedsDestination()).to.equal(charlieAddress);
+        });
+
+        it('Cannot set asset generator hash after launch, if it has been set', async () => {
+            await (await contract.setAssetGeneratorHash('0x1234567812345678123456781234567812345678123456781234567812345678')).wait();
+
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+            expect(contract.setAssetGeneratorHash('0x1234567812345678123456781234567812345678123456781234567812345678')).to.be.revertedWith(
+                'ALREADY_LAUNCHED'
+            );
+        });
+
+        it('Cannot set proceeds destination after launch, if it has been set', async () => {
+            await (await contract.setProceedsDestination(await charlie.getAddress())).wait();
+
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+            expect(contract.setProceedsDestination(await charlie.getAddress())).to.be.revertedWith('ALREADY_LAUNCHED');
+        });
+
+        it('Cannot decrease price per token mint if not owner', async () => {
+            const newPricePerTokenMint = ethers.utils.parseUnits('0.1', 'ether');
+            expect(contract.connect(bob).setPricePerTokenMint(newPricePerTokenMint)).to.be.revertedWith('UNAUTHORIZED');
+        });
+
+        it('Can decrease price per token mint', async () => {
+            const newPricePerTokenMint = ethers.utils.parseUnits('0.1', 'ether');
+            await (await contract.setPricePerTokenMint(newPricePerTokenMint)).wait();
+            expect(await contract.pricePerTokenMint()).to.equal(newPricePerTokenMint);
+        });
+
+        it('Cannot increase price per token mint', async () => {
+            const newPricePerTokenMint = ethers.utils.parseUnits('0.3', 'ether');
+            expect(contract.setPricePerTokenMint(newPricePerTokenMint)).to.be.revertedWith('CANNOT_INCREASE_PRICE');
         });
     });
 
-    describe('purchase', () => {
-        // TODO: test NO_MOLECULES_AVAILABLE (difficult setup)
+    describe('purchase and withdraw proceeds', () => {
+        it('Cannot purchase molecules before launch', async () => {
+            const aliceAddress = await alice.getAddress();
+            await expect(contract.purchase(aliceAddress, 5749, 5749)).to.be.revertedWith('NOT_LAUNCHED_YET');
+        });
 
         it('Cannot purchase molecules if cannot fullfil request', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
             const aliceAddress = await alice.getAddress();
             await expect(contract.purchase(aliceAddress, 5749, 5749)).to.be.revertedWith('CANNOT_FULLFIL_REQUEST');
         });
 
         it('Cannot purchase molecules if insufficient funds provided', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint.mul(4);
             await expect(contract.purchase(aliceAddress, 5, 5, { value })).to.be.revertedWith('INCORRECT_VALUE');
         });
 
         it('Can purchase a batch of 5 molecules', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint.mul(5);
             const tx = await (await contract.purchase(aliceAddress, 5, 5, { value })).wait();
@@ -217,6 +331,8 @@ describe('XSublimatio', () => {
         });
 
         it('Can purchase a batch of 60 molecules', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint.mul(60);
             const tx = await (await contract.purchase(aliceAddress, 60, 60, { value })).wait();
@@ -257,7 +373,9 @@ describe('XSublimatio', () => {
             expect(await checkInvariants(contract)).to.be.true;
         });
 
-        it('Can purchase all molecules in batchers of 120', async () => {
+        it.skip('Can purchase all molecules in batches of 120', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint.mul(120);
 
@@ -286,21 +404,60 @@ describe('XSublimatio', () => {
 
             expect(await checkInvariants(contract)).to.be.true;
         }).timeout(1_000_000);
+
+        it('Can withdraw proceeds to owner, if no proceeds destination set', async () => {
+            const aliceAddress = await alice.getAddress();
+            const value = pricePerTokenMint.mul(60);
+
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+
+            await (await contract.purchase(aliceAddress, 60, 60, { value })).wait();
+
+            const aliceBalanceBeforeWithdrawal = await alice.getBalance();
+
+            await (await contract.connect(bob).withdrawProceeds()).wait();
+
+            const aliceBalanceAfterWithdrawal = await alice.getBalance();
+
+            expect(aliceBalanceAfterWithdrawal.sub(aliceBalanceBeforeWithdrawal)).to.equal(value);
+        });
+
+        it('Can withdraw proceeds to proceeds destination, if set', async () => {
+            const aliceAddress = await alice.getAddress();
+            const bobAddress = await bob.getAddress();
+            const value = pricePerTokenMint.mul(60);
+
+            await (await contract.setProceedsDestination(bobAddress)).wait();
+
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+
+            await (await contract.purchase(aliceAddress, 60, 60, { value })).wait();
+
+            const bobBalanceBeforeWithdrawal = await bob.getBalance();
+
+            await (await contract.withdrawProceeds()).wait();
+
+            const bobBalanceAfterWithdrawal = await bob.getBalance();
+
+            expect(bobBalanceAfterWithdrawal.sub(bobBalanceBeforeWithdrawal)).to.equal(value);
+        });
     });
 
     describe('purchase and brew', () => {
+        it('Cannot brew before launch', async () => {
+            const aliceAddress = await alice.getAddress();
+            await expect(contract.brew([0, 1, 2], 19, aliceAddress)).to.be.revertedWith('NOT_LAUNCHED_YET');
+        });
+
         it('Cannot brew an invalid drug type', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
             const aliceAddress = await alice.getAddress();
             await expect(contract.brew([0, 1, 2], 19, aliceAddress)).to.be.revertedWith('INVALID_DRUG_TYPE');
         });
 
-        // TODO: test DRUG_NOT_AVAILABLE (difficult starting condition)
+        it.skip('Can brew one of each drug', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
 
-        // TODO: test NOT_OWNER (difficult starting condition)
-
-        // TODO: test INVALID_MOLECULE (difficult starting condition)
-
-        it('Can brew one of each drug', async () => {
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint.mul(120);
 
@@ -400,6 +557,8 @@ describe('XSublimatio', () => {
         }).timeout(1_000_000);
 
         it('Can brew one of each drug with special water', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint.mul(120);
 
@@ -504,6 +663,10 @@ describe('XSublimatio', () => {
     });
 
     describe('purchase, brew, and decompose', () => {
+        beforeEach(async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+        });
+
         it('Cannot decompose for token not owned', async () => {
             const aliceAddress = await alice.getAddress();
             const value = pricePerTokenMint;
@@ -629,13 +792,98 @@ describe('XSublimatio', () => {
         }).timeout(1_000_000);
     });
 
-    describe.only('claim water', () => {
-        beforeEach(async () => {
-            await (await contract.setPromotionAccounts([await alice.getAddress(), await bob.getAddress()])).wait();
-        });
-
+    describe('claim water', () => {
         it('Cannot claim water if not whitelisted', async () => {
             await expect(contract.connect(charlie).claimWater(await charlie.getAddress())).to.be.revertedWith('CANNOT_CLAIM');
+        });
+
+        it('Can claim water before launch, if added to whitelisted', async () => {
+            await (await contract.setPromotionAccounts([await bob.getAddress(), await charlie.getAddress()])).wait();
+            const tx1 = await (await contract.connect(bob).claimWater(await bob.getAddress())).wait();
+            const tx2 = await (await contract.connect(charlie).claimWater(await charlie.getAddress())).wait();
+
+            expect(tx1.events?.[0].args?.to).to.equal(await bob.getAddress());
+            expect(getTokenFromId(tx1.events?.[0].args?.tokenId).type).to.equal(0);
+            expect(tx2.events?.[0].args?.to).to.equal(await charlie.getAddress());
+            expect(getTokenFromId(tx2.events?.[0].args?.tokenId).type).to.equal(0);
+        });
+
+        it('Cannot claim water if removed from whitelisted', async () => {
+            await (await contract.setPromotionAccounts([await bob.getAddress(), await charlie.getAddress()])).wait();
+            await (await contract.unsetPromotionAccounts([await charlie.getAddress()])).wait();
+            await (await contract.connect(bob).claimWater(await bob.getAddress())).wait();
+            await expect(contract.connect(charlie).claimWater(await charlie.getAddress())).to.be.revertedWith('CANNOT_CLAIM');
+        });
+
+        it('Cannot claim water after launch', async () => {
+            await (await contract.setPromotionAccounts([await bob.getAddress(), await charlie.getAddress()])).wait();
+
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+            await expect(contract.connect(charlie).claimWater(await charlie.getAddress())).to.be.revertedWith('CANNOT_CLAIM');
+        });
+    });
+
+    describe('give waters and random molecules', () => {
+        it('Cannot give water as non-owner', async () => {
+            await expect(contract.connect(charlie).giveWaters([await charlie.getAddress()], [1])).to.be.revertedWith('UNAUTHORIZED');
+        });
+
+        it('Cannot give molecules as non-owner', async () => {
+            await expect(contract.connect(charlie).giveWaters([await charlie.getAddress()], [1])).to.be.revertedWith('UNAUTHORIZED');
+        });
+
+        it('Can give water before launch', async () => {
+            const destinations = [await bob.getAddress(), await charlie.getAddress()];
+            const amounts = [1, 4];
+
+            const tx = await (await contract.giveWaters(destinations, amounts, { gasLimit: 1000000 })).wait();
+
+            expect(tx.events?.[0].args?.to).to.equal(await bob.getAddress());
+            expect(getTokenFromId(tx.events?.[0].args?.tokenId).globalType).to.equal(0);
+
+            expect(tx.events?.[1].args?.to).to.equal(await charlie.getAddress());
+            expect(getTokenFromId(tx.events?.[1].args?.tokenId).globalType).to.equal(0);
+
+            expect(tx.events?.[2].args?.to).to.equal(await charlie.getAddress());
+            expect(getTokenFromId(tx.events?.[2].args?.tokenId).globalType).to.equal(0);
+
+            expect(tx.events?.[3].args?.to).to.equal(await charlie.getAddress());
+            expect(getTokenFromId(tx.events?.[3].args?.tokenId).globalType).to.equal(0);
+
+            expect(tx.events?.[4].args?.to).to.equal(await charlie.getAddress());
+            expect(getTokenFromId(tx.events?.[4].args?.tokenId).globalType).to.equal(0);
+        });
+
+        it('Can give water before launch', async () => {
+            const destinations = [await bob.getAddress(), await charlie.getAddress()];
+            const amounts = [1, 4];
+
+            const tx = await (await contract.giveMolecules(destinations, amounts, { gasLimit: 1000000 })).wait();
+
+            expect(tx.events?.[0].args?.to).to.equal(await bob.getAddress());
+            expect(getTokenFromId(tx.events?.[0].args?.tokenId).category).to.equal('molecule');
+
+            expect(tx.events?.[1].args?.to).to.equal(await charlie.getAddress());
+            expect(getTokenFromId(tx.events?.[1].args?.tokenId).category).to.equal('molecule');
+
+            expect(tx.events?.[2].args?.to).to.equal(await charlie.getAddress());
+            expect(getTokenFromId(tx.events?.[2].args?.tokenId).category).to.equal('molecule');
+
+            expect(tx.events?.[3].args?.to).to.equal(await charlie.getAddress());
+            expect(getTokenFromId(tx.events?.[3].args?.tokenId).category).to.equal('molecule');
+
+            expect(tx.events?.[4].args?.to).to.equal(await charlie.getAddress());
+            expect(getTokenFromId(tx.events?.[4].args?.tokenId).category).to.equal('molecule');
+        });
+
+        it('Cannot give water after launch', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+            await expect(contract.giveWaters([await charlie.getAddress()], [1])).to.be.revertedWith('ALREADY_LAUNCHED');
+        });
+
+        it('Cannot give molecules after launch', async () => {
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+            await expect(contract.giveWaters([await charlie.getAddress()], [1])).to.be.revertedWith('ALREADY_LAUNCHED');
         });
     });
 });

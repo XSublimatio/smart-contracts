@@ -10,58 +10,43 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
     using Strings for uint256;
 
-    uint256 internal constant IS_NOT_LOCKED = uint256(1);
-    uint256 internal constant IS_LOCKED = uint256(2);
+    // Contains first 21 molecule availabilities (12 bits each).
+    uint256 internal COMPACT_STATE_1 = uint256(60087470205620319587750252891185586116542855063423969629534558109603704138);
 
-    uint256 public immutable PRICE_PER_TOKEN_MINT;
+    // Contains next 42 molecule availabilities (6 bits each).
+    uint256 internal COMPACT_STATE_2 = uint256(114873104402099400223353432978706708436353982610412083425164130989245597730);
+
+    // Contains (right to left) 19 drug availabilities (8 bits each), total drugs available (11 bits), total molecules available (13 bits), and nonce (remaining 80 bits).
+    uint256 internal COMPACT_STATE_3 = uint256(67212165445492353831982701316699907697777805738906362);
+
     uint256 public immutable LAUNCH_TIMESTAMP;
-
-    uint256 internal _lockedStatus = IS_NOT_LOCKED;
 
     address public owner;
     address public pendingOwner;
     address public proceedsDestination;
 
-    string public baseURI;
-
     bytes32 public assetGeneratorHash;
 
-    // Contains first 21 molecule availabilities (12 bits each).
-    uint256 public COMPACT_STATE_1 = uint256(60087470205620319587750252891185586116542855063423969629534558109603704138);
+    string public baseURI;
 
-    // Contains next 42 molecule availabilities (6 bits each).
-    uint256 public COMPACT_STATE_2 = uint256(114873104402099400223353432978706708436353982610412083425164130989245597730);
-
-    // Contains (right to left) 19 drug availabilities (8 bits each), total drugs available (11 bits), total molecules available (13 bits), and nonce (remaining 80 bits).
-    uint256 public COMPACT_STATE_3 = uint256(67212165445492353831982701316699907697777805738906362);
+    uint256 public pricePerTokenMint;
 
     mapping(address => bool) internal _canClaimFreeWater;
 
     constructor (
         string memory baseURI_,
         address owner_,
-        address proceedsDestination_,
         uint256 pricePerTokenMint_,
         uint256 launchTimestamp_
     ) ERC721("XSublimatio", "XSUB") {
         baseURI = baseURI_;
         owner = owner_;
-        PRICE_PER_TOKEN_MINT = pricePerTokenMint_;
+        pricePerTokenMint = pricePerTokenMint_;
         LAUNCH_TIMESTAMP = launchTimestamp_;
-
-        require((proceedsDestination = proceedsDestination_) != address(0), "INVALID_PROCEEDS_DESTINATION");
-    }
-
-    modifier noReenter() {
-        require(_lockedStatus == IS_NOT_LOCKED, "NO_REENTER");
-
-        _lockedStatus = IS_LOCKED;
-        _;
-        _lockedStatus = IS_NOT_LOCKED;
     }
 
     modifier onlyAfterLaunch() {
-        require(block.timestamp > LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
+        require(block.timestamp >= LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
         _;
     }
 
@@ -92,7 +77,8 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         emit OwnershipProposed(owner, pendingOwner = newOwner_);
     }
 
-    function setAssetGeneratorHash(bytes32 assetGeneratorHash_) external onlyOwner onlyBeforeLaunch {
+    function setAssetGeneratorHash(bytes32 assetGeneratorHash_) external onlyOwner {
+        require(assetGeneratorHash == bytes32(0) || block.timestamp < LAUNCH_TIMESTAMP, "ALREADY_LAUNCHED");
         emit AssetGeneratorHashSet(assetGeneratorHash = assetGeneratorHash_);
     }
 
@@ -100,23 +86,37 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         emit BaseURISet(baseURI = baseURI_);
     }
 
-    function setProceedsDestination(address proceedsDestination_) external onlyOwner onlyBeforeLaunch {
+    function setPricePerTokenMint(uint256 pricePerTokenMint_) external onlyOwner {
+        require(pricePerTokenMint_ < pricePerTokenMint, "CANNOT_INCREASE_PRICE");
+        emit PricePerTokenMintSet(pricePerTokenMint = pricePerTokenMint_);
+    }
+
+    function setProceedsDestination(address proceedsDestination_) external onlyOwner {
+        require(proceedsDestination == address(0) || block.timestamp < LAUNCH_TIMESTAMP, "ALREADY_LAUNCHED");
         emit ProceedsDestinationSet(proceedsDestination = proceedsDestination_);
     }
 
     function setPromotionAccounts(address[] memory accounts_) external onlyOwner onlyBeforeLaunch {
-        for (uint256 i; i < accounts_.length; ++i) {
+        for (uint256 i; i < accounts_.length;) {
             address account = accounts_[i];
             _canClaimFreeWater[account] = true;
             emit PromotionAccountSet(account);
+
+            unchecked {
+                ++i;
+            }
         }
     }
 
     function unsetPromotionAccounts(address[] memory accounts_) external onlyOwner onlyBeforeLaunch {
-        for (uint256 i; i < accounts_.length; ++i) {
+        for (uint256 i; i < accounts_.length;) {
             address account = accounts_[i];
             _canClaimFreeWater[account] = false;
             emit PromotionAccountUnset(account);
+
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -197,7 +197,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     }
 
     function claimWater(address destination_) external returns (uint256 molecule_) {
-        // NOTE: no need for the onlyAfterLaunch modifier since `canClaimFreeWater` already checks the timestamp
+        // NOTE: no need for the onlyBeforeLaunch modifier since `canClaimFreeWater` already checks the timestamp
         require(canClaimFreeWater(msg.sender), "CANNOT_CLAIM");
 
         _canClaimFreeWater[msg.sender] = false;
@@ -205,7 +205,8 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         ( COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, molecule_ ) = _giveMolecule(COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3, 0, destination_);
     }
 
-    function decompose(uint256 drug_) external onlyAfterLaunch {
+    function decompose(uint256 drug_) external {
+        // NOTE: no need for onlyAfterLaunch modifier because drug cannot exist (be brewed) before launch, nor can water be burned before launch.
         // Check that the caller owns the token.
         require(ownerOf(drug_) == msg.sender, "NOT_OWNER");
 
@@ -214,7 +215,9 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         // Check that the token is a drug.
         require(drugType >= 63 && drugType < 82, "NOT_DRUG");
 
-        drugType -= 63;
+        unchecked {
+            drugType -= 63;
+        }
 
         address drugAsAddress = address(uint160(drug_));
         uint256 moleculeCount = balanceOf(drugAsAddress);
@@ -232,28 +235,30 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
             _transfer(drugAsAddress, msg.sender, molecule);
         }
 
-        unchecked {
-            // Increment the drugs' availability, increment the total amount of drugs available, and set storage.
-            COMPACT_STATE_3 = _incrementDrugAvailability(COMPACT_STATE_3, drugType);
-        }
+        // Increment the drugs' availability, increment the total amount of drugs available, and set storage.
+        COMPACT_STATE_3 = _incrementDrugAvailability(COMPACT_STATE_3, drugType);
 
         // Burn the drug.
         _burn(drug_);
     }
 
-    function giveWaters(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner onlyBeforeLaunch returns (uint256[][] memory molecules_) {
+    function giveWaters(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner onlyBeforeLaunch {
         // Cache relevant compact states from storage.
         uint256 compactState1 = COMPACT_STATE_1;
         uint256 compactState2 = COMPACT_STATE_2;
         uint256 compactState3 = COMPACT_STATE_3;
 
-        molecules_ = new uint256[][](destinations_.length);
+        for (uint256 i; i < destinations_.length;) {
+            for (uint256 j; j < amounts_[i];) {
+                ( compactState1, compactState2, compactState3, ) = _giveMolecule(compactState1, compactState2, compactState3, 0, destinations_[i]);
 
-        for (uint256 i; i < destinations_.length; ++i) {
-            uint256 count = amounts_[i];
+                unchecked {
+                    ++j;
+                }
+            }
 
-            while (count > 0) {
-                ( compactState1, compactState2, compactState3, molecules_[i][--count] ) = _giveMolecule(compactState1, compactState2, compactState3, 0, destinations_[i]);
+            unchecked {
+                ++i;
             }
         }
 
@@ -263,7 +268,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         COMPACT_STATE_3 = compactState3;
     }
 
-    function giveMolecules(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner onlyBeforeLaunch returns (uint256[][] memory molecules_) {
+    function giveMolecules(address[] memory destinations_, uint256[] memory amounts_) external onlyOwner onlyBeforeLaunch {
         require(block.timestamp < LAUNCH_TIMESTAMP, "ALREADY_LAUNCHED");
 
         // Cache relevant compact states from storage.
@@ -274,24 +279,26 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         // Get the number of molecules available from compactState3.
         uint256 availableMoleculeCount = _getMoleculesAvailable(compactState3);
 
-        molecules_ = new uint256[][](destinations_.length);
-
-        for (uint256 i; i < destinations_.length; ++i) {
-            uint256 count = amounts_[i];
-
-            while (count > 0) {
+        for (uint256 i; i < destinations_.length;) {
+            for (uint256 j; j < amounts_[i];) {
                 // Get a pseudo random number.
                 uint256 randomNumber = _generatePseudoRandomNumber(_getTokenNonce(compactState3));
                 uint256 moleculeType;
 
-                unchecked {
-                    // Provide _drawMolecule with the 3 relevant cached compact states, and a random number between 0 and availableMoleculeCount - 1, inclusively.
-                    // The result is newly updated cached compact states. Also, availableMoleculeCount is pre-decremented so that each random number is within correct bounds.
-                    ( compactState1, compactState2, compactState3, moleculeType ) = _drawMolecule(compactState1, compactState2, compactState3, _limitTo(randomNumber, --availableMoleculeCount));
+                // Provide _drawMolecule with the 3 relevant cached compact states, and a random number between 0 and availableMoleculeCount - 1, inclusively.
+                // The result is newly updated cached compact states. Also, availableMoleculeCount is pre-decremented so that each random number is within correct bounds.
+                ( compactState1, compactState2, compactState3, moleculeType ) = _drawMolecule(compactState1, compactState2, compactState3, _limitTo(randomNumber, --availableMoleculeCount));
 
-                    // Generate a token id from the moleculeType and randomNumber (saving it in the array of token IDs) and mint the molecule NFT.
-                    _mint(destinations_[i], molecules_[i][--count] = _generateTokenId(moleculeType, randomNumber));
+                // Generate a token id from the moleculeType and randomNumber (saving it in the array of token IDs) and mint the molecule NFT.
+                _mint(destinations_[i], _generateTokenId(moleculeType, randomNumber));
+
+                unchecked {
+                    ++j;
                 }
+            }
+
+            unchecked {
+                ++i;
             }
         }
 
@@ -318,7 +325,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         // Compute the price this purchase will cost, since it will be needed later, and count will be decremented in a while-loop.
         uint256 totalCost;
         unchecked {
-            totalCost = PRICE_PER_TOKEN_MINT * count;
+            totalCost = pricePerTokenMint * count;
         }
 
         // Require that enough ether was provided,
@@ -326,7 +333,9 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
         if (msg.value > totalCost) {
             // If extra, require that it is successfully returned to the caller.
-            require(_transferEther(msg.sender, msg.value - totalCost), "TRANSFER_FAILED");
+            unchecked {
+                require(_transferEther(msg.sender, msg.value - totalCost), "TRANSFER_FAILED");
+            }
         }
 
         // Initialize the array of token IDs to a length of the nfts to be purchased.
@@ -366,6 +375,10 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         return block.timestamp < LAUNCH_TIMESTAMP && _canClaimFreeWater[account_];
     }
 
+    function compactStates() external view returns (uint256 compactState1_, uint256 compactState2_, uint256 compactState3_) {
+        return (COMPACT_STATE_1, COMPACT_STATE_2, COMPACT_STATE_3);
+    }
+
     function contractURI() external view returns (string memory contractURI_) {
         return baseURI;
     }
@@ -374,9 +387,14 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         // Cache relevant compact states from storage.
         uint256 compactState3 = COMPACT_STATE_3;
 
-        for (uint256 i; i < 19; ++i) {
+        for (uint256 i; i < 19;) {
             availabilities_[i] = _getDrugAvailability(compactState3, i);
+
+            unchecked {
+                ++i;
+            }
         }
+
     }
 
     function drugsAvailable() external view returns (uint256 drugsAvailable_) {
@@ -509,8 +527,12 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         uint256 compactState1 = COMPACT_STATE_1;
         uint256 compactState2 = COMPACT_STATE_2;
 
-        for (uint256 i; i < 63; ++i) {
+        for (uint256 i; i < 63;) {
             availabilities_[i] = _getMoleculeAvailability(compactState1, compactState2, i);
+
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -520,8 +542,10 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         tokenIds_ = new uint256[](balance);
 
         for (uint256 i; i < balance;) {
+            tokenIds_[i] = tokenOfOwnerByIndex(owner_, i);
+
             unchecked {
-                tokenIds_[i++] = tokenOfOwnerByIndex(owner_, i);
+                ++i;
             }
         }
     }
@@ -539,7 +563,8 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     /**************************/
 
     function _beforeTokenTransfer(address from_, address to_, uint256 tokenId_) internal override {
-        require(block.timestamp >= LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
+        // Can mint before launch, but transfers and burns can only happen after launch.
+        require(from_ == address(0) || block.timestamp >= LAUNCH_TIMESTAMP, "NOT_LAUNCHED_YET");
         super._beforeTokenTransfer(from_, to_, tokenId_);
     }
 
@@ -617,10 +642,8 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
     }
 
     function _generateTokenId(uint256 type_, uint256 pseudoRandomNumber_) internal pure returns (uint256 tokenId_) {
-        unchecked {
-            // In right-most 100 bits, first 7 bits are the type and last 93 bits are from the pseudo random number.
-            tokenId_ = (type_ << 93) | (pseudoRandomNumber_ >> 163);
-        }
+        // In right-most 100 bits, first 7 bits are the type and last 93 bits are from the pseudo random number.
+        tokenId_ = (type_ << 93) | (pseudoRandomNumber_ >> 163);
 
         // From right to left:
         //  - 32 bits are to be used as an unsigned 32-bit (or signed 32-bit) seed.

@@ -21,20 +21,17 @@ import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
 export interface XSublimatioInterface extends utils.Interface {
     contractName: 'XSublimatio';
     functions: {
-        'COMPACT_STATE_1()': FunctionFragment;
-        'COMPACT_STATE_2()': FunctionFragment;
-        'COMPACT_STATE_3()': FunctionFragment;
         'LAUNCH_TIMESTAMP()': FunctionFragment;
-        'PRICE_PER_TOKEN_MINT()': FunctionFragment;
-        'PROCEEDS_DESTINATION()': FunctionFragment;
         'acceptOwnership()': FunctionFragment;
         'approve(address,uint256)': FunctionFragment;
+        'assetGeneratorHash()': FunctionFragment;
         'availabilities()': FunctionFragment;
         'balanceOf(address)': FunctionFragment;
         'baseURI()': FunctionFragment;
         'brew(uint256[],uint256,address)': FunctionFragment;
         'canClaimFreeWater(address)': FunctionFragment;
         'claimWater(address)': FunctionFragment;
+        'compactStates()': FunctionFragment;
         'contractURI()': FunctionFragment;
         'decompose(uint256)': FunctionFragment;
         'drugAvailabilities()': FunctionFragment;
@@ -54,11 +51,16 @@ export interface XSublimatioInterface extends utils.Interface {
         'owner()': FunctionFragment;
         'ownerOf(uint256)': FunctionFragment;
         'pendingOwner()': FunctionFragment;
+        'pricePerTokenMint()': FunctionFragment;
+        'proceedsDestination()': FunctionFragment;
         'proposeOwnership(address)': FunctionFragment;
         'purchase(address,uint256,uint256)': FunctionFragment;
         'safeTransferFrom(address,address,uint256)': FunctionFragment;
         'setApprovalForAll(address,bool)': FunctionFragment;
+        'setAssetGeneratorHash(bytes32)': FunctionFragment;
         'setBaseURI(string)': FunctionFragment;
+        'setPricePerTokenMint(uint256)': FunctionFragment;
+        'setProceedsDestination(address)': FunctionFragment;
         'setPromotionAccounts(address[])': FunctionFragment;
         'supportsInterface(bytes4)': FunctionFragment;
         'symbol()': FunctionFragment;
@@ -72,20 +74,17 @@ export interface XSublimatioInterface extends utils.Interface {
         'withdrawProceeds()': FunctionFragment;
     };
 
-    encodeFunctionData(functionFragment: 'COMPACT_STATE_1', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'COMPACT_STATE_2', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'COMPACT_STATE_3', values?: undefined): string;
     encodeFunctionData(functionFragment: 'LAUNCH_TIMESTAMP', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'PRICE_PER_TOKEN_MINT', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'PROCEEDS_DESTINATION', values?: undefined): string;
     encodeFunctionData(functionFragment: 'acceptOwnership', values?: undefined): string;
     encodeFunctionData(functionFragment: 'approve', values: [string, BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'assetGeneratorHash', values?: undefined): string;
     encodeFunctionData(functionFragment: 'availabilities', values?: undefined): string;
     encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
     encodeFunctionData(functionFragment: 'baseURI', values?: undefined): string;
     encodeFunctionData(functionFragment: 'brew', values: [BigNumberish[], BigNumberish, string]): string;
     encodeFunctionData(functionFragment: 'canClaimFreeWater', values: [string]): string;
     encodeFunctionData(functionFragment: 'claimWater', values: [string]): string;
+    encodeFunctionData(functionFragment: 'compactStates', values?: undefined): string;
     encodeFunctionData(functionFragment: 'contractURI', values?: undefined): string;
     encodeFunctionData(functionFragment: 'decompose', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'drugAvailabilities', values?: undefined): string;
@@ -105,11 +104,16 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
     encodeFunctionData(functionFragment: 'ownerOf', values: [BigNumberish]): string;
     encodeFunctionData(functionFragment: 'pendingOwner', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'pricePerTokenMint', values?: undefined): string;
+    encodeFunctionData(functionFragment: 'proceedsDestination', values?: undefined): string;
     encodeFunctionData(functionFragment: 'proposeOwnership', values: [string]): string;
     encodeFunctionData(functionFragment: 'purchase', values: [string, BigNumberish, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'safeTransferFrom', values: [string, string, BigNumberish]): string;
     encodeFunctionData(functionFragment: 'setApprovalForAll', values: [string, boolean]): string;
+    encodeFunctionData(functionFragment: 'setAssetGeneratorHash', values: [BytesLike]): string;
     encodeFunctionData(functionFragment: 'setBaseURI', values: [string]): string;
+    encodeFunctionData(functionFragment: 'setPricePerTokenMint', values: [BigNumberish]): string;
+    encodeFunctionData(functionFragment: 'setProceedsDestination', values: [string]): string;
     encodeFunctionData(functionFragment: 'setPromotionAccounts', values: [string[]]): string;
     encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
     encodeFunctionData(functionFragment: 'symbol', values?: undefined): string;
@@ -122,20 +126,17 @@ export interface XSublimatioInterface extends utils.Interface {
     encodeFunctionData(functionFragment: 'unsetPromotionAccounts', values: [string[]]): string;
     encodeFunctionData(functionFragment: 'withdrawProceeds', values?: undefined): string;
 
-    decodeFunctionResult(functionFragment: 'COMPACT_STATE_1', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'COMPACT_STATE_2', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'COMPACT_STATE_3', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'LAUNCH_TIMESTAMP', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'PRICE_PER_TOKEN_MINT', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'PROCEEDS_DESTINATION', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'acceptOwnership', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'assetGeneratorHash', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'availabilities', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'baseURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'brew', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'canClaimFreeWater', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'claimWater', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'compactStates', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'contractURI', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'decompose', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'drugAvailabilities', data: BytesLike): Result;
@@ -155,11 +156,16 @@ export interface XSublimatioInterface extends utils.Interface {
     decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'ownerOf', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'pendingOwner', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'pricePerTokenMint', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'proceedsDestination', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'proposeOwnership', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'purchase', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'safeTransferFrom', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'setApprovalForAll', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'setAssetGeneratorHash', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'setBaseURI', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'setPricePerTokenMint', data: BytesLike): Result;
+    decodeFunctionResult(functionFragment: 'setProceedsDestination', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'setPromotionAccounts', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
     decodeFunctionResult(functionFragment: 'symbol', data: BytesLike): Result;
@@ -176,11 +182,14 @@ export interface XSublimatioInterface extends utils.Interface {
         'AirdropSet(address)': EventFragment;
         'Approval(address,address,uint256)': EventFragment;
         'ApprovalForAll(address,address,bool)': EventFragment;
+        'AssetGeneratorHashSet(bytes32)': EventFragment;
         'BaseURISet(string)': EventFragment;
         'DrugDecomposed(uint256,uint256[])': EventFragment;
         'OwnershipAccepted(address,address)': EventFragment;
         'OwnershipProposed(address,address)': EventFragment;
-        'ProceedsWithdrawn(uint256)': EventFragment;
+        'PricePerTokenMintSet(uint256)': EventFragment;
+        'ProceedsDestinationSet(address)': EventFragment;
+        'ProceedsWithdrawn(address,uint256)': EventFragment;
         'PromotionAccountSet(address)': EventFragment;
         'PromotionAccountUnset(address)': EventFragment;
         'Transfer(address,address,uint256)': EventFragment;
@@ -189,10 +198,13 @@ export interface XSublimatioInterface extends utils.Interface {
     getEvent(nameOrSignatureOrTopic: 'AirdropSet'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'AssetGeneratorHashSet'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'BaseURISet'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'DrugDecomposed'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'OwnershipAccepted'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'OwnershipProposed'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'PricePerTokenMintSet'): EventFragment;
+    getEvent(nameOrSignatureOrTopic: 'ProceedsDestinationSet'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'ProceedsWithdrawn'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'PromotionAccountSet'): EventFragment;
     getEvent(nameOrSignatureOrTopic: 'PromotionAccountUnset'): EventFragment;
@@ -211,6 +223,10 @@ export type ApprovalForAllEvent = TypedEvent<[string, string, boolean], { owner:
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 
+export type AssetGeneratorHashSetEvent = TypedEvent<[string], { assetGeneratorHash: string }>;
+
+export type AssetGeneratorHashSetEventFilter = TypedEventFilter<AssetGeneratorHashSetEvent>;
+
 export type BaseURISetEvent = TypedEvent<[string], { baseURI: string }>;
 
 export type BaseURISetEventFilter = TypedEventFilter<BaseURISetEvent>;
@@ -227,7 +243,15 @@ export type OwnershipProposedEvent = TypedEvent<[string, string], { owner: strin
 
 export type OwnershipProposedEventFilter = TypedEventFilter<OwnershipProposedEvent>;
 
-export type ProceedsWithdrawnEvent = TypedEvent<[BigNumber], { amount: BigNumber }>;
+export type PricePerTokenMintSetEvent = TypedEvent<[BigNumber], { price: BigNumber }>;
+
+export type PricePerTokenMintSetEventFilter = TypedEventFilter<PricePerTokenMintSetEvent>;
+
+export type ProceedsDestinationSetEvent = TypedEvent<[string], { account: string }>;
+
+export type ProceedsDestinationSetEventFilter = TypedEventFilter<ProceedsDestinationSetEvent>;
+
+export type ProceedsWithdrawnEvent = TypedEvent<[string, BigNumber], { destination: string; amount: BigNumber }>;
 
 export type ProceedsWithdrawnEventFilter = TypedEventFilter<ProceedsWithdrawnEvent>;
 
@@ -267,17 +291,7 @@ export interface XSublimatio extends BaseContract {
     removeListener: OnEvent<this>;
 
     functions: {
-        COMPACT_STATE_1(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-        COMPACT_STATE_2(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-        COMPACT_STATE_3(overrides?: CallOverrides): Promise<[BigNumber]>;
-
         LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-        PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-        PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<[string]>;
 
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
@@ -286,6 +300,8 @@ export interface XSublimatio extends BaseContract {
             tokenId: BigNumberish,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
+
+        assetGeneratorHash(overrides?: CallOverrides): Promise<[string]>;
 
         availabilities(overrides?: CallOverrides): Promise<
             [BigNumber[], BigNumber[]] & {
@@ -308,6 +324,14 @@ export interface XSublimatio extends BaseContract {
         canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<[boolean] & { canClaimFreeWater_: boolean }>;
 
         claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
+        compactStates(overrides?: CallOverrides): Promise<
+            [BigNumber, BigNumber, BigNumber] & {
+                compactState1_: BigNumber;
+                compactState2_: BigNumber;
+                compactState3_: BigNumber;
+            }
+        >;
 
         contractURI(overrides?: CallOverrides): Promise<[string] & { contractURI_: string }>;
 
@@ -358,6 +382,10 @@ export interface XSublimatio extends BaseContract {
 
         pendingOwner(overrides?: CallOverrides): Promise<[string]>;
 
+        pricePerTokenMint(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+        proceedsDestination(overrides?: CallOverrides): Promise<[string]>;
+
         proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
         purchase(
@@ -388,7 +416,22 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<ContractTransaction>;
 
+        setAssetGeneratorHash(
+            assetGeneratorHash_: BytesLike,
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<ContractTransaction>;
+
         setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
+        setPricePerTokenMint(
+            pricePerTokenMint_: BigNumberish,
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<ContractTransaction>;
+
+        setProceedsDestination(
+            proceedsDestination_: string,
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<ContractTransaction>;
 
         setPromotionAccounts(
             accounts_: string[],
@@ -424,21 +467,13 @@ export interface XSublimatio extends BaseContract {
         withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
     };
 
-    COMPACT_STATE_1(overrides?: CallOverrides): Promise<BigNumber>;
-
-    COMPACT_STATE_2(overrides?: CallOverrides): Promise<BigNumber>;
-
-    COMPACT_STATE_3(overrides?: CallOverrides): Promise<BigNumber>;
-
     LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
-
-    PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<BigNumber>;
-
-    PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<string>;
 
     acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     approve(to: string, tokenId: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
+    assetGeneratorHash(overrides?: CallOverrides): Promise<string>;
 
     availabilities(overrides?: CallOverrides): Promise<
         [BigNumber[], BigNumber[]] & {
@@ -461,6 +496,14 @@ export interface XSublimatio extends BaseContract {
     canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<boolean>;
 
     claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
+    compactStates(overrides?: CallOverrides): Promise<
+        [BigNumber, BigNumber, BigNumber] & {
+            compactState1_: BigNumber;
+            compactState2_: BigNumber;
+            compactState3_: BigNumber;
+        }
+    >;
 
     contractURI(overrides?: CallOverrides): Promise<string>;
 
@@ -508,6 +551,10 @@ export interface XSublimatio extends BaseContract {
 
     pendingOwner(overrides?: CallOverrides): Promise<string>;
 
+    pricePerTokenMint(overrides?: CallOverrides): Promise<BigNumber>;
+
+    proceedsDestination(overrides?: CallOverrides): Promise<string>;
+
     proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     purchase(
@@ -538,7 +585,22 @@ export interface XSublimatio extends BaseContract {
         overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setAssetGeneratorHash(
+        assetGeneratorHash_: BytesLike,
+        overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+
+    setPricePerTokenMint(
+        pricePerTokenMint_: BigNumberish,
+        overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setProceedsDestination(
+        proceedsDestination_: string,
+        overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     setPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
@@ -568,21 +630,13 @@ export interface XSublimatio extends BaseContract {
     withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
 
     callStatic: {
-        COMPACT_STATE_1(overrides?: CallOverrides): Promise<BigNumber>;
-
-        COMPACT_STATE_2(overrides?: CallOverrides): Promise<BigNumber>;
-
-        COMPACT_STATE_3(overrides?: CallOverrides): Promise<BigNumber>;
-
         LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
-
-        PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<BigNumber>;
-
-        PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<string>;
 
         acceptOwnership(overrides?: CallOverrides): Promise<void>;
 
         approve(to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        assetGeneratorHash(overrides?: CallOverrides): Promise<string>;
 
         availabilities(overrides?: CallOverrides): Promise<
             [BigNumber[], BigNumber[]] & {
@@ -600,6 +654,14 @@ export interface XSublimatio extends BaseContract {
         canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<boolean>;
 
         claimWater(destination_: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+        compactStates(overrides?: CallOverrides): Promise<
+            [BigNumber, BigNumber, BigNumber] & {
+                compactState1_: BigNumber;
+                compactState2_: BigNumber;
+                compactState3_: BigNumber;
+            }
+        >;
 
         contractURI(overrides?: CallOverrides): Promise<string>;
 
@@ -621,9 +683,9 @@ export interface XSublimatio extends BaseContract {
 
         getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<number[]>;
 
-        giveMolecules(destinations_: string[], amounts_: BigNumberish[], overrides?: CallOverrides): Promise<BigNumber[][]>;
+        giveMolecules(destinations_: string[], amounts_: BigNumberish[], overrides?: CallOverrides): Promise<void>;
 
-        giveWaters(destinations_: string[], amounts_: BigNumberish[], overrides?: CallOverrides): Promise<BigNumber[][]>;
+        giveWaters(destinations_: string[], amounts_: BigNumberish[], overrides?: CallOverrides): Promise<void>;
 
         isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
 
@@ -638,6 +700,10 @@ export interface XSublimatio extends BaseContract {
         ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
         pendingOwner(overrides?: CallOverrides): Promise<string>;
+
+        pricePerTokenMint(overrides?: CallOverrides): Promise<BigNumber>;
+
+        proceedsDestination(overrides?: CallOverrides): Promise<string>;
 
         proposeOwnership(newOwner_: string, overrides?: CallOverrides): Promise<void>;
 
@@ -665,7 +731,13 @@ export interface XSublimatio extends BaseContract {
 
         setApprovalForAll(operator: string, approved: boolean, overrides?: CallOverrides): Promise<void>;
 
+        setAssetGeneratorHash(assetGeneratorHash_: BytesLike, overrides?: CallOverrides): Promise<void>;
+
         setBaseURI(baseURI_: string, overrides?: CallOverrides): Promise<void>;
+
+        setPricePerTokenMint(pricePerTokenMint_: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
+        setProceedsDestination(proceedsDestination_: string, overrides?: CallOverrides): Promise<void>;
 
         setPromotionAccounts(accounts_: string[], overrides?: CallOverrides): Promise<void>;
 
@@ -704,6 +776,9 @@ export interface XSublimatio extends BaseContract {
         'ApprovalForAll(address,address,bool)'(owner?: string | null, operator?: string | null, approved?: null): ApprovalForAllEventFilter;
         ApprovalForAll(owner?: string | null, operator?: string | null, approved?: null): ApprovalForAllEventFilter;
 
+        'AssetGeneratorHashSet(bytes32)'(assetGeneratorHash?: BytesLike | null): AssetGeneratorHashSetEventFilter;
+        AssetGeneratorHashSet(assetGeneratorHash?: BytesLike | null): AssetGeneratorHashSetEventFilter;
+
         'BaseURISet(string)'(baseURI?: null): BaseURISetEventFilter;
         BaseURISet(baseURI?: null): BaseURISetEventFilter;
 
@@ -716,8 +791,14 @@ export interface XSublimatio extends BaseContract {
         'OwnershipProposed(address,address)'(owner?: string | null, pendingOwner?: string | null): OwnershipProposedEventFilter;
         OwnershipProposed(owner?: string | null, pendingOwner?: string | null): OwnershipProposedEventFilter;
 
-        'ProceedsWithdrawn(uint256)'(amount?: null): ProceedsWithdrawnEventFilter;
-        ProceedsWithdrawn(amount?: null): ProceedsWithdrawnEventFilter;
+        'PricePerTokenMintSet(uint256)'(price?: null): PricePerTokenMintSetEventFilter;
+        PricePerTokenMintSet(price?: null): PricePerTokenMintSetEventFilter;
+
+        'ProceedsDestinationSet(address)'(account?: string | null): ProceedsDestinationSetEventFilter;
+        ProceedsDestinationSet(account?: string | null): ProceedsDestinationSetEventFilter;
+
+        'ProceedsWithdrawn(address,uint256)'(destination?: string | null, amount?: null): ProceedsWithdrawnEventFilter;
+        ProceedsWithdrawn(destination?: string | null, amount?: null): ProceedsWithdrawnEventFilter;
 
         'PromotionAccountSet(address)'(account?: string | null): PromotionAccountSetEventFilter;
         PromotionAccountSet(account?: string | null): PromotionAccountSetEventFilter;
@@ -730,21 +811,13 @@ export interface XSublimatio extends BaseContract {
     };
 
     estimateGas: {
-        COMPACT_STATE_1(overrides?: CallOverrides): Promise<BigNumber>;
-
-        COMPACT_STATE_2(overrides?: CallOverrides): Promise<BigNumber>;
-
-        COMPACT_STATE_3(overrides?: CallOverrides): Promise<BigNumber>;
-
         LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
-
-        PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<BigNumber>;
-
-        PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<BigNumber>;
 
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
         approve(to: string, tokenId: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+
+        assetGeneratorHash(overrides?: CallOverrides): Promise<BigNumber>;
 
         availabilities(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -762,6 +835,8 @@ export interface XSublimatio extends BaseContract {
         canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<BigNumber>;
 
         claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+
+        compactStates(overrides?: CallOverrides): Promise<BigNumber>;
 
         contractURI(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -809,6 +884,10 @@ export interface XSublimatio extends BaseContract {
 
         pendingOwner(overrides?: CallOverrides): Promise<BigNumber>;
 
+        pricePerTokenMint(overrides?: CallOverrides): Promise<BigNumber>;
+
+        proceedsDestination(overrides?: CallOverrides): Promise<BigNumber>;
+
         proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
         purchase(
@@ -839,7 +918,22 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<BigNumber>;
 
+        setAssetGeneratorHash(
+            assetGeneratorHash_: BytesLike,
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<BigNumber>;
+
         setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+
+        setPricePerTokenMint(
+            pricePerTokenMint_: BigNumberish,
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<BigNumber>;
+
+        setProceedsDestination(
+            proceedsDestination_: string,
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<BigNumber>;
 
         setPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
@@ -870,17 +964,7 @@ export interface XSublimatio extends BaseContract {
     };
 
     populateTransaction: {
-        COMPACT_STATE_1(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        COMPACT_STATE_2(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        COMPACT_STATE_3(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
         LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        PRICE_PER_TOKEN_MINT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        PROCEEDS_DESTINATION(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
@@ -889,6 +973,8 @@ export interface XSublimatio extends BaseContract {
             tokenId: BigNumberish,
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
+
+        assetGeneratorHash(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         availabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -906,6 +992,8 @@ export interface XSublimatio extends BaseContract {
         canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
+
+        compactStates(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
         contractURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -953,6 +1041,10 @@ export interface XSublimatio extends BaseContract {
 
         pendingOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+        pricePerTokenMint(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+        proceedsDestination(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
         proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
 
         purchase(
@@ -983,7 +1075,22 @@ export interface XSublimatio extends BaseContract {
             overrides?: Overrides & { from?: string | Promise<string> }
         ): Promise<PopulatedTransaction>;
 
+        setAssetGeneratorHash(
+            assetGeneratorHash_: BytesLike,
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<PopulatedTransaction>;
+
         setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
+
+        setPricePerTokenMint(
+            pricePerTokenMint_: BigNumberish,
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<PopulatedTransaction>;
+
+        setProceedsDestination(
+            proceedsDestination_: string,
+            overrides?: Overrides & { from?: string | Promise<string> }
+        ): Promise<PopulatedTransaction>;
 
         setPromotionAccounts(
             accounts_: string[],
