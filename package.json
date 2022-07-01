@@ -1,6 +1,6 @@
 {
     "name": "@faction-nfts/xsublimatio-smart-contracts",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "XSublimatio smart contracts and Typechain bindings",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",

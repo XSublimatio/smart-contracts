@@ -401,7 +401,7 @@ export interface ContractMetadata {
     seller_fee_basis_points: number;
     fee_recipient: string;
     artist: string;
-    asset_generator_torrent_hash: string;
+    asset_generator_hash: string;
 }
 
 export interface Token {
@@ -563,16 +563,16 @@ export function getContractMetadata(
     imageExtension = 'png',
     feeBasisPoints = 0,
     feeRecipient = '',
-    torrentHash = ''
+    assetGeneratorHash = ''
 ): ContractMetadata {
     return {
         name: 'xSublimatio',
         description: 'A digital drug experience as NFTs',
         image: `${imageUri}/xSublimatio.${imageExtension}`,
-        external_link: 'faction.art/xsublimatio',
+        external_link: 'faction.art/project/xsublimatio',
         seller_fee_basis_points: feeBasisPoints,
         fee_recipient: feeRecipient,
         artist: 'Pierre Pauze',
-        asset_generator_torrent_hash: torrentHash,
+        asset_generator_hash: assetGeneratorHash,
     };
 }
