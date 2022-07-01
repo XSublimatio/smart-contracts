@@ -520,7 +520,7 @@ export function getTokenFromId(
         moleculeIntegrityType: category === 'molecule' ? moleculeIntegrityType : undefined,
         metadata: {
             attributes,
-            description: `An xSublimatio ${category}`,
+            description: `An xSublimatio ${category}. ${category === 'molecule' ? MOLECULE_DESCRIPTIONS[type] : DRUG_DESCRIPTIONS[type]}`,
             name,
             background_color: 'ffffff',
             image: `${imageUri}/${id}.${imageExtension}`,
