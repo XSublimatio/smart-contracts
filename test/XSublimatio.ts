@@ -251,20 +251,27 @@ describe('XSublimatio', () => {
             expect(contract.setProceedsDestination(await charlie.getAddress())).to.be.revertedWith('ALREADY_LAUNCHED');
         });
 
-        it('Cannot decrease price per token mint if not owner', async () => {
-            const newPricePerTokenMint = ethers.utils.parseUnits('0.1', 'ether');
-            expect(contract.connect(bob).setPricePerTokenMint(newPricePerTokenMint)).to.be.revertedWith('UNAUTHORIZED');
-        });
-
         it('Can decrease price per token mint', async () => {
             const newPricePerTokenMint = ethers.utils.parseUnits('0.1', 'ether');
             await (await contract.setPricePerTokenMint(newPricePerTokenMint)).wait();
             expect(await contract.pricePerTokenMint()).to.equal(newPricePerTokenMint);
         });
 
-        it('Cannot increase price per token mint', async () => {
-            const newPricePerTokenMint = ethers.utils.parseUnits('0.3', 'ether');
-            expect(contract.setPricePerTokenMint(newPricePerTokenMint)).to.be.revertedWith('CANNOT_INCREASE_PRICE');
+        it('Can increase price per token mint', async () => {
+            const newPricePerTokenMint = ethers.utils.parseUnits('1', 'ether');
+            await (await contract.setPricePerTokenMint(newPricePerTokenMint)).wait();
+            expect(await contract.pricePerTokenMint()).to.equal(newPricePerTokenMint);
+        });
+
+        it('Cannot change price per token mint if not owner', async () => {
+            const newPricePerTokenMint = ethers.utils.parseUnits('0.1', 'ether');
+            expect(contract.connect(bob).setPricePerTokenMint(newPricePerTokenMint)).to.be.revertedWith('UNAUTHORIZED');
+        });
+
+        it('Cannot change price per token mint after launch', async () => {
+            const newPricePerTokenMint = ethers.utils.parseUnits('0.1', 'ether');
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+            expect(contract.setPricePerTokenMint(newPricePerTokenMint)).to.be.revertedWith('ALREADY_LAUNCHED');
         });
     });
 

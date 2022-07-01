@@ -86,8 +86,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
         emit BaseURISet(baseURI = baseURI_);
     }
 
-    function setPricePerTokenMint(uint256 pricePerTokenMint_) external onlyOwner {
-        require(pricePerTokenMint_ < pricePerTokenMint, "CANNOT_INCREASE_PRICE");
+    function setPricePerTokenMint(uint256 pricePerTokenMint_) external onlyOwner onlyBeforeLaunch {
         emit PricePerTokenMintSet(pricePerTokenMint = pricePerTokenMint_);
     }
 
