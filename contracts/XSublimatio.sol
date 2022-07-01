@@ -555,7 +555,7 @@ contract XSublimatio is IXSublimatio, ERC721Enumerable {
 
         string memory baseURICache = baseURI;
 
-        tokenURI_ = bytes(baseURICache).length > 0 ? string(abi.encodePacked(baseURICache, tokenId_.toString())) : "";
+        tokenURI_ = bytes(baseURICache).length > 0 ? string(abi.encodePacked(baseURICache, "/", tokenId_.toString())) : "";
     }
 
     /**************************/

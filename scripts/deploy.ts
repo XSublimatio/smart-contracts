@@ -4,7 +4,7 @@ async function main() {
     const [deployer] = await ethers.getSigners();
 
     const deployerAddress = await deployer.getAddress();
-    const baseUri = process.env.BASE_URI ?? 'http://127.0.0.1:5001/';
+    const baseUri = process.env.BASE_URI ?? 'http://127.0.0.1:5001';
     const pricePerTokenMint = process.env.PRICE_PER_TOKEN_MINT ?? ethers.utils.parseUnits('0.2', 'ether');
     const launchTimestamp = process.env.LAUNCH_TIMESTAMP ?? 0;
 

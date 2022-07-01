@@ -68,7 +68,7 @@ const getBlockTimestamp = async () => {
 
 describe('XSublimatio', () => {
     const pricePerTokenMint = ethers.utils.parseUnits('0.2', 'ether');
-    const contractURI = 'http://127.0.0.1:8080/';
+    const contractURI = 'http://127.0.0.1:8080';
 
     let contract: XSublimatio;
     let alice: Signer;
@@ -102,7 +102,7 @@ describe('XSublimatio', () => {
             expect(await contract.owner()).to.equal(await alice.getAddress());
             expect(await contract.pendingOwner()).to.equal(ethers.constants.AddressZero);
             expect(await contract.proceedsDestination()).to.equal(ethers.constants.AddressZero);
-            expect(await contract.baseURI()).to.equal('http://127.0.0.1:8080/');
+            expect(await contract.baseURI()).to.equal('http://127.0.0.1:8080');
             expect(await contract.pricePerTokenMint()).to.equal(pricePerTokenMint);
 
             const [compactState1, compactState2, compactState3] = await contract.compactStates();
@@ -373,7 +373,7 @@ describe('XSublimatio', () => {
             expect(await checkInvariants(contract)).to.be.true;
         });
 
-        it.skip('Can purchase all molecules in batches of 120', async () => {
+        it('Can purchase all molecules in batches of 120', async () => {
             await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
 
             const aliceAddress = await alice.getAddress();
@@ -455,7 +455,7 @@ describe('XSublimatio', () => {
             await expect(contract.brew([0, 1, 2], 19, aliceAddress)).to.be.revertedWith('INVALID_DRUG_TYPE');
         });
 
-        it.skip('Can brew one of each drug', async () => {
+        it('Can brew one of each drug', async () => {
             await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
 
             const aliceAddress = await alice.getAddress();
