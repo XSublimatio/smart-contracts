@@ -2,484 +2,1083 @@
 /* tslint:disable */
 /* eslint-disable */
 import {
-    BaseContract,
-    BigNumber,
-    BigNumberish,
-    BytesLike,
-    CallOverrides,
-    ContractTransaction,
-    Overrides,
-    PayableOverrides,
-    PopulatedTransaction,
-    Signer,
-    utils,
-} from 'ethers';
-import { FunctionFragment, Result, EventFragment } from '@ethersproject/abi';
-import { Listener, Provider } from '@ethersproject/providers';
-import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
+  BaseContract,
+  BigNumber,
+  BigNumberish,
+  BytesLike,
+  CallOverrides,
+  ContractTransaction,
+  Overrides,
+  PayableOverrides,
+  PopulatedTransaction,
+  Signer,
+  utils,
+} from "ethers";
+import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
+import { Listener, Provider } from "@ethersproject/providers";
+import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
 export interface XSublimatioInterface extends utils.Interface {
-    contractName: 'XSublimatio';
-    functions: {
-        'LAUNCH_TIMESTAMP()': FunctionFragment;
-        'acceptOwnership()': FunctionFragment;
-        'approve(address,uint256)': FunctionFragment;
-        'assetGeneratorHash()': FunctionFragment;
-        'availabilities()': FunctionFragment;
-        'balanceOf(address)': FunctionFragment;
-        'baseURI()': FunctionFragment;
-        'brew(uint256[],uint256,address)': FunctionFragment;
-        'canClaimFreeWater(address)': FunctionFragment;
-        'claimWater(address)': FunctionFragment;
-        'compactStates()': FunctionFragment;
-        'contractURI()': FunctionFragment;
-        'decompose(uint256)': FunctionFragment;
-        'drugAvailabilities()': FunctionFragment;
-        'drugsAvailable()': FunctionFragment;
-        'getApproved(uint256)': FunctionFragment;
-        'getAvailabilityOfDrug(uint256)': FunctionFragment;
-        'getAvailabilityOfMolecule(uint256)': FunctionFragment;
-        'getDrugContainingMolecule(uint256)': FunctionFragment;
-        'getMoleculesWithinDrug(uint256)': FunctionFragment;
-        'getRecipeOfDrug(uint256)': FunctionFragment;
-        'giveMolecules(address[],uint256[])': FunctionFragment;
-        'giveWaters(address[],uint256[])': FunctionFragment;
-        'isApprovedForAll(address,address)': FunctionFragment;
-        'moleculeAvailabilities()': FunctionFragment;
-        'moleculesAvailable()': FunctionFragment;
-        'name()': FunctionFragment;
-        'owner()': FunctionFragment;
-        'ownerOf(uint256)': FunctionFragment;
-        'pendingOwner()': FunctionFragment;
-        'pricePerTokenMint()': FunctionFragment;
-        'proceedsDestination()': FunctionFragment;
-        'proposeOwnership(address)': FunctionFragment;
-        'purchase(address,uint256,uint256)': FunctionFragment;
-        'safeTransferFrom(address,address,uint256)': FunctionFragment;
-        'setApprovalForAll(address,bool)': FunctionFragment;
-        'setAssetGeneratorHash(bytes32)': FunctionFragment;
-        'setBaseURI(string)': FunctionFragment;
-        'setPricePerTokenMint(uint256)': FunctionFragment;
-        'setProceedsDestination(address)': FunctionFragment;
-        'setPromotionAccounts(address[])': FunctionFragment;
-        'supportsInterface(bytes4)': FunctionFragment;
-        'symbol()': FunctionFragment;
-        'tokenByIndex(uint256)': FunctionFragment;
-        'tokenOfOwnerByIndex(address,uint256)': FunctionFragment;
-        'tokenURI(uint256)': FunctionFragment;
-        'tokensOfOwner(address)': FunctionFragment;
-        'totalSupply()': FunctionFragment;
-        'transferFrom(address,address,uint256)': FunctionFragment;
-        'unsetPromotionAccounts(address[])': FunctionFragment;
-        'withdrawProceeds()': FunctionFragment;
-    };
+  contractName: "XSublimatio";
+  functions: {
+    "LAUNCH_TIMESTAMP()": FunctionFragment;
+    "acceptOwnership()": FunctionFragment;
+    "approve(address,uint256)": FunctionFragment;
+    "assetGeneratorHash()": FunctionFragment;
+    "availabilities()": FunctionFragment;
+    "balanceOf(address)": FunctionFragment;
+    "baseURI()": FunctionFragment;
+    "brew(uint256[],uint256,address)": FunctionFragment;
+    "canClaimFreeWater(address)": FunctionFragment;
+    "claimWater(address)": FunctionFragment;
+    "compactStates()": FunctionFragment;
+    "contractURI()": FunctionFragment;
+    "decompose(uint256)": FunctionFragment;
+    "drugAvailabilities()": FunctionFragment;
+    "drugsAvailable()": FunctionFragment;
+    "getApproved(uint256)": FunctionFragment;
+    "getAvailabilityOfDrug(uint256)": FunctionFragment;
+    "getAvailabilityOfMolecule(uint256)": FunctionFragment;
+    "getDrugContainingMolecule(uint256)": FunctionFragment;
+    "getMoleculesWithinDrug(uint256)": FunctionFragment;
+    "getRecipeOfDrug(uint256)": FunctionFragment;
+    "giveMolecules(address[],uint256[])": FunctionFragment;
+    "giveWaters(address[],uint256[])": FunctionFragment;
+    "isApprovedForAll(address,address)": FunctionFragment;
+    "moleculeAvailabilities()": FunctionFragment;
+    "moleculesAvailable()": FunctionFragment;
+    "name()": FunctionFragment;
+    "owner()": FunctionFragment;
+    "ownerOf(uint256)": FunctionFragment;
+    "pendingOwner()": FunctionFragment;
+    "pricePerTokenMint()": FunctionFragment;
+    "proceedsDestination()": FunctionFragment;
+    "proposeOwnership(address)": FunctionFragment;
+    "purchase(address,uint256,uint256)": FunctionFragment;
+    "safeTransferFrom(address,address,uint256)": FunctionFragment;
+    "setApprovalForAll(address,bool)": FunctionFragment;
+    "setAssetGeneratorHash(bytes32)": FunctionFragment;
+    "setBaseURI(string)": FunctionFragment;
+    "setPricePerTokenMint(uint256)": FunctionFragment;
+    "setProceedsDestination(address)": FunctionFragment;
+    "setPromotionAccounts(address[])": FunctionFragment;
+    "supportsInterface(bytes4)": FunctionFragment;
+    "symbol()": FunctionFragment;
+    "tokenByIndex(uint256)": FunctionFragment;
+    "tokenOfOwnerByIndex(address,uint256)": FunctionFragment;
+    "tokenURI(uint256)": FunctionFragment;
+    "tokensOfOwner(address)": FunctionFragment;
+    "totalSupply()": FunctionFragment;
+    "transferFrom(address,address,uint256)": FunctionFragment;
+    "unsetPromotionAccounts(address[])": FunctionFragment;
+    "withdrawProceeds()": FunctionFragment;
+  };
 
-    encodeFunctionData(functionFragment: 'LAUNCH_TIMESTAMP', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'acceptOwnership', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'approve', values: [string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'assetGeneratorHash', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'availabilities', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
-    encodeFunctionData(functionFragment: 'baseURI', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'brew', values: [BigNumberish[], BigNumberish, string]): string;
-    encodeFunctionData(functionFragment: 'canClaimFreeWater', values: [string]): string;
-    encodeFunctionData(functionFragment: 'claimWater', values: [string]): string;
-    encodeFunctionData(functionFragment: 'compactStates', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'contractURI', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'decompose', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'drugAvailabilities', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'drugsAvailable', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'getApproved', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'getAvailabilityOfDrug', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'getAvailabilityOfMolecule', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'getDrugContainingMolecule', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'getMoleculesWithinDrug', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'getRecipeOfDrug', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'giveMolecules', values: [string[], BigNumberish[]]): string;
-    encodeFunctionData(functionFragment: 'giveWaters', values: [string[], BigNumberish[]]): string;
-    encodeFunctionData(functionFragment: 'isApprovedForAll', values: [string, string]): string;
-    encodeFunctionData(functionFragment: 'moleculeAvailabilities', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'moleculesAvailable', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'name', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'ownerOf', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'pendingOwner', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'pricePerTokenMint', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'proceedsDestination', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'proposeOwnership', values: [string]): string;
-    encodeFunctionData(functionFragment: 'purchase', values: [string, BigNumberish, BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'safeTransferFrom', values: [string, string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'setApprovalForAll', values: [string, boolean]): string;
-    encodeFunctionData(functionFragment: 'setAssetGeneratorHash', values: [BytesLike]): string;
-    encodeFunctionData(functionFragment: 'setBaseURI', values: [string]): string;
-    encodeFunctionData(functionFragment: 'setPricePerTokenMint', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'setProceedsDestination', values: [string]): string;
-    encodeFunctionData(functionFragment: 'setPromotionAccounts', values: [string[]]): string;
-    encodeFunctionData(functionFragment: 'supportsInterface', values: [BytesLike]): string;
-    encodeFunctionData(functionFragment: 'symbol', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'tokenByIndex', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'tokenOfOwnerByIndex', values: [string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'tokenURI', values: [BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'tokensOfOwner', values: [string]): string;
-    encodeFunctionData(functionFragment: 'totalSupply', values?: undefined): string;
-    encodeFunctionData(functionFragment: 'transferFrom', values: [string, string, BigNumberish]): string;
-    encodeFunctionData(functionFragment: 'unsetPromotionAccounts', values: [string[]]): string;
-    encodeFunctionData(functionFragment: 'withdrawProceeds', values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "LAUNCH_TIMESTAMP",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "acceptOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "approve",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "assetGeneratorHash",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "availabilities",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "balanceOf", values: [string]): string;
+  encodeFunctionData(functionFragment: "baseURI", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "brew",
+    values: [BigNumberish[], BigNumberish, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "canClaimFreeWater",
+    values: [string]
+  ): string;
+  encodeFunctionData(functionFragment: "claimWater", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "compactStates",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "contractURI",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "decompose",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "drugAvailabilities",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "drugsAvailable",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getApproved",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAvailabilityOfDrug",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAvailabilityOfMolecule",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getDrugContainingMolecule",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getMoleculesWithinDrug",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getRecipeOfDrug",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "giveMolecules",
+    values: [string[], BigNumberish[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "giveWaters",
+    values: [string[], BigNumberish[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isApprovedForAll",
+    values: [string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "moleculeAvailabilities",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "moleculesAvailable",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "name", values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "ownerOf",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "pendingOwner",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "pricePerTokenMint",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "proceedsDestination",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "proposeOwnership",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "purchase",
+    values: [string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "safeTransferFrom",
+    values: [string, string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setApprovalForAll",
+    values: [string, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setAssetGeneratorHash",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(functionFragment: "setBaseURI", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "setPricePerTokenMint",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setProceedsDestination",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setPromotionAccounts",
+    values: [string[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "supportsInterface",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "tokenByIndex",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tokenOfOwnerByIndex",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tokenURI",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tokensOfOwner",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "totalSupply",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferFrom",
+    values: [string, string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unsetPromotionAccounts",
+    values: [string[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawProceeds",
+    values?: undefined
+  ): string;
 
-    decodeFunctionResult(functionFragment: 'LAUNCH_TIMESTAMP', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'acceptOwnership', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'assetGeneratorHash', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'availabilities', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'baseURI', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'brew', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'canClaimFreeWater', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'claimWater', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'compactStates', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'contractURI', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'decompose', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'drugAvailabilities', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'drugsAvailable', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'getApproved', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'getAvailabilityOfDrug', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'getAvailabilityOfMolecule', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'getDrugContainingMolecule', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'getMoleculesWithinDrug', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'getRecipeOfDrug', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'giveMolecules', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'giveWaters', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'isApprovedForAll', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'moleculeAvailabilities', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'moleculesAvailable', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'name', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'ownerOf', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'pendingOwner', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'pricePerTokenMint', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'proceedsDestination', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'proposeOwnership', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'purchase', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'safeTransferFrom', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'setApprovalForAll', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'setAssetGeneratorHash', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'setBaseURI', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'setPricePerTokenMint', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'setProceedsDestination', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'setPromotionAccounts', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'supportsInterface', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'symbol', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'tokenByIndex', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'tokenOfOwnerByIndex', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'tokenURI', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'tokensOfOwner', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'totalSupply', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'transferFrom', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'unsetPromotionAccounts', data: BytesLike): Result;
-    decodeFunctionResult(functionFragment: 'withdrawProceeds', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "LAUNCH_TIMESTAMP",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "acceptOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "assetGeneratorHash",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "availabilities",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "baseURI", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "brew", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "canClaimFreeWater",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "claimWater", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "compactStates",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "contractURI",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "decompose", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "drugAvailabilities",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "drugsAvailable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getApproved",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getAvailabilityOfDrug",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getAvailabilityOfMolecule",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getDrugContainingMolecule",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getMoleculesWithinDrug",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getRecipeOfDrug",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "giveMolecules",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "giveWaters", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "isApprovedForAll",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "moleculeAvailabilities",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "moleculesAvailable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "pendingOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "pricePerTokenMint",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "proceedsDestination",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "proposeOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "purchase", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "safeTransferFrom",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setApprovalForAll",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setAssetGeneratorHash",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "setBaseURI", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setPricePerTokenMint",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setProceedsDestination",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setPromotionAccounts",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "supportsInterface",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "tokenByIndex",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "tokenOfOwnerByIndex",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "tokensOfOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "totalSupply",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferFrom",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "unsetPromotionAccounts",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawProceeds",
+    data: BytesLike
+  ): Result;
 
-    events: {
-        'AirdropSet(address)': EventFragment;
-        'Approval(address,address,uint256)': EventFragment;
-        'ApprovalForAll(address,address,bool)': EventFragment;
-        'AssetGeneratorHashSet(bytes32)': EventFragment;
-        'BaseURISet(string)': EventFragment;
-        'DrugDecomposed(uint256,uint256[])': EventFragment;
-        'OwnershipAccepted(address,address)': EventFragment;
-        'OwnershipProposed(address,address)': EventFragment;
-        'PricePerTokenMintSet(uint256)': EventFragment;
-        'ProceedsDestinationSet(address)': EventFragment;
-        'ProceedsWithdrawn(address,uint256)': EventFragment;
-        'PromotionAccountSet(address)': EventFragment;
-        'PromotionAccountUnset(address)': EventFragment;
-        'Transfer(address,address,uint256)': EventFragment;
-    };
+  events: {
+    "AirdropSet(address)": EventFragment;
+    "Approval(address,address,uint256)": EventFragment;
+    "ApprovalForAll(address,address,bool)": EventFragment;
+    "AssetGeneratorHashSet(bytes32)": EventFragment;
+    "BaseURISet(string)": EventFragment;
+    "DrugDecomposed(uint256,uint256[])": EventFragment;
+    "OwnershipAccepted(address,address)": EventFragment;
+    "OwnershipProposed(address,address)": EventFragment;
+    "PricePerTokenMintSet(uint256)": EventFragment;
+    "ProceedsDestinationSet(address)": EventFragment;
+    "ProceedsWithdrawn(address,uint256)": EventFragment;
+    "PromotionAccountSet(address)": EventFragment;
+    "PromotionAccountUnset(address)": EventFragment;
+    "Transfer(address,address,uint256)": EventFragment;
+  };
 
-    getEvent(nameOrSignatureOrTopic: 'AirdropSet'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'Approval'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'ApprovalForAll'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'AssetGeneratorHashSet'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'BaseURISet'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'DrugDecomposed'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'OwnershipAccepted'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'OwnershipProposed'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'PricePerTokenMintSet'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'ProceedsDestinationSet'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'ProceedsWithdrawn'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'PromotionAccountSet'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'PromotionAccountUnset'): EventFragment;
-    getEvent(nameOrSignatureOrTopic: 'Transfer'): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "AirdropSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "AssetGeneratorHashSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BaseURISet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DrugDecomposed"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipAccepted"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipProposed"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PricePerTokenMintSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ProceedsDestinationSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ProceedsWithdrawn"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PromotionAccountSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "PromotionAccountUnset"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
 export type AirdropSetEvent = TypedEvent<[string], { account: string }>;
 
 export type AirdropSetEventFilter = TypedEventFilter<AirdropSetEvent>;
 
-export type ApprovalEvent = TypedEvent<[string, string, BigNumber], { owner: string; approved: string; tokenId: BigNumber }>;
+export type ApprovalEvent = TypedEvent<
+  [string, string, BigNumber],
+  { owner: string; approved: string; tokenId: BigNumber }
+>;
 
 export type ApprovalEventFilter = TypedEventFilter<ApprovalEvent>;
 
-export type ApprovalForAllEvent = TypedEvent<[string, string, boolean], { owner: string; operator: string; approved: boolean }>;
+export type ApprovalForAllEvent = TypedEvent<
+  [string, string, boolean],
+  { owner: string; operator: string; approved: boolean }
+>;
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 
-export type AssetGeneratorHashSetEvent = TypedEvent<[string], { assetGeneratorHash: string }>;
+export type AssetGeneratorHashSetEvent = TypedEvent<
+  [string],
+  { assetGeneratorHash: string }
+>;
 
-export type AssetGeneratorHashSetEventFilter = TypedEventFilter<AssetGeneratorHashSetEvent>;
+export type AssetGeneratorHashSetEventFilter =
+  TypedEventFilter<AssetGeneratorHashSetEvent>;
 
 export type BaseURISetEvent = TypedEvent<[string], { baseURI: string }>;
 
 export type BaseURISetEventFilter = TypedEventFilter<BaseURISetEvent>;
 
-export type DrugDecomposedEvent = TypedEvent<[BigNumber, BigNumber[]], { drug: BigNumber; molecules: BigNumber[] }>;
+export type DrugDecomposedEvent = TypedEvent<
+  [BigNumber, BigNumber[]],
+  { drug: BigNumber; molecules: BigNumber[] }
+>;
 
 export type DrugDecomposedEventFilter = TypedEventFilter<DrugDecomposedEvent>;
 
-export type OwnershipAcceptedEvent = TypedEvent<[string, string], { previousOwner: string; owner: string }>;
+export type OwnershipAcceptedEvent = TypedEvent<
+  [string, string],
+  { previousOwner: string; owner: string }
+>;
 
-export type OwnershipAcceptedEventFilter = TypedEventFilter<OwnershipAcceptedEvent>;
+export type OwnershipAcceptedEventFilter =
+  TypedEventFilter<OwnershipAcceptedEvent>;
 
-export type OwnershipProposedEvent = TypedEvent<[string, string], { owner: string; pendingOwner: string }>;
+export type OwnershipProposedEvent = TypedEvent<
+  [string, string],
+  { owner: string; pendingOwner: string }
+>;
 
-export type OwnershipProposedEventFilter = TypedEventFilter<OwnershipProposedEvent>;
+export type OwnershipProposedEventFilter =
+  TypedEventFilter<OwnershipProposedEvent>;
 
-export type PricePerTokenMintSetEvent = TypedEvent<[BigNumber], { price: BigNumber }>;
+export type PricePerTokenMintSetEvent = TypedEvent<
+  [BigNumber],
+  { price: BigNumber }
+>;
 
-export type PricePerTokenMintSetEventFilter = TypedEventFilter<PricePerTokenMintSetEvent>;
+export type PricePerTokenMintSetEventFilter =
+  TypedEventFilter<PricePerTokenMintSetEvent>;
 
-export type ProceedsDestinationSetEvent = TypedEvent<[string], { account: string }>;
+export type ProceedsDestinationSetEvent = TypedEvent<
+  [string],
+  { account: string }
+>;
 
-export type ProceedsDestinationSetEventFilter = TypedEventFilter<ProceedsDestinationSetEvent>;
+export type ProceedsDestinationSetEventFilter =
+  TypedEventFilter<ProceedsDestinationSetEvent>;
 
-export type ProceedsWithdrawnEvent = TypedEvent<[string, BigNumber], { destination: string; amount: BigNumber }>;
+export type ProceedsWithdrawnEvent = TypedEvent<
+  [string, BigNumber],
+  { destination: string; amount: BigNumber }
+>;
 
-export type ProceedsWithdrawnEventFilter = TypedEventFilter<ProceedsWithdrawnEvent>;
+export type ProceedsWithdrawnEventFilter =
+  TypedEventFilter<ProceedsWithdrawnEvent>;
 
-export type PromotionAccountSetEvent = TypedEvent<[string], { account: string }>;
+export type PromotionAccountSetEvent = TypedEvent<
+  [string],
+  { account: string }
+>;
 
-export type PromotionAccountSetEventFilter = TypedEventFilter<PromotionAccountSetEvent>;
+export type PromotionAccountSetEventFilter =
+  TypedEventFilter<PromotionAccountSetEvent>;
 
-export type PromotionAccountUnsetEvent = TypedEvent<[string], { account: string }>;
+export type PromotionAccountUnsetEvent = TypedEvent<
+  [string],
+  { account: string }
+>;
 
-export type PromotionAccountUnsetEventFilter = TypedEventFilter<PromotionAccountUnsetEvent>;
+export type PromotionAccountUnsetEventFilter =
+  TypedEventFilter<PromotionAccountUnsetEvent>;
 
-export type TransferEvent = TypedEvent<[string, string, BigNumber], { from: string; to: string; tokenId: BigNumber }>;
+export type TransferEvent = TypedEvent<
+  [string, string, BigNumber],
+  { from: string; to: string; tokenId: BigNumber }
+>;
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
 export interface XSublimatio extends BaseContract {
-    contractName: 'XSublimatio';
-    connect(signerOrProvider: Signer | Provider | string): this;
-    attach(addressOrName: string): this;
-    deployed(): Promise<this>;
+  contractName: "XSublimatio";
+  connect(signerOrProvider: Signer | Provider | string): this;
+  attach(addressOrName: string): this;
+  deployed(): Promise<this>;
 
-    interface: XSublimatioInterface;
+  interface: XSublimatioInterface;
 
-    queryFilter<TEvent extends TypedEvent>(
-        event: TypedEventFilter<TEvent>,
-        fromBlockOrBlockhash?: string | number | undefined,
-        toBlock?: string | number | undefined
-    ): Promise<Array<TEvent>>;
+  queryFilter<TEvent extends TypedEvent>(
+    event: TypedEventFilter<TEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TEvent>>;
 
-    listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
-    listeners(eventName?: string): Array<Listener>;
-    removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
-    removeAllListeners(eventName?: string): this;
-    off: OnEvent<this>;
-    on: OnEvent<this>;
-    once: OnEvent<this>;
-    removeListener: OnEvent<this>;
+  listeners<TEvent extends TypedEvent>(
+    eventFilter?: TypedEventFilter<TEvent>
+  ): Array<TypedListener<TEvent>>;
+  listeners(eventName?: string): Array<Listener>;
+  removeAllListeners<TEvent extends TypedEvent>(
+    eventFilter: TypedEventFilter<TEvent>
+  ): this;
+  removeAllListeners(eventName?: string): this;
+  off: OnEvent<this>;
+  on: OnEvent<this>;
+  once: OnEvent<this>;
+  removeListener: OnEvent<this>;
 
-    functions: {
-        LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<[BigNumber]>;
+  functions: {
+    LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-        acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    acceptOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        approve(
-            to: string,
-            tokenId: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    approve(
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        assetGeneratorHash(overrides?: CallOverrides): Promise<[string]>;
+    assetGeneratorHash(overrides?: CallOverrides): Promise<[string]>;
 
-        availabilities(overrides?: CallOverrides): Promise<
-            [BigNumber[], BigNumber[]] & {
-                moleculesAvailabilities_: BigNumber[];
-                drugAvailabilities_: BigNumber[];
-            }
-        >;
+    availabilities(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber[], BigNumber[]] & {
+        moleculesAvailabilities_: BigNumber[];
+        drugAvailabilities_: BigNumber[];
+      }
+    >;
 
-        balanceOf(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+    balanceOf(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-        baseURI(overrides?: CallOverrides): Promise<[string]>;
+    baseURI(overrides?: CallOverrides): Promise<[string]>;
 
-        brew(
-            molecules_: BigNumberish[],
-            drugType_: BigNumberish,
-            destination_: string,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    brew(
+      molecules_: BigNumberish[],
+      drugType_: BigNumberish,
+      destination_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<[boolean] & { canClaimFreeWater_: boolean }>;
+    canClaimFreeWater(
+      account_: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean] & { canClaimFreeWater_: boolean }>;
 
-        claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    claimWater(
+      destination_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        compactStates(overrides?: CallOverrides): Promise<
-            [BigNumber, BigNumber, BigNumber] & {
-                compactState1_: BigNumber;
-                compactState2_: BigNumber;
-                compactState3_: BigNumber;
-            }
-        >;
+    compactStates(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber] & {
+        compactState1_: BigNumber;
+        compactState2_: BigNumber;
+        compactState3_: BigNumber;
+      }
+    >;
 
-        contractURI(overrides?: CallOverrides): Promise<[string] & { contractURI_: string }>;
+    contractURI(
+      overrides?: CallOverrides
+    ): Promise<[string] & { contractURI_: string }>;
 
-        decompose(drug_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    decompose(
+      drug_: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        drugAvailabilities(overrides?: CallOverrides): Promise<[BigNumber[]] & { availabilities_: BigNumber[] }>;
+    drugAvailabilities(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]] & { availabilities_: BigNumber[] }>;
 
-        drugsAvailable(overrides?: CallOverrides): Promise<[BigNumber] & { drugsAvailable_: BigNumber }>;
+    drugsAvailable(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { drugsAvailable_: BigNumber }>;
 
-        getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+    getApproved(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
-        getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber] & { availability_: BigNumber }>;
+    getAvailabilityOfDrug(
+      drugType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { availability_: BigNumber }>;
 
-        getAvailabilityOfMolecule(
-            moleculeType_: BigNumberish,
-            overrides?: CallOverrides
-        ): Promise<[BigNumber] & { availability_: BigNumber }>;
+    getAvailabilityOfMolecule(
+      moleculeType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { availability_: BigNumber }>;
 
-        getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber] & { drug_: BigNumber }>;
+    getDrugContainingMolecule(
+      molecule_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { drug_: BigNumber }>;
 
-        getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber[]] & { molecules_: BigNumber[] }>;
+    getMoleculesWithinDrug(
+      drug_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]] & { molecules_: BigNumber[] }>;
 
-        getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<[number[]] & { recipe_: number[] }>;
+    getRecipeOfDrug(
+      drugType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[number[]] & { recipe_: number[] }>;
 
-        giveMolecules(
-            destinations_: string[],
-            amounts_: BigNumberish[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    giveMolecules(
+      destinations_: string[],
+      amounts_: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        giveWaters(
-            destinations_: string[],
-            amounts_: BigNumberish[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    giveWaters(
+      destinations_: string[],
+      amounts_: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<[boolean]>;
+    isApprovedForAll(
+      owner: string,
+      operator: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
-        moleculeAvailabilities(overrides?: CallOverrides): Promise<[BigNumber[]] & { availabilities_: BigNumber[] }>;
+    moleculeAvailabilities(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]] & { availabilities_: BigNumber[] }>;
 
-        moleculesAvailable(overrides?: CallOverrides): Promise<[BigNumber] & { moleculesAvailable_: BigNumber }>;
+    moleculesAvailable(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { moleculesAvailable_: BigNumber }>;
 
-        name(overrides?: CallOverrides): Promise<[string]>;
+    name(overrides?: CallOverrides): Promise<[string]>;
 
-        owner(overrides?: CallOverrides): Promise<[string]>;
+    owner(overrides?: CallOverrides): Promise<[string]>;
 
-        ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<[string]>;
+    ownerOf(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
-        pendingOwner(overrides?: CallOverrides): Promise<[string]>;
+    pendingOwner(overrides?: CallOverrides): Promise<[string]>;
 
-        pricePerTokenMint(overrides?: CallOverrides): Promise<[BigNumber]>;
+    pricePerTokenMint(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-        proceedsDestination(overrides?: CallOverrides): Promise<[string]>;
+    proceedsDestination(overrides?: CallOverrides): Promise<[string]>;
 
-        proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    proposeOwnership(
+      newOwner_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        purchase(
-            destination_: string,
-            quantity_: BigNumberish,
-            minQuantity_: BigNumberish,
-            overrides?: PayableOverrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    purchase(
+      destination_: string,
+      quantity_: BigNumberish,
+      minQuantity_: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        'safeTransferFrom(address,address,uint256)'(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    "safeTransferFrom(address,address,uint256)"(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        'safeTransferFrom(address,address,uint256,bytes)'(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            data: BytesLike,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    "safeTransferFrom(address,address,uint256,bytes)"(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        setApprovalForAll(
-            operator: string,
-            approved: boolean,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    setApprovalForAll(
+      operator: string,
+      approved: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        setAssetGeneratorHash(
-            assetGeneratorHash_: BytesLike,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    setAssetGeneratorHash(
+      assetGeneratorHash_: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    setBaseURI(
+      baseURI_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        setPricePerTokenMint(
-            pricePerTokenMint_: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    setPricePerTokenMint(
+      pricePerTokenMint_: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        setProceedsDestination(
-            proceedsDestination_: string,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    setProceedsDestination(
+      proceedsDestination_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        setPromotionAccounts(
-            accounts_: string[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    setPromotionAccounts(
+      accounts_: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<[boolean]>;
+    supportsInterface(
+      interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
 
-        symbol(overrides?: CallOverrides): Promise<[string]>;
+    symbol(overrides?: CallOverrides): Promise<[string]>;
 
-        tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
+    tokenByIndex(
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-        tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<[BigNumber]>;
+    tokenOfOwnerByIndex(
+      owner: string,
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
-        tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<[string] & { tokenURI_: string }>;
+    tokenURI(
+      tokenId_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string] & { tokenURI_: string }>;
 
-        tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<[BigNumber[]] & { tokenIds_: BigNumber[] }>;
+    tokensOfOwner(
+      owner_: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]] & { tokenIds_: BigNumber[] }>;
 
-        totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
+    totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-        transferFrom(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    transferFrom(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        unsetPromotionAccounts(
-            accounts_: string[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<ContractTransaction>;
+    unsetPromotionAccounts(
+      accounts_: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-        withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-    };
+    withdrawProceeds(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+  };
 
+  LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
+
+  acceptOwnership(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  approve(
+    to: string,
+    tokenId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  assetGeneratorHash(overrides?: CallOverrides): Promise<string>;
+
+  availabilities(
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber[], BigNumber[]] & {
+      moleculesAvailabilities_: BigNumber[];
+      drugAvailabilities_: BigNumber[];
+    }
+  >;
+
+  balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  baseURI(overrides?: CallOverrides): Promise<string>;
+
+  brew(
+    molecules_: BigNumberish[],
+    drugType_: BigNumberish,
+    destination_: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  canClaimFreeWater(
+    account_: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  claimWater(
+    destination_: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  compactStates(
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, BigNumber, BigNumber] & {
+      compactState1_: BigNumber;
+      compactState2_: BigNumber;
+      compactState3_: BigNumber;
+    }
+  >;
+
+  contractURI(overrides?: CallOverrides): Promise<string>;
+
+  decompose(
+    drug_: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
+
+  drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getApproved(
+    tokenId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  getAvailabilityOfDrug(
+    drugType_: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getAvailabilityOfMolecule(
+    moleculeType_: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getDrugContainingMolecule(
+    molecule_: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getMoleculesWithinDrug(
+    drug_: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
+
+  getRecipeOfDrug(
+    drugType_: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<number[]>;
+
+  giveMolecules(
+    destinations_: string[],
+    amounts_: BigNumberish[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  giveWaters(
+    destinations_: string[],
+    amounts_: BigNumberish[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  isApprovedForAll(
+    owner: string,
+    operator: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
+
+  moleculesAvailable(overrides?: CallOverrides): Promise<BigNumber>;
+
+  name(overrides?: CallOverrides): Promise<string>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  pendingOwner(overrides?: CallOverrides): Promise<string>;
+
+  pricePerTokenMint(overrides?: CallOverrides): Promise<BigNumber>;
+
+  proceedsDestination(overrides?: CallOverrides): Promise<string>;
+
+  proposeOwnership(
+    newOwner_: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  purchase(
+    destination_: string,
+    quantity_: BigNumberish,
+    minQuantity_: BigNumberish,
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  "safeTransferFrom(address,address,uint256)"(
+    from: string,
+    to: string,
+    tokenId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  "safeTransferFrom(address,address,uint256,bytes)"(
+    from: string,
+    to: string,
+    tokenId: BigNumberish,
+    data: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setApprovalForAll(
+    operator: string,
+    approved: boolean,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setAssetGeneratorHash(
+    assetGeneratorHash_: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setBaseURI(
+    baseURI_: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setPricePerTokenMint(
+    pricePerTokenMint_: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setProceedsDestination(
+    proceedsDestination_: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setPromotionAccounts(
+    accounts_: string[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  supportsInterface(
+    interfaceId: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  symbol(overrides?: CallOverrides): Promise<string>;
+
+  tokenByIndex(
+    index: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  tokenOfOwnerByIndex(
+    owner: string,
+    index: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  tokensOfOwner(
+    owner_: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
+
+  totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
+  transferFrom(
+    from: string,
+    to: string,
+    tokenId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  unsetPromotionAccounts(
+    accounts_: string[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  withdrawProceeds(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  callStatic: {
     LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
 
-    acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    acceptOwnership(overrides?: CallOverrides): Promise<void>;
 
-    approve(to: string, tokenId: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    approve(
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     assetGeneratorHash(overrides?: CallOverrides): Promise<string>;
 
-    availabilities(overrides?: CallOverrides): Promise<
-        [BigNumber[], BigNumber[]] & {
-            moleculesAvailabilities_: BigNumber[];
-            drugAvailabilities_: BigNumber[];
-        }
+    availabilities(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber[], BigNumber[]] & {
+        moleculesAvailabilities_: BigNumber[];
+        drugAvailabilities_: BigNumber[];
+      }
     >;
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
@@ -487,57 +1086,87 @@ export interface XSublimatio extends BaseContract {
     baseURI(overrides?: CallOverrides): Promise<string>;
 
     brew(
-        molecules_: BigNumberish[],
-        drugType_: BigNumberish,
-        destination_: string,
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+      molecules_: BigNumberish[],
+      drugType_: BigNumberish,
+      destination_: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<boolean>;
+    canClaimFreeWater(
+      account_: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
-    claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    claimWater(
+      destination_: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    compactStates(overrides?: CallOverrides): Promise<
-        [BigNumber, BigNumber, BigNumber] & {
-            compactState1_: BigNumber;
-            compactState2_: BigNumber;
-            compactState3_: BigNumber;
-        }
+    compactStates(
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, BigNumber] & {
+        compactState1_: BigNumber;
+        compactState2_: BigNumber;
+        compactState3_: BigNumber;
+      }
     >;
 
     contractURI(overrides?: CallOverrides): Promise<string>;
 
-    decompose(drug_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    decompose(drug_: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
     drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
     drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
+    getApproved(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
-    getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    getAvailabilityOfDrug(
+      drugType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    getAvailabilityOfMolecule(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    getAvailabilityOfMolecule(
+      moleculeType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    getDrugContainingMolecule(
+      molecule_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber[]>;
+    getMoleculesWithinDrug(
+      drug_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
 
-    getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<number[]>;
+    getRecipeOfDrug(
+      drugType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<number[]>;
 
     giveMolecules(
-        destinations_: string[],
-        amounts_: BigNumberish[],
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+      destinations_: string[],
+      amounts_: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     giveWaters(
-        destinations_: string[],
-        amounts_: BigNumberish[],
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+      destinations_: string[],
+      amounts_: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
+    isApprovedForAll(
+      owner: string,
+      operator: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
@@ -555,574 +1184,672 @@ export interface XSublimatio extends BaseContract {
 
     proceedsDestination(overrides?: CallOverrides): Promise<string>;
 
-    proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    proposeOwnership(
+      newOwner_: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     purchase(
-        destination_: string,
-        quantity_: BigNumberish,
-        minQuantity_: BigNumberish,
-        overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+      destination_: string,
+      quantity_: BigNumberish,
+      minQuantity_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
 
-    'safeTransferFrom(address,address,uint256)'(
-        from: string,
-        to: string,
-        tokenId: BigNumberish,
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    "safeTransferFrom(address,address,uint256)"(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    'safeTransferFrom(address,address,uint256,bytes)'(
-        from: string,
-        to: string,
-        tokenId: BigNumberish,
-        data: BytesLike,
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    "safeTransferFrom(address,address,uint256,bytes)"(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      data: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setApprovalForAll(
-        operator: string,
-        approved: boolean,
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+      operator: string,
+      approved: boolean,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setAssetGeneratorHash(
-        assetGeneratorHash_: BytesLike,
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+      assetGeneratorHash_: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    setBaseURI(baseURI_: string, overrides?: CallOverrides): Promise<void>;
 
     setPricePerTokenMint(
-        pricePerTokenMint_: BigNumberish,
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+      pricePerTokenMint_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setProceedsDestination(
-        proceedsDestination_: string,
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+      proceedsDestination_: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    setPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    setPromotionAccounts(
+      accounts_: string[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
+    supportsInterface(
+      interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     symbol(overrides?: CallOverrides): Promise<string>;
 
-    tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    tokenByIndex(
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+    tokenOfOwnerByIndex(
+      owner: string,
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<string>;
+    tokenURI(
+      tokenId_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
-    tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<BigNumber[]>;
+    tokensOfOwner(
+      owner_: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
 
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferFrom(
-        from: string,
-        to: string,
-        tokenId: BigNumberish,
-        overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    unsetPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
-    withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
-    callStatic: {
-        LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
-
-        acceptOwnership(overrides?: CallOverrides): Promise<void>;
-
-        approve(to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-        assetGeneratorHash(overrides?: CallOverrides): Promise<string>;
-
-        availabilities(overrides?: CallOverrides): Promise<
-            [BigNumber[], BigNumber[]] & {
-                moleculesAvailabilities_: BigNumber[];
-                drugAvailabilities_: BigNumber[];
-            }
-        >;
-
-        balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-        baseURI(overrides?: CallOverrides): Promise<string>;
-
-        brew(molecules_: BigNumberish[], drugType_: BigNumberish, destination_: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-        canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<boolean>;
-
-        claimWater(destination_: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-        compactStates(overrides?: CallOverrides): Promise<
-            [BigNumber, BigNumber, BigNumber] & {
-                compactState1_: BigNumber;
-                compactState2_: BigNumber;
-                compactState3_: BigNumber;
-            }
-        >;
-
-        contractURI(overrides?: CallOverrides): Promise<string>;
-
-        decompose(drug_: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-        drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
-
-        drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
-
-        getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-        getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        getAvailabilityOfMolecule(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber[]>;
-
-        getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<number[]>;
-
-        giveMolecules(destinations_: string[], amounts_: BigNumberish[], overrides?: CallOverrides): Promise<void>;
-
-        giveWaters(destinations_: string[], amounts_: BigNumberish[], overrides?: CallOverrides): Promise<void>;
-
-        isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<boolean>;
-
-        moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber[]>;
-
-        moleculesAvailable(overrides?: CallOverrides): Promise<BigNumber>;
-
-        name(overrides?: CallOverrides): Promise<string>;
-
-        owner(overrides?: CallOverrides): Promise<string>;
-
-        ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-        pendingOwner(overrides?: CallOverrides): Promise<string>;
-
-        pricePerTokenMint(overrides?: CallOverrides): Promise<BigNumber>;
-
-        proceedsDestination(overrides?: CallOverrides): Promise<string>;
-
-        proposeOwnership(newOwner_: string, overrides?: CallOverrides): Promise<void>;
-
-        purchase(
-            destination_: string,
-            quantity_: BigNumberish,
-            minQuantity_: BigNumberish,
-            overrides?: CallOverrides
-        ): Promise<BigNumber[]>;
-
-        'safeTransferFrom(address,address,uint256)'(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            overrides?: CallOverrides
-        ): Promise<void>;
-
-        'safeTransferFrom(address,address,uint256,bytes)'(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            data: BytesLike,
-            overrides?: CallOverrides
-        ): Promise<void>;
-
-        setApprovalForAll(operator: string, approved: boolean, overrides?: CallOverrides): Promise<void>;
-
-        setAssetGeneratorHash(assetGeneratorHash_: BytesLike, overrides?: CallOverrides): Promise<void>;
-
-        setBaseURI(baseURI_: string, overrides?: CallOverrides): Promise<void>;
-
-        setPricePerTokenMint(pricePerTokenMint_: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-        setProceedsDestination(proceedsDestination_: string, overrides?: CallOverrides): Promise<void>;
-
-        setPromotionAccounts(accounts_: string[], overrides?: CallOverrides): Promise<void>;
-
-        supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<boolean>;
-
-        symbol(overrides?: CallOverrides): Promise<string>;
-
-        tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<string>;
-
-        tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<BigNumber[]>;
-
-        totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
-
-        transferFrom(from: string, to: string, tokenId: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-        unsetPromotionAccounts(accounts_: string[], overrides?: CallOverrides): Promise<void>;
-
-        withdrawProceeds(overrides?: CallOverrides): Promise<void>;
-    };
-
-    filters: {
-        'AirdropSet(address)'(account?: string | null): AirdropSetEventFilter;
-        AirdropSet(account?: string | null): AirdropSetEventFilter;
-
-        'Approval(address,address,uint256)'(
-            owner?: string | null,
-            approved?: string | null,
-            tokenId?: BigNumberish | null
-        ): ApprovalEventFilter;
-        Approval(owner?: string | null, approved?: string | null, tokenId?: BigNumberish | null): ApprovalEventFilter;
-
-        'ApprovalForAll(address,address,bool)'(owner?: string | null, operator?: string | null, approved?: null): ApprovalForAllEventFilter;
-        ApprovalForAll(owner?: string | null, operator?: string | null, approved?: null): ApprovalForAllEventFilter;
-
-        'AssetGeneratorHashSet(bytes32)'(assetGeneratorHash?: BytesLike | null): AssetGeneratorHashSetEventFilter;
-        AssetGeneratorHashSet(assetGeneratorHash?: BytesLike | null): AssetGeneratorHashSetEventFilter;
-
-        'BaseURISet(string)'(baseURI?: null): BaseURISetEventFilter;
-        BaseURISet(baseURI?: null): BaseURISetEventFilter;
-
-        'DrugDecomposed(uint256,uint256[])'(drug?: BigNumberish | null, molecules?: null): DrugDecomposedEventFilter;
-        DrugDecomposed(drug?: BigNumberish | null, molecules?: null): DrugDecomposedEventFilter;
-
-        'OwnershipAccepted(address,address)'(previousOwner?: string | null, owner?: string | null): OwnershipAcceptedEventFilter;
-        OwnershipAccepted(previousOwner?: string | null, owner?: string | null): OwnershipAcceptedEventFilter;
-
-        'OwnershipProposed(address,address)'(owner?: string | null, pendingOwner?: string | null): OwnershipProposedEventFilter;
-        OwnershipProposed(owner?: string | null, pendingOwner?: string | null): OwnershipProposedEventFilter;
-
-        'PricePerTokenMintSet(uint256)'(price?: null): PricePerTokenMintSetEventFilter;
-        PricePerTokenMintSet(price?: null): PricePerTokenMintSetEventFilter;
-
-        'ProceedsDestinationSet(address)'(account?: string | null): ProceedsDestinationSetEventFilter;
-        ProceedsDestinationSet(account?: string | null): ProceedsDestinationSetEventFilter;
-
-        'ProceedsWithdrawn(address,uint256)'(destination?: string | null, amount?: null): ProceedsWithdrawnEventFilter;
-        ProceedsWithdrawn(destination?: string | null, amount?: null): ProceedsWithdrawnEventFilter;
-
-        'PromotionAccountSet(address)'(account?: string | null): PromotionAccountSetEventFilter;
-        PromotionAccountSet(account?: string | null): PromotionAccountSetEventFilter;
-
-        'PromotionAccountUnset(address)'(account?: string | null): PromotionAccountUnsetEventFilter;
-        PromotionAccountUnset(account?: string | null): PromotionAccountUnsetEventFilter;
-
-        'Transfer(address,address,uint256)'(from?: string | null, to?: string | null, tokenId?: BigNumberish | null): TransferEventFilter;
-        Transfer(from?: string | null, to?: string | null, tokenId?: BigNumberish | null): TransferEventFilter;
-    };
-
-    estimateGas: {
-        LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
-
-        acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        approve(to: string, tokenId: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        assetGeneratorHash(overrides?: CallOverrides): Promise<BigNumber>;
-
-        availabilities(overrides?: CallOverrides): Promise<BigNumber>;
-
-        balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-        baseURI(overrides?: CallOverrides): Promise<BigNumber>;
-
-        brew(
-            molecules_: BigNumberish[],
-            drugType_: BigNumberish,
-            destination_: string,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-        claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        compactStates(overrides?: CallOverrides): Promise<BigNumber>;
-
-        contractURI(overrides?: CallOverrides): Promise<BigNumber>;
-
-        decompose(drug_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber>;
-
-        drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
-
-        getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        getAvailabilityOfMolecule(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        giveMolecules(
-            destinations_: string[],
-            amounts_: BigNumberish[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        giveWaters(
-            destinations_: string[],
-            amounts_: BigNumberish[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-        moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber>;
-
-        moleculesAvailable(overrides?: CallOverrides): Promise<BigNumber>;
-
-        name(overrides?: CallOverrides): Promise<BigNumber>;
-
-        owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-        ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        pendingOwner(overrides?: CallOverrides): Promise<BigNumber>;
-
-        pricePerTokenMint(overrides?: CallOverrides): Promise<BigNumber>;
-
-        proceedsDestination(overrides?: CallOverrides): Promise<BigNumber>;
-
-        proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        purchase(
-            destination_: string,
-            quantity_: BigNumberish,
-            minQuantity_: BigNumberish,
-            overrides?: PayableOverrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        'safeTransferFrom(address,address,uint256)'(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        'safeTransferFrom(address,address,uint256,bytes)'(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            data: BytesLike,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        setApprovalForAll(
-            operator: string,
-            approved: boolean,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        setAssetGeneratorHash(
-            assetGeneratorHash_: BytesLike,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        setPricePerTokenMint(
-            pricePerTokenMint_: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        setProceedsDestination(
-            proceedsDestination_: string,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        setPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
-
-        symbol(overrides?: CallOverrides): Promise<BigNumber>;
-
-        tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
-
-        tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-        totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
-
-        transferFrom(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<BigNumber>;
-
-        unsetPromotionAccounts(accounts_: string[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-        withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-    };
-
-    populateTransaction: {
-        LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        acceptOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
-
-        approve(
-            to: string,
-            tokenId: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        assetGeneratorHash(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        availabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        balanceOf(owner: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        baseURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        brew(
-            molecules_: BigNumberish[],
-            drugType_: BigNumberish,
-            destination_: string,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        canClaimFreeWater(account_: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        claimWater(destination_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
-
-        compactStates(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        contractURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        decompose(drug_: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
-
-        drugAvailabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        drugsAvailable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        getApproved(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        getAvailabilityOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        getAvailabilityOfMolecule(moleculeType_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        getDrugContainingMolecule(molecule_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        getMoleculesWithinDrug(drug_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        getRecipeOfDrug(drugType_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        giveMolecules(
-            destinations_: string[],
-            amounts_: BigNumberish[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        giveWaters(
-            destinations_: string[],
-            amounts_: BigNumberish[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        isApprovedForAll(owner: string, operator: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        moleculeAvailabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        moleculesAvailable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        pendingOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        pricePerTokenMint(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        proceedsDestination(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        proposeOwnership(newOwner_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
-
-        purchase(
-            destination_: string,
-            quantity_: BigNumberish,
-            minQuantity_: BigNumberish,
-            overrides?: PayableOverrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        'safeTransferFrom(address,address,uint256)'(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        'safeTransferFrom(address,address,uint256,bytes)'(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            data: BytesLike,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        setApprovalForAll(
-            operator: string,
-            approved: boolean,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        setAssetGeneratorHash(
-            assetGeneratorHash_: BytesLike,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        setBaseURI(baseURI_: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
-
-        setPricePerTokenMint(
-            pricePerTokenMint_: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        setProceedsDestination(
-            proceedsDestination_: string,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        setPromotionAccounts(
-            accounts_: string[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        supportsInterface(interfaceId: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        tokenByIndex(index: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        tokenOfOwnerByIndex(owner: string, index: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        tokenURI(tokenId_: BigNumberish, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        tokensOfOwner(owner_: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-        transferFrom(
-            from: string,
-            to: string,
-            tokenId: BigNumberish,
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        unsetPromotionAccounts(
-            accounts_: string[],
-            overrides?: Overrides & { from?: string | Promise<string> }
-        ): Promise<PopulatedTransaction>;
-
-        withdrawProceeds(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
-    };
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    unsetPromotionAccounts(
+      accounts_: string[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    withdrawProceeds(overrides?: CallOverrides): Promise<void>;
+  };
+
+  filters: {
+    "AirdropSet(address)"(account?: string | null): AirdropSetEventFilter;
+    AirdropSet(account?: string | null): AirdropSetEventFilter;
+
+    "Approval(address,address,uint256)"(
+      owner?: string | null,
+      approved?: string | null,
+      tokenId?: BigNumberish | null
+    ): ApprovalEventFilter;
+    Approval(
+      owner?: string | null,
+      approved?: string | null,
+      tokenId?: BigNumberish | null
+    ): ApprovalEventFilter;
+
+    "ApprovalForAll(address,address,bool)"(
+      owner?: string | null,
+      operator?: string | null,
+      approved?: null
+    ): ApprovalForAllEventFilter;
+    ApprovalForAll(
+      owner?: string | null,
+      operator?: string | null,
+      approved?: null
+    ): ApprovalForAllEventFilter;
+
+    "AssetGeneratorHashSet(bytes32)"(
+      assetGeneratorHash?: BytesLike | null
+    ): AssetGeneratorHashSetEventFilter;
+    AssetGeneratorHashSet(
+      assetGeneratorHash?: BytesLike | null
+    ): AssetGeneratorHashSetEventFilter;
+
+    "BaseURISet(string)"(baseURI?: null): BaseURISetEventFilter;
+    BaseURISet(baseURI?: null): BaseURISetEventFilter;
+
+    "DrugDecomposed(uint256,uint256[])"(
+      drug?: BigNumberish | null,
+      molecules?: null
+    ): DrugDecomposedEventFilter;
+    DrugDecomposed(
+      drug?: BigNumberish | null,
+      molecules?: null
+    ): DrugDecomposedEventFilter;
+
+    "OwnershipAccepted(address,address)"(
+      previousOwner?: string | null,
+      owner?: string | null
+    ): OwnershipAcceptedEventFilter;
+    OwnershipAccepted(
+      previousOwner?: string | null,
+      owner?: string | null
+    ): OwnershipAcceptedEventFilter;
+
+    "OwnershipProposed(address,address)"(
+      owner?: string | null,
+      pendingOwner?: string | null
+    ): OwnershipProposedEventFilter;
+    OwnershipProposed(
+      owner?: string | null,
+      pendingOwner?: string | null
+    ): OwnershipProposedEventFilter;
+
+    "PricePerTokenMintSet(uint256)"(
+      price?: null
+    ): PricePerTokenMintSetEventFilter;
+    PricePerTokenMintSet(price?: null): PricePerTokenMintSetEventFilter;
+
+    "ProceedsDestinationSet(address)"(
+      account?: string | null
+    ): ProceedsDestinationSetEventFilter;
+    ProceedsDestinationSet(
+      account?: string | null
+    ): ProceedsDestinationSetEventFilter;
+
+    "ProceedsWithdrawn(address,uint256)"(
+      destination?: string | null,
+      amount?: null
+    ): ProceedsWithdrawnEventFilter;
+    ProceedsWithdrawn(
+      destination?: string | null,
+      amount?: null
+    ): ProceedsWithdrawnEventFilter;
+
+    "PromotionAccountSet(address)"(
+      account?: string | null
+    ): PromotionAccountSetEventFilter;
+    PromotionAccountSet(
+      account?: string | null
+    ): PromotionAccountSetEventFilter;
+
+    "PromotionAccountUnset(address)"(
+      account?: string | null
+    ): PromotionAccountUnsetEventFilter;
+    PromotionAccountUnset(
+      account?: string | null
+    ): PromotionAccountUnsetEventFilter;
+
+    "Transfer(address,address,uint256)"(
+      from?: string | null,
+      to?: string | null,
+      tokenId?: BigNumberish | null
+    ): TransferEventFilter;
+    Transfer(
+      from?: string | null,
+      to?: string | null,
+      tokenId?: BigNumberish | null
+    ): TransferEventFilter;
+  };
+
+  estimateGas: {
+    LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<BigNumber>;
+
+    acceptOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    approve(
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    assetGeneratorHash(overrides?: CallOverrides): Promise<BigNumber>;
+
+    availabilities(overrides?: CallOverrides): Promise<BigNumber>;
+
+    balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    baseURI(overrides?: CallOverrides): Promise<BigNumber>;
+
+    brew(
+      molecules_: BigNumberish[],
+      drugType_: BigNumberish,
+      destination_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    canClaimFreeWater(
+      account_: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    claimWater(
+      destination_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    compactStates(overrides?: CallOverrides): Promise<BigNumber>;
+
+    contractURI(overrides?: CallOverrides): Promise<BigNumber>;
+
+    decompose(
+      drug_: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    drugAvailabilities(overrides?: CallOverrides): Promise<BigNumber>;
+
+    drugsAvailable(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getApproved(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getAvailabilityOfDrug(
+      drugType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getAvailabilityOfMolecule(
+      moleculeType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getDrugContainingMolecule(
+      molecule_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getMoleculesWithinDrug(
+      drug_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getRecipeOfDrug(
+      drugType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    giveMolecules(
+      destinations_: string[],
+      amounts_: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    giveWaters(
+      destinations_: string[],
+      amounts_: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    isApprovedForAll(
+      owner: string,
+      operator: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    moleculeAvailabilities(overrides?: CallOverrides): Promise<BigNumber>;
+
+    moleculesAvailable(overrides?: CallOverrides): Promise<BigNumber>;
+
+    name(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    ownerOf(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    pendingOwner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    pricePerTokenMint(overrides?: CallOverrides): Promise<BigNumber>;
+
+    proceedsDestination(overrides?: CallOverrides): Promise<BigNumber>;
+
+    proposeOwnership(
+      newOwner_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    purchase(
+      destination_: string,
+      quantity_: BigNumberish,
+      minQuantity_: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    "safeTransferFrom(address,address,uint256)"(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    "safeTransferFrom(address,address,uint256,bytes)"(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setApprovalForAll(
+      operator: string,
+      approved: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setAssetGeneratorHash(
+      assetGeneratorHash_: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setBaseURI(
+      baseURI_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setPricePerTokenMint(
+      pricePerTokenMint_: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setProceedsDestination(
+      proceedsDestination_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setPromotionAccounts(
+      accounts_: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    supportsInterface(
+      interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    symbol(overrides?: CallOverrides): Promise<BigNumber>;
+
+    tokenByIndex(
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    tokenOfOwnerByIndex(
+      owner: string,
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    tokenURI(
+      tokenId_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    tokensOfOwner(
+      owner_: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
+
+    transferFrom(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    unsetPromotionAccounts(
+      accounts_: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    withdrawProceeds(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+  };
+
+  populateTransaction: {
+    LAUNCH_TIMESTAMP(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    acceptOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    approve(
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    assetGeneratorHash(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    availabilities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    balanceOf(
+      owner: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    baseURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    brew(
+      molecules_: BigNumberish[],
+      drugType_: BigNumberish,
+      destination_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    canClaimFreeWater(
+      account_: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    claimWater(
+      destination_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    compactStates(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    contractURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    decompose(
+      drug_: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    drugAvailabilities(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    drugsAvailable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getApproved(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getAvailabilityOfDrug(
+      drugType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getAvailabilityOfMolecule(
+      moleculeType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getDrugContainingMolecule(
+      molecule_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getMoleculesWithinDrug(
+      drug_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getRecipeOfDrug(
+      drugType_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    giveMolecules(
+      destinations_: string[],
+      amounts_: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    giveWaters(
+      destinations_: string[],
+      amounts_: BigNumberish[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    isApprovedForAll(
+      owner: string,
+      operator: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    moleculeAvailabilities(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    moleculesAvailable(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    ownerOf(
+      tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    pendingOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    pricePerTokenMint(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    proceedsDestination(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    proposeOwnership(
+      newOwner_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    purchase(
+      destination_: string,
+      quantity_: BigNumberish,
+      minQuantity_: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "safeTransferFrom(address,address,uint256)"(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "safeTransferFrom(address,address,uint256,bytes)"(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      data: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setApprovalForAll(
+      operator: string,
+      approved: boolean,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setAssetGeneratorHash(
+      assetGeneratorHash_: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setBaseURI(
+      baseURI_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setPricePerTokenMint(
+      pricePerTokenMint_: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setProceedsDestination(
+      proceedsDestination_: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setPromotionAccounts(
+      accounts_: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    supportsInterface(
+      interfaceId: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    tokenByIndex(
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    tokenOfOwnerByIndex(
+      owner: string,
+      index: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    tokenURI(
+      tokenId_: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    tokensOfOwner(
+      owner_: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    transferFrom(
+      from: string,
+      to: string,
+      tokenId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    unsetPromotionAccounts(
+      accounts_: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    withdrawProceeds(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+  };
 }

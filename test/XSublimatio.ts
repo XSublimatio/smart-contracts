@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { BigNumber, Signer } from 'ethers';
+import { BigNumber, providers, Signer } from 'ethers';
 import {
     MOLECULE_MAX_SUPPLY,
     MOLECULE_MAX_SUPPLIES,
@@ -12,7 +12,7 @@ import {
     DRUGS,
     getTokenFromId,
 } from '../src';
-import { XSublimatio__factory, XSublimatio } from '../src/ethers';
+import { XSublimatio__factory, XSublimatio, Splitter__factory, MockERC20__factory } from '../src/ethers';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;
@@ -217,6 +217,15 @@ describe('XSublimatio', () => {
 
         it('Can set proceeds destination before launch', async () => {
             const charlieAddress = await charlie.getAddress();
+            await (await contract.setProceedsDestination(charlieAddress)).wait();
+            expect(await contract.proceedsDestination()).to.equal(charlieAddress);
+        });
+
+        it.only('Can reset proceeds destination before launch', async () => {
+            const bobAddress = await bob.getAddress();
+            const charlieAddress = await charlie.getAddress();
+            await (await contract.setProceedsDestination(bobAddress)).wait();
+            expect(await contract.proceedsDestination()).to.equal(bobAddress);
             await (await contract.setProceedsDestination(charlieAddress)).wait();
             expect(await contract.proceedsDestination()).to.equal(charlieAddress);
         });
@@ -891,6 +900,108 @@ describe('XSublimatio', () => {
         it('Cannot give molecules after launch', async () => {
             await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
             await expect(contract.giveWaters([await charlie.getAddress()], [1])).to.be.revertedWith('ALREADY_LAUNCHED');
+        });
+    });
+
+    describe('transfer', () => {
+        it('Cannot transfer before launch', async () => {
+            const bobAddress = await bob.getAddress();
+            const charlieAddress = await charlie.getAddress();
+            const tx = await (await contract.giveWaters([bobAddress], [1], { gasLimit: 1000000 })).wait();
+            const tokenId = tx.events?.[0].args?.tokenId;
+
+            await expect(contract.connect(bob).transferFrom(bobAddress, charlieAddress, tokenId)).to.be.revertedWith('NOT_LAUNCHED_YET');
+        });
+
+        it('Can transfer after launch', async () => {
+            const bobAddress = await bob.getAddress();
+            const charlieAddress = await charlie.getAddress();
+            const tx = await (await contract.giveWaters([bobAddress], [1], { gasLimit: 1000000 })).wait();
+            const tokenId = tx.events?.[0].args?.tokenId;
+
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+            const transferTx = await (await contract.connect(bob).transferFrom(bobAddress, charlieAddress, tokenId)).wait();
+            expect(transferTx.events?.[1].args?.tokenId).to.equal(tokenId);
+            expect(transferTx.events?.[1].args?.to).to.equal(charlieAddress);
+        });
+    });
+
+    describe('Splitter', () => {
+        it('works', async () => {
+            const aliceAddress = await alice.getAddress();
+            const bobAddress = await bob.getAddress();
+            const charlieAddress = await charlie.getAddress();
+
+            const splitterFactory = new Splitter__factory(alice);
+            const splitter = await splitterFactory.deploy([aliceAddress, bobAddress, charlieAddress]);
+            await splitter.deployed();
+
+            expect(await splitter.accounts(0)).to.equal(aliceAddress);
+            expect(await splitter.accounts(1)).to.equal(bobAddress);
+            expect(await splitter.accounts(2)).to.equal(charlieAddress);
+
+            const tx = await (await contract.setProceedsDestination(splitter.address)).wait();
+            expect(tx.events?.[0].args?.account).to.equal(splitter.address);
+            expect(await contract.proceedsDestination()).to.equal(splitter.address);
+
+            await (await alice.sendTransaction({ to: splitter.address, value: ethers.utils.parseEther('10.0') })).wait();
+
+            const aliceBalanceBeforeSplit = await alice.getBalance();
+            const bobBalanceBeforeSplit = await bob.getBalance();
+            const charlieBalanceBeforeSplit = await charlie.getBalance();
+
+            const splitTx = await (await splitter.splitETH()).wait();
+
+            const aliceBalanceAfterSplit = await alice.getBalance();
+            const bobBalanceAfterSplit = await bob.getBalance();
+            const charlieBalanceAfterSplit = await charlie.getBalance();
+
+            expect(aliceBalanceAfterSplit.sub(aliceBalanceBeforeSplit)).to.equal(
+                ethers.utils.parseEther('7.0').sub(splitTx.gasUsed.mul(splitTx.effectiveGasPrice))
+            );
+            expect(bobBalanceAfterSplit.sub(bobBalanceBeforeSplit)).to.equal(ethers.utils.parseEther('1.5'));
+            expect(charlieBalanceAfterSplit.sub(charlieBalanceBeforeSplit)).to.equal(ethers.utils.parseEther('1.5'));
+
+            const erc20Factory = new MockERC20__factory(alice);
+            const erc20 = await erc20Factory.deploy();
+            await erc20.deployed();
+
+            await (await erc20.mint(splitter.address, ethers.utils.parseEther('10.0'))).wait();
+
+            await (await splitter.splitToken(erc20.address)).wait();
+
+            expect(await erc20.balanceOf(aliceAddress)).to.equal(ethers.utils.parseEther('7.0'));
+            expect(await erc20.balanceOf(bobAddress)).to.equal(ethers.utils.parseEther('1.5'));
+            expect(await erc20.balanceOf(charlieAddress)).to.equal(ethers.utils.parseEther('1.5'));
+
+            await expect(splitter.connect(charlie).changeAccount(1, charlieAddress)).to.be.revertedWith('UNAUTHORIZED');
+
+            await (await splitter.connect(bob).changeAccount(1, charlieAddress)).wait();
+
+            expect(await splitter.accounts(0)).to.equal(aliceAddress);
+            expect(await splitter.accounts(1)).to.equal(charlieAddress);
+            expect(await splitter.accounts(2)).to.equal(charlieAddress);
+
+            const purchaseValue = pricePerTokenMint.mul(60);
+
+            await ethers.provider.send('evm_increaseTime', [launchTimestamp - (await getBlockTimestamp())]);
+
+            await (await contract.purchase(aliceAddress, 60, 60, { value: purchaseValue })).wait();
+
+            await (await contract.withdrawProceeds()).wait();
+
+            const aliceBalanceBeforeSplit2 = await alice.getBalance();
+            const charlieBalanceBeforeSplit2 = await charlie.getBalance();
+
+            const splitTx2 = await (await splitter.splitETH()).wait();
+
+            const aliceBalanceAfterSplit2 = await alice.getBalance();
+            const charlieBalanceAfterSplit2 = await charlie.getBalance();
+
+            expect(aliceBalanceAfterSplit2.sub(aliceBalanceBeforeSplit2)).to.equal(
+                purchaseValue.mul(70).div(100).sub(splitTx2.gasUsed.mul(splitTx2.effectiveGasPrice))
+            );
+            expect(charlieBalanceAfterSplit2.sub(charlieBalanceBeforeSplit2)).to.equal(purchaseValue.mul(15).div(100).mul(2));
         });
     });
 });
