@@ -391,6 +391,7 @@ export interface Metadata {
     image: string;
     animation_url: string;
     artist: string;
+    external_url: string;
 }
 
 export interface ContractMetadata {
@@ -435,7 +436,8 @@ export function getTokenFromId(
     imageUri = '',
     videoUri = '',
     imageExtension = 'png',
-    videoExtension = 'webm'
+    videoExtension = 'webm',
+    rootUri = ''
 ): Token {
     const id = BigNumber.from(tokenId.toString());
 
@@ -526,6 +528,7 @@ export function getTokenFromId(
             image: `${imageUri}/${id}.${imageExtension}`,
             animation_url: `${videoUri}/${id}.${videoExtension}`,
             artist: 'Pierre Pauze',
+            external_url: `${rootUri}/${id.toString()}`,
         },
     };
 }
