@@ -579,3 +579,19 @@ export function getContractMetadata(
         asset_generator_hash: assetGeneratorHash,
     };
 }
+
+export const ATTRIBUTES = [
+    { name: 'Category', values: ['Molecule', 'Drug'] },
+    { name: 'Name', values: MOLECULE_NAMES.concat(DRUG_NAMES) },
+    { name: 'Hue', min: BigInt(0), max: BigInt(65535) },
+    { name: 'Saturation', min: BigInt(0), max: BigInt(65535) },
+    { name: 'Brightness', min: BigInt(0), max: BigInt(65535) },
+    { name: 'Seed', min: BigInt(0), max: BigInt(4294967295) },
+    { name: 'Deformation', values: DEFORMATION_TYPES },
+    { name: 'Stripes Color Shift', values: STRIPES_COLOR_SHIFT_TYPES },
+    { name: 'Stripes Amount', values: STRIPES_AMOUNT_TYPES },
+    { name: 'Blob', values: BLOB_TYPES },
+    { name: 'Palette', values: PALETTE_TYPES },
+    { name: 'Molecule Lighting', values: MOLECULE_LIGHTING_TYPES },
+    { name: 'Molecule Integrity', values: MOLECULE_INTEGRITY_TYPES },
+];

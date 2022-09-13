@@ -12,6 +12,7 @@ export {
     DRUG_LABELS,
     MOLECULES,
     DRUGS,
+    ATTRIBUTES,
     Molecule,
     Drug,
     Attribute,
